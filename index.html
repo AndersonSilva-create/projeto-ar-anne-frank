@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Com Sistema de Colisões</title>
+    <title>Anexo Secreto - Colisão Blindada</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
 
     <style>
         #interface-diario {
@@ -35,6 +34,51 @@
         .contador-paginas { font-family: sans-serif; font-size: 0.9rem; color: #5c4033; font-weight: bold; }
         #instrucoes { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-family: sans-serif; pointer-events: none; z-index: 999; text-align: center; }
     </style>
+
+    <script>
+        // COMPONENTE PERSONALIZADO DE COLISÃO MATEMÁTICA ANTIMALHA
+        AFRAME.registerComponent('barreira-invisivel', {
+            tick: function () {
+                let el = this.el;
+                let pos = el.getAttribute('position');
+                let estanteAberta = window.estanteGiroCompleto || false;
+
+                // 1. Limites do ecrã / Paredes Laterais Gerais (X: Esquerda e Direita)
+                if (pos.x < -2.6) pos.x = -2.6;
+                if (pos.x > 2.6) pos.x = 2.6;
+
+                // 2. Limites de Profundidade Geral (Z)
+                if (pos.z > 1.6) pos.z = 1.6; // Não sai pela parede da biblioteca
+                if (pos.z < -9.4) pos.z = -9.4; // Não passa da parede do fundo do quarto
+
+                // 3. Bloqueio da Estante Secreta (Se estiver fechada, não passa de Z = -1.6)
+                if (!estanteAberta && pos.z < -1.5 && pos.z > -2.2) {
+                    pos.z = -1.5; // Empurra o jogador de volta para a biblioteca
+                }
+
+                // 4. Colisão com o Armário do Quarto (Térreo)
+                // O armário está em X = -2.7, Z = -8.5. Escala: 0.6x1.4. Caixa de colisão: X < -2.0 e Z < -7.6
+                if (pos.y < 3) { // Só no térreo
+                    if (pos.x < -1.9 && pos.z < -7.6) {
+                        // Se colidir vindo de lado ou de frente, trava
+                        if (pos.z > -7.8) { pos.z = -7.6; }
+                        else { pos.x = -1.9; }
+                    }
+                }
+
+                // 5. Colisão com a Cama do Segundo Andar
+                // A cama está em X = 0.8, Z = -8.9. Escala: 1.4x2. Caixa de colisão: X entre 0.0 e 1.6 e Z < -7.8
+                if (pos.y > 3 && pos.y < 7) { // Só no 2º andar
+                    if (pos.x > -0.1 && pos.x < 1.6 && pos.z < -7.8) {
+                        pos.z = -7.8;
+                    }
+                }
+
+                // Aplica a posição corrigida instantaneamente
+                el.setAttribute('position', pos);
+            }
+        });
+    </script>
 </head>
 <body>
 
@@ -50,7 +94,7 @@
         </div>
     </div>
 
-    <a-scene physics="gravity: 0; debug: false" background="color: #0d0d0d">
+    <a-scene background="color: #0d0d0d">
         <a-assets>
             <img id="tex-biblioteca" src="assets/biblioteca_parede.jpg">
             <img id="tex-quarto" src="assets/quarto_parede.jpg">
@@ -62,29 +106,29 @@
         <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity light="type: directional; color: #ffeebb; intensity: 0.5" position="1 4 1"></a-entity>
 
-        <a-plane static-body position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#5c4033" material="side: double;"></a-plane> 
-        <a-plane static-body position="0 4 0" rotation="90 0 0" width="6" height="4" color="#f4f1ea" material="side: double;"></a-plane> 
+        <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#5c4033" material="side: double;"></a-plane> 
+        <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#f4f1ea" material="side: double;"></a-plane> 
         
-        <a-plane static-body position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
-        <a-plane static-body position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
-        <a-plane static-body position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca"></a-plane> 
+        <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
+        <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
+        <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca"></a-plane> 
         
-        <a-plane static-body position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
-        <a-plane static-body position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
-        <a-plane static-body position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double;"></a-plane>
+        <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
+        <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
+        <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double;"></a-plane>
 
-        <a-box id="estante-secreta" static-body position="0 1.5 -1.9" scale="1.9 3 0.4" color="#5c4033" class="interactable"
+        <a-box id="estante-secreta" position="0 1.5 -1.9" scale="1.9 3 0.4" color="#5c4033" class="interactable"
                animation="property: position; to: 1.8 1.5 -1.9; dur: 2000; startEvents: abrirPassagem">
         </a-box>
 
 
-        <a-plane static-body position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#3a2212" material="side: double;"></a-plane> 
-        <a-plane static-body position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
-        <a-plane static-body position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
-        <a-plane static-body position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"></a-plane> 
+        <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#3a2212" material="side: double;"></a-plane> 
+        <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
+        <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
+        <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"></a-plane> 
 
         <a-entity id="mesinha" position="0 0 -6.5">
-            <a-box static-body id="tampo-mesa" position="0 0.72 0" scale="0.8 0.05 0.8" color="#6e4720"></a-box>
+            <a-box id="tampo-mesa" position="0 0.72 0" scale="0.8 0.05 0.8" color="#6e4720"></a-box>
             <a-cylinder position="-0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
             <a-cylinder position="0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
             <a-cylinder position="-0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
@@ -93,7 +137,9 @@
         <a-box id="objeto-diario" position="0 0.8 -6.5" scale="0.4 0.08 0.5" color="#a63a2b" class="interactable"></a-box>
 
         <a-entity id="armario" position="-2.7 0 -8.5">
-            <a-box static-body scale="0.6 2.8 1.4" color="#5c4033" position="0 1.4 0"></a-box>
+            <a-box scale="0.6 2.8 1.4" color="#5c4033" position="0 1.4 0"></a-box>
+            <a-box scale="0.02 2.6 0.65" position="0.31 1.4 -0.33" color="#6e4720"></a-box>
+            <a-box scale="0.02 2.6 0.65" position="0.31 1.4 0.33" color="#6e4720"></a-box>
         </a-entity>
 
 
@@ -105,19 +151,25 @@
         </a-entity>
 
 
-        <a-plane static-body position="1 4.01 -6" rotation="-90 0 0" width="4" height="8" color="#5c4033" material="side: double;"></a-plane> 
-        <a-plane static-body position="-2 4.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#5c4033" material="side: double;"></a-plane> 
-        <a-plane static-body position="-2 4.01 -3" rotation="-90 0 0" width="2" height="2" color="#5c4033" material="side: double;"></a-plane> 
+        <a-plane position="1 4.01 -6" rotation="-90 0 0" width="4" height="8" color="#5c4033" material="side: double;"></a-plane> 
+        <a-plane position="-2 4.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#5c4033" material="side: double;"></a-plane> 
+        <a-plane position="-2 4.01 -3" rotation="-90 0 0" width="2" height="2" color="#5c4033" material="side: double;"></a-plane> 
         
-        <a-plane static-body position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1"></a-plane>
-        <a-plane static-body position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1"></a-plane>
-        <a-plane static-body position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1"></a-plane>
+        <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1"></a-plane>
+        <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1"></a-plane>
+        <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1"></a-plane>
 
-        <a-plane static-body position="3 6 -3.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1"></a-plane> 
-        <a-plane static-body position="3 6 -8.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1"></a-plane> 
+        <a-plane position="3 6 -3.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1"></a-plane> 
+        <a-plane position="3 6 -8.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1"></a-plane> 
+        <a-plane position="3 4.6 -6" rotation="0 -90 0" width="2" height="1.2" src="#tex-andar1"></a-plane> 
+        <a-plane position="3 7.4 -6" rotation="0 -90 0" width="2" height="1.2" src="#tex-andar1"></a-plane> 
+
+        <a-plane position="3.01 6 -6" rotation="0 -90 0" width="2" height="1.6" src="#tex-vista" color="#a0c0d0" material="side: double;"></a-plane>
 
         <a-entity id="cama-andar1" position="0.8 4.01 -8.9">
-            <a-box static-body scale="1.4 0.8 2" color="#5c4033" position="0 0.4 0"></a-box>
+            <a-box scale="1.4 0.3 2" color="#5c4033" position="0 0.15 0"></a-box>
+            <a-box scale="1.3 0.15 1.9" color="#f4ebd0" position="0 0.35 0"></a-box>
+            <a-box scale="1.4 0.8 0.1" color="#4a2f13" position="0 0.4 -0.95"></a-box>
         </a-entity>
 
 
@@ -129,18 +181,18 @@
         </a-entity>
 
 
-        <a-plane static-body position="-1 8.01 -6" rotation="-90 0 0" width="4" height="8" color="#3a2212" material="side: double;"></a-plane> 
-        <a-plane static-body position="2 8.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#3a2212" material="side: double;"></a-plane> 
-        <a-plane static-body position="2 8.01 -3" rotation="-90 0 0" width="2" height="2" color="#3a2212" material="side: double;"></a-plane> 
+        <a-plane position="-1 8.01 -6" rotation="-90 0 0" width="4" height="8" color="#3a2212" material="side: double;"></a-plane> 
+        <a-plane position="2 8.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#3a2212" material="side: double;"></a-plane> 
+        <a-plane position="2 8.01 -3" rotation="-90 0 0" width="2" height="2" color="#3a2212" material="side: double;"></a-plane> 
 
-        <a-plane static-body position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao"></a-plane>
-        <a-plane static-body position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"></a-plane>
-        <a-plane static-body position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao"></a-plane>
-        <a-plane static-body position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao"></a-plane>
-        <a-plane static-body position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
+        <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao"></a-plane>
+        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"></a-plane>
+        <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao"></a-plane>
+        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao"></a-plane>
+        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
 
 
-        <a-entity id="camera-rig" position="0 1.6 0" kinematic-body="radius: 0.25">
+        <a-entity id="camera-rig" position="0 1.6 0" barreira-invisivel>
             <a-entity camera look-controls wasd-controls="acceleration: 65" id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"></a-cursor>
             </a-entity>
@@ -166,6 +218,8 @@
         const btnAnterior = document.querySelector('#btn-anterior');
         const btnProximo = document.querySelector('#btn-proximo');
         const gibaContador = document.querySelector('#giba-contador');
+
+        window.estanteGiroCompleto = false;
 
         const paginasDiario = [
             { data: "9 de Julho de 1942", texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."' },
@@ -201,14 +255,14 @@
             cameraEfeito.components['look-controls'].play();
         });
 
-        // Quando clica na estante, ela remove a colisão física estática para você conseguir passar!
+        // Libera a passagem matemática no script de barreira ao clicar
         estante.addEventListener('click', function () {
             estante.emit('abrirPassagem');
-            estante.removeAttribute('static-body');
+            window.estanteGiroCompleto = true;
             textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
         });
 
-        // Teletransportes ajustados para acomodar a física do Rig
+        // Teletransportes
         subir1.addEventListener('click', function () {
             cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
