@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Colisão Blindada</title>
+    <title>Anexo Secreto - Correção das Escadas e Colisão</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
@@ -36,45 +36,42 @@
     </style>
 
     <script>
-        // COMPONENTE PERSONALIZADO DE COLISÃO MATEMÁTICA ANTIMALHA
-        AFRAME.registerComponent('barreira-invisivel', {
+        // SISTEMA DE TRAVAMENTO DE MOVIMENTO NAS PAREDES
+        // Se o A-Frame rodar esse script sem erros, é impossível atravessar por pura matemática.
+        表达 = AFRAME.registerComponent('barreira-invisivel', {
             tick: function () {
                 let el = this.el;
                 let pos = el.getAttribute('position');
                 let estanteAberta = window.estanteGiroCompleto || false;
 
-                // 1. Limites do ecrã / Paredes Laterais Gerais (X: Esquerda e Direita)
+                // 1. Limites das Paredes Laterais (X: Esquerda e Direita)
                 if (pos.x < -2.6) pos.x = -2.6;
                 if (pos.x > 2.6) pos.x = 2.6;
 
                 // 2. Limites de Profundidade Geral (Z)
-                if (pos.z > 1.6) pos.z = 1.6; // Não sai pela parede da biblioteca
-                if (pos.z < -9.4) pos.z = -9.4; // Não passa da parede do fundo do quarto
+                if (pos.z > 1.6) pos.z = 1.6; 
+                if (pos.z < -9.4) pos.z = -9.4; 
 
-                // 3. Bloqueio da Estante Secreta (Se estiver fechada, não passa de Z = -1.6)
+                // 3. Bloqueio da Estante Secreta (Se fechada, não passa para o quarto)
                 if (!estanteAberta && pos.z < -1.5 && pos.z > -2.2) {
-                    pos.z = -1.5; // Empurra o jogador de volta para a biblioteca
+                    pos.z = -1.5; 
                 }
 
-                // 4. Colisão com o Armário do Quarto (Térreo)
-                // O armário está em X = -2.7, Z = -8.5. Escala: 0.6x1.4. Caixa de colisão: X < -2.0 e Z < -7.6
-                if (pos.y < 3) { // Só no térreo
+                // 4. Colisão com o Armário (Térreo)
+                if (pos.y < 3) { 
                     if (pos.x < -1.9 && pos.z < -7.6) {
-                        // Se colidir vindo de lado ou de frente, trava
                         if (pos.z > -7.8) { pos.z = -7.6; }
                         else { pos.x = -1.9; }
                     }
                 }
 
-                // 5. Colisão com a Cama do Segundo Andar
-                // A cama está em X = 0.8, Z = -8.9. Escala: 1.4x2. Caixa de colisão: X entre 0.0 e 1.6 e Z < -7.8
-                if (pos.y > 3 && pos.y < 7) { // Só no 2º andar
+                // 5. Colisão com a Cama (Segundo Andar)
+                if (pos.y > 3 && pos.y < 7) { 
                     if (pos.x > -0.1 && pos.x < 1.6 && pos.z < -7.8) {
                         pos.z = -7.8;
                     }
                 }
 
-                // Aplica a posição corrigida instantaneamente
                 el.setAttribute('position', pos);
             }
         });
@@ -146,6 +143,13 @@
         <a-entity id="escada-complexa-1" position="-2.3 0 -4.5">
             <a-box scale="0.1 6 0.1" color="#777" position="-0.3 3 0"></a-box>
             <a-box scale="0.1 6 0.1" color="#777" position="0.3 3 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#777" position="0 0.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#777" position="0 1.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#777" position="0 2.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#777" position="0 3.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#777" position="0 4.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#777" position="0 5.5 0"></a-box>
+
             <a-box id="btn-subir-1" class="interactable" position="0 2 0" scale="1 4 0.5" visible="false"></a-box>
             <a-box id="btn-descer-1" class="interactable" position="0 5 0" scale="1 2 0.5" visible="false"></a-box>
         </a-entity>
@@ -176,6 +180,13 @@
         <a-entity id="escada-complexa-2" position="2.3 4 -4.5">
             <a-box scale="0.1 6 0.1" color="#666" position="-0.3 3 0"></a-box>
             <a-box scale="0.1 6 0.1" color="#666" position="0.3 3 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#666" position="0 0.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#666" position="0 1.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#666" position="0 2.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#666" position="0 3.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#666" position="0 4.5 0"></a-box>
+            <a-box scale="0.7 0.05 0.05" color="#666" position="0 5.5 0"></a-box>
+
             <a-box id="btn-subir-2" class="interactable" position="0 2 0" scale="1 4 0.5" visible="false"></a-box>
             <a-box id="btn-descer-2" class="interactable" position="0 5 0" scale="1 2 0.5" visible="false"></a-box>
         </a-entity>
@@ -224,7 +235,7 @@
         const paginasDiario = [
             { data: "9 de Julho de 1942", texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."' },
             { data: "11 de Julho de 1942", texto: '"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda. Nossas janelas permanecem fechadas o tempo todo, mas o silêncio nos protege."' },
-            { data: "1 de Outubro de 1942", texto: '"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador. O pavor que sinto dos barulhos da noite me faz perceber o quão frágil é a nossa segurança aqui dentro."' },
+            { data: "1 of Outubro de 1942", texto: '"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador. O pavor que sinto dos barulhos da noite me faz perceber o quão frágil é a nossa segurança aqui dentro."' },
             { data: "19 de Novembro de 1942", texto: '"Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos, e para os quais tememos o pior. E tudo isto por quê? Porque são judeus... Sinto-me má por estar numa cama quente, enquanto as minhas amigas mais queridas foram jogadas em campos de concentração."' },
             { data: "6 de Junho de 1944", texto: '"É o Dia D! A invasão começou! Os Aliados desembarcaram na Normandia. O rádio fala em notícias de esperança. Será que a libertação está próxima? Este ano de 1944 nos trará a vitória? Oh, Kitty, a ideia de poder voltar para a escola em setembro me faz chorar de alegria!"' }
         ];
@@ -255,14 +266,12 @@
             cameraEfeito.components['look-controls'].play();
         });
 
-        // Libera a passagem matemática no script de barreira ao clicar
         estante.addEventListener('click', function () {
             estante.emit('abrirPassagem');
             window.estanteGiroCompleto = true;
             textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
         });
 
-        // Teletransportes
         subir1.addEventListener('click', function () {
             cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
