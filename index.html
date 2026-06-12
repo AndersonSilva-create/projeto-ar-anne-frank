@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Ajustes de Móveis e Escadas</title>
+    <title>Anexo Secreto - Correção Definitiva de Posições</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
-        /* Estilos do Modal do Diário */
         #interface-diario {
             display: none;
             position: fixed;
@@ -31,7 +30,6 @@
         .data-diario { font-weight: bold; margin-bottom: 15px; display: block; }
         .botao-fechar { position: absolute; bottom: 20px; right: 20px; background-color: #5c4033; color: #f4ebd0; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; }
         
-        /* Legenda de instruções */
         #instrucoes {
             position: fixed;
             bottom: 20px;
@@ -69,10 +67,12 @@
             <img id="tex-vista" src="assets/vista_rua.jpg">
         </a-assets>
 
+        <!-- ILUMINAÇÃO -->
         <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity light="type: directional; color: #ffeebb; intensity: 0.5" position="1 4 1"></a-entity>
 
 
+        <!-- ================= CÔMODO 1: A BIBLIOTECA (TÉRREO) ================= -->
         <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#5c4033" material="side: double;"></a-plane> 
         <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#f4f1ea" material="side: double;"></a-plane> 
         
@@ -80,40 +80,46 @@
         <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
         <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca"></a-plane> 
         
+        <!-- Parede da Divisória -->
         <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
         <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
         <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double;"></a-plane>
 
+        <!-- Estante Secreta -->
         <a-box id="estante-secreta" position="0 1.5 -1.9" scale="1.9 3 0.4" color="#5c4033" class="interactable"
                animation="property: position; to: 1.8 1.5 -1.9; dur: 2000; startEvents: abrirPassagem">
         </a-box>
 
 
+        <!-- ================= CÔMODO 2: O QUARTO PRINCIPAL (TÉRREO) ================= -->
         <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#3a2212" material="side: double;"></a-plane> 
         <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
         <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
         <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"></a-plane> 
 
-        <a-entity id="mesinha" position="0 0 -8">
+        <!-- MESA DO DIÁRIO (No centro do quarto) -->
+        <a-entity id="mesinha" position="0 0 -6.5">
             <a-box id="tampo-mesa" position="0 0.72 0" scale="0.8 0.05 0.8" color="#6e4720"></a-box>
             <a-cylinder position="-0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
             <a-cylinder position="0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
             <a-cylinder position="-0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
             <a-cylinder position="0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
         </a-entity>
+        <a-box id="objeto-diario" position="0 0.8 -6.5" scale="0.4 0.08 0.5" color="#a63a2b" class="interactable"></a-box>
 
-        <a-box id="objeto-diario" position="0 0.8 -8" scale="0.4 0.08 0.5" color="#a63a2b" class="interactable"></a-box>
-
-        <a-entity id="armario" position="-2.4 0 -9">
-            <a-box scale="1.2 2.8 0.6" color="#5c4033" position="0 1.4 0"></a-box>
-            <a-box scale="0.5 2.6 0.02" position="-0.27 1.4 0.31" color="#6e4720"></a-box>
-            <a-box scale="0.5 2.6 0.02" position="0.28 1.4 0.31" color="#6e4720"></a-box>
-            <a-sphere position="-0.05 1.4 0.33" radius="0.03" color="#d4af37"></a-sphere>
-            <a-sphere position="0.05 1.4 0.33" radius="0.03" color="#d4af37"></a-sphere>
+        <!-- CORREÇÃO: Armário totalmente colado e alinhado na Parede Esquerda (X = -2.7) -->
+        <a-entity id="armario" position="-2.7 0 -8.5">
+            <a-box scale="0.6 2.8 1.4" color="#5c4033" position="0 1.4 0"></a-box>
+            <!-- Portas e Detalhes relativos ao centro do armário -->
+            <a-box scale="0.02 2.6 0.65" position="0.31 1.4 -0.33" color="#6e4720"></a-box>
+            <a-box scale="0.02 2.6 0.65" position="0.31 1.4 0.33" color="#6e4720"></a-box>
+            <a-sphere position="0.33 1.4 -0.05" radius="0.03" color="#d4af37"></a-sphere>
+            <a-sphere position="0.33 1.4 0.05" radius="0.03" color="#d4af37"></a-sphere>
         </a-entity>
 
 
-        <a-entity id="escada-complexa-1" position="-2.3 0 -5">
+        <!-- ================= ESCADA 1: QUARTO <-> 1º ANDAR ================= -->
+        <a-entity id="escada-complexa-1" position="-2.3 0 -4.5">
             <a-box scale="0.1 6 0.1" color="#777" position="-0.3 3 0"></a-box>
             <a-box scale="0.1 6 0.1" color="#777" position="0.3 3 0"></a-box>
             <a-box scale="0.7 0.05 0.05" color="#777" position="0 0.5 0"></a-box>
@@ -128,20 +134,23 @@
         </a-entity>
 
 
+        <!-- ================= CÔMODOS SUPERIORES (SEGUNDO ANDAR / 1º ANDAR) ================= -->
         <a-plane position="1 4.01 -6" rotation="-90 0 0" width="4" height="8" color="#5c4033" material="side: double;"></a-plane> 
         <a-plane position="-2 4.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#5c4033" material="side: double;"></a-plane> 
         <a-plane position="-2 4.01 -3" rotation="-90 0 0" width="2" height="2" color="#5c4033" material="side: double;"></a-plane> 
         
+        <!-- Paredes do 2º andar -->
         <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1"></a-plane>
         <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1"></a-plane>
         <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1"></a-plane>
 
+        <!-- Janela na Parede Direita -->
         <a-plane position="3 6 -3.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1" material="side: double;"></a-plane> 
         <a-plane position="3 6 -8.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1" material="side: double;"></a-plane> 
         <a-plane position="3 4.6 -6" rotation="0 -90 0" width="2" height="1.2" src="#tex-andar1" material="side: double;"></a-plane> 
         <a-plane position="3 7.4 -6" rotation="0 -90 0" width="2" height="1.2" src="#tex-andar1" material="side: double;"></a-plane> 
 
-        <a-plane position="3.05 6 -6" rotation="0 -90 0" width="2" height="1.6" src="#tex-vista" color="#a0c0d0" material="side: double;"></a-plane>
+        <a-plane position="3.01 6 -6" rotation="0 -90 0" width="2" height="1.6" src="#tex-vista" color="#a0c0d0" material="side: double;"></a-plane>
         
         <a-box position="2.98 6 -5" scale="0.06 1.6 0.06" color="#2b1d11"></a-box> 
         <a-box position="2.98 6 -7" scale="0.06 1.6 0.06" color="#2b1d11"></a-box> 
@@ -150,7 +159,8 @@
         <a-box position="2.98 6 -6" scale="0.04 1.6 0.04" color="#2b1d11"></a-box> 
         <a-box position="2.98 6 -6" scale="0.04 0.04 2.02" color="#2b1d11"></a-box>
 
-        <a-entity id="cama-andar1" position="0.8 4.01 -9.0">
+        <!-- CORREÇÃO: Cama totalmente montada em bloco e travada contra a parede traseira (Z = -8.9) -->
+        <a-entity id="cama-andar1" position="0.8 4.01 -8.9">
             <a-box scale="1.4 0.3 2" color="#5c4033" position="0 0.15 0"></a-box>
             <a-box scale="1.3 0.15 1.9" color="#f4ebd0" position="0 0.35 0"></a-box>
             <a-box scale="1.1 0.1 0.4" color="#ffffff" position="0 0.45 -0.7"></a-box>
@@ -158,7 +168,8 @@
         </a-entity>
 
 
-        <a-entity id="escada-complexa-2" position="2.3 4 -5">
+        <!-- ================= ESCADA 2: 1º ANDAR <-> SÓTÃO ================= -->
+        <a-entity id="escada-complexa-2" position="2.3 4 -4.5">
             <a-box scale="0.1 6 0.1" color="#666" position="-0.3 3 0"></a-box>
             <a-box scale="0.1 6 0.1" color="#666" position="0.3 3 0"></a-box>
             <a-box scale="0.7 0.05 0.05" color="#666" position="0 0.5 0"></a-box>
@@ -173,6 +184,7 @@
         </a-entity>
 
 
+        <!-- ================= CÔMODO FINAL: O SÓTÃO ================= -->
         <a-plane position="-1 8.01 -6" rotation="-90 0 0" width="4" height="8" color="#3a2212" material="side: double;"></a-plane> 
         <a-plane position="2 8.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#3a2212" material="side: double;"></a-plane> 
         <a-plane position="2 8.01 -3" rotation="-90 0 0" width="2" height="2" color="#3a2212" material="side: double;"></a-plane> 
@@ -185,6 +197,7 @@
         <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
 
 
+        <!-- ================= SISTEMA DE CÂMERA E SEUS CONTROLES ================= -->
         <a-entity id="camera-rig" position="0 1.6 0">
             <a-entity camera look-controls wasd-controls id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"></a-cursor>
@@ -208,13 +221,11 @@
         
         const textoInstrucoes = document.querySelector('#instrucoes');
 
-        // Estante
         estante.addEventListener('click', function () {
             estante.emit('abrirPassagem');
-            textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente para o Quarto Principal.";
+            textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
         });
 
-        // Diário
         diarioVirtual.addEventListener('click', function () {
             interfaceDiario.style.display = 'block';
             cameraEfeito.components['look-controls'].pause();
@@ -225,23 +236,22 @@
             cameraEfeito.components['look-controls'].play();
         });
 
-        // CORREÇÃO: Ponto de teletransporte centralizado no 2º andar para evitar cair fora do mapa
+        // CORREÇÃO RADICAL: Teletransporte joga o jogador EXATAMENTE no meio geométrico da sala livre
         subir1.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0 5.6 -6'); 
-            textoInstrucoes.innerHTML = "2º Andar. Olhe para a escada se quiser descer, ou vá para a outra escada.";
+            cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
+            textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
         });
         descer1.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0 1.6 -6'); 
+            cameraRig.setAttribute('position', '0 1.6 -5.5'); 
             textoInstrucoes.innerHTML = "De volta ao Quarto Principal.";
         });
 
-        // CORREÇÃO: Ponto de teletransporte centralizado no sótão para evitar cair fora do mapa
         subir2.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0 9.6 -6'); 
-            textoInstrucoes.innerHTML = "<b>O Sótão.</b> Espaço de reflexão profunda. Olhe a sua volta.";
+            cameraRig.setAttribute('position', '-0.5 9.6 -5.5'); 
+            textoInstrucoes.innerHTML = "O Sótão.";
         });
         descer2.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0 5.6 -6'); 
+            cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "De volta ao 2º Andar.";
         });
     </script>
