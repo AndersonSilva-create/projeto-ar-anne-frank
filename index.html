@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Correção Definitiva de Posições</title>
+    <title>Anexo Secreto - Diário com Várias Páginas</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
+        /* Estilos do Modal do Diário */
         #interface-diario {
             display: none;
             position: fixed;
@@ -15,7 +16,7 @@
             transform: translate(-50%, -50%);
             width: 80%;
             max-width: 500px;
-            height: 60vh;
+            height: 65vh;
             background-color: #f4ebd0;
             border: 12px solid #5c4033;
             border-radius: 8px;
@@ -26,10 +27,47 @@
             font-family: 'Georgia', serif;
             color: #2b1d11;
         }
-        .conteudo-diario { height: 85%; overflow-y: auto; line-height: 1.6; font-size: 1.1rem; font-style: italic; }
+        .conteudo-diario { 
+            height: 75%; 
+            overflow-y: auto; 
+            line-height: 1.6; 
+            font-size: 1.1rem; 
+            font-style: italic; 
+        }
         .data-diario { font-weight: bold; margin-bottom: 15px; display: block; }
-        .botao-fechar { position: absolute; bottom: 20px; right: 20px; background-color: #5c4033; color: #f4ebd0; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; }
         
+        /* Controles de Navegação do Diário */
+        .controles-diario {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            right: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-diario {
+            background-color: #5c4033;
+            color: #f4ebd0;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            font-family: sans-serif;
+        }
+        .btn-diario:disabled {
+            background-color: #c2b69d;
+            cursor: not-allowed;
+        }
+        .contador-paginas {
+            font-family: sans-serif;
+            font-size: 0.9rem;
+            color: #5c4033;
+            font-weight: bold;
+        }
+        
+        /* Legenda de instruções */
         #instrucoes {
             position: fixed;
             bottom: 20px;
@@ -50,12 +88,18 @@
 
     <div id="instrucoes">Use W,A,S,D para andar, Mouse para olhar. <br><b>Clique na Estante para abrir a passagem.</b></div>
 
+    <!-- Interface do Diário (Com Sistema de Páginas) -->
     <div id="interface-diario">
-        <div class="conteudo-diario">
-            <span class="data-diario">9 de Julho de 1942</span>
-            <p>"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."</p>
+        <div class="conteudo-diario" id="texto-pagina">
+            <!-- O conteúdo será injetado dinamicamente via JavaScript -->
         </div>
-        <button class="botao-fechar" id="btn-fechar">Fechar Diário</button>
+        
+        <div class="controles-diario">
+            <button class="btn-diario" id="btn-anterior">Anterior</button>
+            <span class="contador-paginas" id="giba-contador">Pág. 1 / 5</span>
+            <button class="btn-diario" id="btn-proximo">Próximo</button>
+            <button class="btn-diario" id="btn-fechar">Fechar</button>
+        </div>
     </div>
 
     <a-scene background="color: #0d0d0d">
@@ -97,7 +141,7 @@
         <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
         <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"></a-plane> 
 
-        <!-- MESA DO DIÁRIO (No centro do quarto) -->
+        <!-- MESA DO DIÁRIO -->
         <a-entity id="mesinha" position="0 0 -6.5">
             <a-box id="tampo-mesa" position="0 0.72 0" scale="0.8 0.05 0.8" color="#6e4720"></a-box>
             <a-cylinder position="-0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
@@ -107,10 +151,9 @@
         </a-entity>
         <a-box id="objeto-diario" position="0 0.8 -6.5" scale="0.4 0.08 0.5" color="#a63a2b" class="interactable"></a-box>
 
-        <!-- CORREÇÃO: Armário totalmente colado e alinhado na Parede Esquerda (X = -2.7) -->
+        <!-- Armário alinhado na Parede Esquerda -->
         <a-entity id="armario" position="-2.7 0 -8.5">
             <a-box scale="0.6 2.8 1.4" color="#5c4033" position="0 1.4 0"></a-box>
-            <!-- Portas e Detalhes relativos ao centro do armário -->
             <a-box scale="0.02 2.6 0.65" position="0.31 1.4 -0.33" color="#6e4720"></a-box>
             <a-box scale="0.02 2.6 0.65" position="0.31 1.4 0.33" color="#6e4720"></a-box>
             <a-sphere position="0.33 1.4 -0.05" radius="0.03" color="#d4af37"></a-sphere>
@@ -159,7 +202,7 @@
         <a-box position="2.98 6 -6" scale="0.04 1.6 0.04" color="#2b1d11"></a-box> 
         <a-box position="2.98 6 -6" scale="0.04 0.04 2.02" color="#2b1d11"></a-box>
 
-        <!-- CORREÇÃO: Cama totalmente montada em bloco e travada contra a parede traseira (Z = -8.9) -->
+        <!-- Cama travada contra a parede traseira -->
         <a-entity id="cama-andar1" position="0.8 4.01 -8.9">
             <a-box scale="1.4 0.3 2" color="#5c4033" position="0 0.15 0"></a-box>
             <a-box scale="1.3 0.15 1.9" color="#f4ebd0" position="0 0.35 0"></a-box>
@@ -207,6 +250,7 @@
     </a-scene>
 
     <script>
+        // Elementos de Interação
         const estante = document.querySelector('#estante-secreta');
         const diarioVirtual = document.querySelector('#objeto-diario');
         const interfaceDiario = document.querySelector('#interface-diario');
@@ -221,22 +265,84 @@
         
         const textoInstrucoes = document.querySelector('#instrucoes');
 
-        estante.addEventListener('click', function () {
-            estante.emit('abrirPassagem');
-            textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
+        // Elementos do Sistema de Páginas do Diário
+        const textoPagina = document.querySelector('#texto-pagina');
+        const btnAnterior = document.querySelector('#btn-anterior');
+        const btnProximo = document.querySelector('#btn-proximo');
+        const gibaContador = document.querySelector('#giba-contador');
+
+        // Conteúdo das Páginas do Diário
+        const paginasDiario = [
+            {
+                data: "9 de Julho de 1942",
+                texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."'
+            },
+            {
+                data: "11 de Julho de 1942",
+                texto: '"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda. Nossas janelas permanecem fechadas o tempo todo, mas o silêncio nos protege."'
+            },
+            {
+                data: "1 de Outubro de 1942",
+                texto: '"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador. O pavor que sinto dos barulhos da noite me faz perceber o quão frágil é a nossa segurança aqui dentro."'
+            },
+            {
+                data: "19 de Novembro de 1942",
+                texto: '"Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos, e para os quais tememos o pior. E tudo isto por quê? Porque são judeus... Sinto-me má por estar numa cama quente, enquanto as minhas amigas mais queridas foram jogadas em campos de concentração."'
+            },
+            {
+                data: "6 de Junho de 1944",
+                texto: '"É o Dia D! A invasão começou! Os Aliados desembarcaram na Normandia. O rádio fala em notícias de esperança. Será que a libertação está próxima? Este ano de 1944 nos trará a vitória? Oh, Kitty, a ideia de poder voltar para a escola em setembro me faz chorar de alegria!"'
+            }
+        ];
+
+        let paginaAtual = 0;
+
+        function atualizarModalDiario() {
+            const dadosPagina = paginasDiario[paginaAtual];
+            textoPagina.innerHTML = `<span class="data-diario">${dadosPagina.data}</span><p>${dadosPagina.texto}</p>`;
+            gibaContador.innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
+            
+            // Gerenciar estado dos botões
+            btnAnterior.disabled = paginaAtual === 0;
+            btnProximo.disabled = paginaAtual === paginasDiario.length - 1;
+        }
+
+        // Eventos dos botões do Diário
+        btnAnterior.addEventListener('click', function() {
+            if (paginaAtual > 0) {
+                paginaAtual--;
+                atualizarModalDiario();
+            }
         });
 
+        btnProximo.addEventListener('click', function() {
+            if (paginaAtual < paginasDiario.length - 1) {
+                paginaAtual++;
+                atualizarModalDiario();
+            }
+        });
+
+        // Abrir e Fechar Diário
         diarioVirtual.addEventListener('click', function () {
+            paginaAtual = 0; // Sempre começa na primeira página ao abrir
+            atualizarModalDiario();
             interfaceDiario.style.display = 'block';
             cameraEfeito.components['look-controls'].pause();
             document.exitPointerLock();
         });
+
         botaoFechar.addEventListener('click', function () {
             interfaceDiario.style.display = 'none';
             cameraEfeito.components['look-controls'].play();
         });
 
-        // CORREÇÃO RADICAL: Teletransporte joga o jogador EXATAMENTE no meio geométrico da sala livre
+        // Funcionamento da Estante
+        estante.addEventListener('click', function () {
+            estante.emit('abrirPassagem');
+            textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
+        });
+
+        // Controles de Teletransporte das Escadas
         subir1.addEventListener('click', function () {
             cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
