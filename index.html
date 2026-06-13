@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Versão Final com Colisões Físicas</title>
+    <title>Anexo Secreto - Versão Final com Colisões</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
@@ -36,34 +36,34 @@
     </style>
 
     <script>
-        // LOGICA MATEMÁTICA DE ADICIONAR COLISÃO NAS DIRETRIZES DO SCENE GRAPH
+        // COMPONENTE NATIVO PARA CAIXAS DE COLISÃO (BOUNDING BOXES)
         AFRAME.registerComponent('barreira-limite', {
             init: function () {
-                // Instancia o vetor 3D uma única vez para otimização de memória
+                // Cria o vetor 3D na memória de forma otimizada
                 this.novaPosicao = new THREE.Vector3();
             },
             tick: function () {
                 let el = this.el;
                 let currentPos = el.getAttribute('position');
                 
-                // Clona a posição que o componente WASD tentou aplicar neste frame
+                if (!currentPos) return;
                 this.novaPosicao.copy(currentPos);
 
-                // 1. Limites das Paredes Laterais Visuais (X de -3 a 3) com margem de colisão do corpo
+                // 1. Limites das Paredes Laterais (X de -3 a 3) com margem do corpo
                 if (this.novaPosicao.x < -2.6) this.novaPosicao.x = -2.6;
                 if (this.novaPosicao.x > 2.6) this.novaPosicao.x = 2.6;
 
-                // 2. Limites de Profundidade Visuais (Z de 2 a -10)
+                // 2. Limites de Profundidade (Z de 2 a -10)
                 if (this.novaPosicao.z > 1.6) this.novaPosicao.z = 1.6;
                 if (this.novaPosicao.z < -9.4) this.novaPosicao.z = -9.4;
 
-                // 3. Bloqueio Físico da Estante Secreta (Caso esteja fechada)
+                // 3. Bloqueio Físico da Estante Secreta (Z = -1.9)
                 let estanteAberta = window.estanteGiroCompleto || false;
                 if (!estanteAberta && this.novaPosicao.z < -1.5 && this.novaPosicao.z > -2.2) {
                     this.novaPosicao.z = -1.5;
                 }
 
-                // 4. Caixa de Colisão: Armário do Quarto (Térreo: Y < 3)
+                // 4. Colisão com o Armário do Quarto (Térreo: Y < 3)
                 if (this.novaPosicao.y < 3) {
                     if (this.novaPosicao.x < -1.8 && this.novaPosicao.z < -7.4) {
                         if (this.novaPosicao.z > -7.6) { this.novaPosicao.z = -7.4; } 
@@ -71,14 +71,14 @@
                     }
                 }
 
-                // 5. Caixa de Colisão: Cama (Segundo Andar: Y entre 3 e 7)
+                // 5. Colisão com a Cama (Segundo Andar: Y entre 3 e 7)
                 if (this.novaPosicao.y > 3 && this.novaPosicao.y < 7) {
                     if (this.novaPosicao.x > -0.2 && this.novaPosicao.x < 1.7 && this.novaPosicao.z < -7.4) {
                         this.novaPosicao.z = -7.4;
                     }
                 }
 
-                // Injeta as coordenadas tratadas diretamente no objeto 3D antes da renderização do frame
+                // Aplica as posições filtradas direto no objeto 3D antes de renderizar
                 el.object3D.position.copy(this.novaPosicao);
             }
         });
@@ -279,7 +279,7 @@
             textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
         });
 
-        // Eventos de Teletransporte entre andares através das escadas
+        // Eventos de Teletransporte
         subir1.addEventListener('click', function () {
             cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
