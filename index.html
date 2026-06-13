@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Colisão Nativa</title>
+    <title>Anexo Secreto - Versão Final com Colisões Físicas</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
@@ -34,6 +34,55 @@
         .contador-paginas { font-family: sans-serif; font-size: 0.9rem; color: #5c4033; font-weight: bold; }
         #instrucoes { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-family: sans-serif; pointer-events: none; z-index: 999; text-align: center; }
     </style>
+
+    <script>
+        // LOGICA MATEMÁTICA DE ADICIONAR COLISÃO NAS DIRETRIZES DO SCENE GRAPH
+        AFRAME.registerComponent('barreira-limite', {
+            init: function () {
+                // Instancia o vetor 3D uma única vez para otimização de memória
+                this.novaPosicao = new THREE.Vector3();
+            },
+            tick: function () {
+                let el = this.el;
+                let currentPos = el.getAttribute('position');
+                
+                // Clona a posição que o componente WASD tentou aplicar neste frame
+                this.novaPosicao.copy(currentPos);
+
+                // 1. Limites das Paredes Laterais Visuais (X de -3 a 3) com margem de colisão do corpo
+                if (this.novaPosicao.x < -2.6) this.novaPosicao.x = -2.6;
+                if (this.novaPosicao.x > 2.6) this.novaPosicao.x = 2.6;
+
+                // 2. Limites de Profundidade Visuais (Z de 2 a -10)
+                if (this.novaPosicao.z > 1.6) this.novaPosicao.z = 1.6;
+                if (this.novaPosicao.z < -9.4) this.novaPosicao.z = -9.4;
+
+                // 3. Bloqueio Físico da Estante Secreta (Caso esteja fechada)
+                let estanteAberta = window.estanteGiroCompleto || false;
+                if (!estanteAberta && this.novaPosicao.z < -1.5 && this.novaPosicao.z > -2.2) {
+                    this.novaPosicao.z = -1.5;
+                }
+
+                // 4. Caixa de Colisão: Armário do Quarto (Térreo: Y < 3)
+                if (this.novaPosicao.y < 3) {
+                    if (this.novaPosicao.x < -1.8 && this.novaPosicao.z < -7.4) {
+                        if (this.novaPosicao.z > -7.6) { this.novaPosicao.z = -7.4; } 
+                        else { this.novaPosicao.x = -1.8; }
+                    }
+                }
+
+                // 5. Caixa de Colisão: Cama (Segundo Andar: Y entre 3 e 7)
+                if (this.novaPosicao.y > 3 && this.novaPosicao.y < 7) {
+                    if (this.novaPosicao.x > -0.2 && this.novaPosicao.x < 1.7 && this.novaPosicao.z < -7.4) {
+                        this.novaPosicao.z = -7.4;
+                    }
+                }
+
+                // Injeta as coordenadas tratadas diretamente no objeto 3D antes da renderização do frame
+                el.object3D.position.copy(this.novaPosicao);
+            }
+        });
+    </script>
 </head>
 <body>
 
@@ -161,7 +210,7 @@
         <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
 
 
-        <a-entity id="camera-rig" position="0 1.6 0">
+        <a-entity id="camera-rig" position="0 1.6 0" barreira-limite>
             <a-entity camera look-controls wasd-controls="acceleration: 65" id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"></a-cursor>
             </a-entity>
@@ -230,50 +279,7 @@
             textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
         });
 
-        // LOOP DE CHECAGEM DIRETA NA CÂMERA (Impede a travessia após o input do WASD)
-        setInterval(() => {
-            let pos = cameraRig.getAttribute('position');
-            let mudei = false;
-
-            // 1. Paredes Visuais Laterais (Esquerda X=-3 e Direita X=3) com folga de colisão
-            if (pos.x < -2.6) { pos.x = -2.6; mudei = true; }
-            if (pos.x > 2.6) {  pos.x = 2.6;  mudei = true; }
-
-            // 2. Paredes de Profundidade (Frente Z=2 e Fundo Z=-10)
-            if (pos.z > 1.6) {  pos.z = 1.6;  mudei = true; }
-            if (pos.z < -9.4) { pos.z = -9.4; mudei = true; }
-
-            // 3. Bloqueio Físico da Estante Secreta (Posição Z = -1.9)
-            if (!window.estanteGiroCompleto && pos.z < -1.5 && pos.z > -2.2) {
-                pos.z = -1.5; 
-                mudei = true;
-            }
-
-            // 4. Colisão com o Armário do Quarto (Térreo - Altura Y próxima de 1.6)
-            if (pos.y < 3) {
-                // Armário fica no canto esquerdo superior (X próximo de -2.7, Z perto de -8.5)
-                if (pos.x < -1.8 && pos.z < -7.4) {
-                    if (pos.z > -7.6) { pos.z = -7.4; } 
-                    else { pos.x = -1.8; }
-                    mudei = true;
-                }
-            }
-
-            // 5. Colisão com a Cama (1º Andar - Altura Y próxima de 5.6)
-            if (pos.y > 3 && pos.y < 7) {
-                // Cama fica em X=0.8, Z=-8.9. Caixa de exclusão:
-                if (pos.x > -0.2 && pos.x < 1.7 && pos.z < -7.4) {
-                    pos.z = -7.4;
-                    mudei = true;
-                }
-            }
-
-            if (mudei) {
-                cameraRig.setAttribute('position', pos);
-            }
-        }, 10); // Roda a cada 10 milissegundos para vencer o lag do WASD
-
-        // Teletransportes entre andares
+        // Eventos de Teletransporte entre andares através das escadas
         subir1.addEventListener('click', function () {
             cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
