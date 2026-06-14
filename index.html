@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Versão Objeto 3D</title>
+    <title>Anexo Secreto - Anne Frank Texturizada</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
@@ -60,7 +60,7 @@
             <img id="tex-anne-vestido" src="assets/anne_vestido.jpg">
             <img id="tex-anne-rosto" src="assets/anne_rosto.jpg">
             <img id="tex-anne-cabelo" src="assets/anne_cabelo.jpg">
-            </a-assets>
+        </a-assets>
 
         <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity light="type: directional; color: #ffeebb; intensity: 0.5" position="1 4 1"></a-entity>
@@ -138,7 +138,6 @@
             <a-box scale="1.4 0.8 0.1" color="#4a2f13" position="0 0.4 -0.95"></a-box>
             
             <a-entity id="anne-frank-3d" position="0 0.38 0.1" rotation="0 45 0" class="interactable">
-    
                 <a-box position="0 0.25 0" scale="0.35 0.45 0.25" src="#tex-anne-vestido"></a-box>
                 
                 <a-sphere position="0 0.58 0" radius="0.13" src="#tex-anne-rosto" rotation="0 180 0"></a-sphere>
@@ -185,7 +184,7 @@
         <a-plane position="2 8.01 -3" rotation="-90 0 0" width="2" height="2" color="#3a2212" material="side: double;"></a-plane> 
 
         <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao"></a-plane>
-        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"></a-plane>
+        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"></a-box>
         <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao"></a-plane>
         <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao"></a-plane>
         <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
@@ -219,7 +218,7 @@
         const gibaContador = document.querySelector('#giba-contador');
 
         const paginasDiario = [
-            { data: "9 de Julho de 1942", texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta di entrada..."' },
+            { data: "9 de Julho de 1942", texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."' },
             { data: "11 de Julho de 1942", texto: '"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda. Nossas janelas permanecem fechadas o tempo todo, mas o silêncio nos protege."' },
             { data: "1 de Outubro de 1942", texto: '"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador. O pavor que sinto dos barulhos da noite me faz perceber o quão frágil é a nossa segurança aqui dentro."' },
             { data: "19 de Novembro de 1942", texto: '"Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos, e para os quais tememos o pior. E tudo isto por quê? Porque são judeus... Sinto-me má por estar numa cama quente, enquanto as minhas amigas mais queridas foram jogadas em campos de classificação."' },
