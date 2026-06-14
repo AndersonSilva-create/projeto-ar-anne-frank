@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Reconstrução Total</title>
+    <title>Anexo Secreto - Versão Estável</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
     <style>
@@ -34,60 +34,6 @@
         .contador-paginas { font-family: sans-serif; font-size: 0.9rem; color: #5c4033; font-weight: bold; }
         #instrucoes { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-family: sans-serif; pointer-events: none; z-index: 999; text-align: center; }
     </style>
-
-    <script>
-        // COMPONENTE CORE: Sistema de Intercepção Vetorial Tridimensional
-        AFRAME.registerComponent('motor-colisao', {
-            init: function () {
-                this.posicaoAlvo = new THREE.Vector3();
-            },
-            tick: function () {
-                let el = this.el;
-                let posAtual = el.getAttribute('position');
-                if (!posAtual) return;
-
-                // Copia o vetor de movimento calculado pelo WASD para processamento
-                this.posicaoAlvo.copy(posAtual);
-
-                // LIMITES GLOBAIS DO MAPA (Bounding Box Externa)
-                // Paredes Laterais (Largura total de 6 metros, cortada em X = 3 e -3)
-                if (this.posicaoAlvo.x < -2.6) this.posicaoAlvo.x = -2.6;
-                if (this.posicaoAlvo.x > 2.6) this.posicaoAlvo.x = 2.6;
-
-                // Profundidade do Cenário (Z vai de 2 na entrada até -10 no fundo)
-                if (this.posicaoAlvo.z > 1.6) this.posicaoAlvo.z = 1.6;
-                if (this.posicaoAlvo.z < -9.4) this.posicaoAlvo.z = -9.4;
-
-                // OBSTÁCULO 1: Estante Secreta (Gatilho de barreira mecânica ativa)
-                let liberado = window.estanteGiroCompleto || false;
-                if (!liberado && this.posicaoAlvo.z < -1.5 && this.posicaoAlvo.z > -2.2) {
-                    this.posicaoAlvo.z = -1.5; // Bloqueia a passagem para o quarto se fechada
-                }
-
-                // OBSTÁCULO 2: O Armário do Térreo (Só colide se o jogador estiver no andar de baixo: Y < 3)
-                if (this.posicaoAlvo.y < 3) {
-                    if (this.posicaoAlvo.x < -1.8 && this.posicaoAlvo.z < -7.4) {
-                        // Descobre por qual lado o jogador bateu para deslizar suavemente na quina
-                        if (this.posicaoAlvo.z > -7.6) {
-                            this.posicaoAlvo.z = -7.4;
-                        } else {
-                            this.posicaoAlvo.x = -1.8;
-                        }
-                    }
-                }
-
-                // OBSTÁCULO 3: A Cama do Primeiro Andar (Só colide se o jogador estiver no andar do meio: Y entre 3 e 7)
-                if (this.posicaoAlvo.y > 3 && this.posicaoAlvo.y < 7) {
-                    if (this.posicaoAlvo.x > -0.2 && this.posicaoAlvo.x < 1.7 && this.posicaoAlvo.z < -7.4) {
-                        this.posicaoAlvo.z = -7.4;
-                    }
-                }
-
-                // Aplica a filtragem matemática direto na matriz do objeto 3D
-                el.object3D.position.copy(this.posicaoAlvo);
-            }
-        });
-    </script>
 </head>
 <body>
 
@@ -104,18 +50,17 @@
     </div>
 
     <a-scene background="color: #0d0d0d">
-        
         <a-assets>
             <img id="tex-biblioteca" src="assets/biblioteca_parede.jpg">
             <img id="tex-quarto" src="assets/quarto_parede.jpg">
             <img id="tex-andar1" src="assets/andar1_parede.jpg">
             <img id="tex-sotao" src="assets/sotao_parede.jpg">
             <img id="tex-vista" src="assets/vista_rua.jpg">
+            <img id="char-anne" src="assets/anne_frank_cama.png">
         </a-assets>
 
         <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity light="type: directional; color: #ffeebb; intensity: 0.5" position="1 4 1"></a-entity>
-
 
         <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#5c4033" material="side: double;"></a-plane> 
         <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#f4f1ea" material="side: double;"></a-plane> 
@@ -145,7 +90,6 @@
             <a-cylinder position="-0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
             <a-cylinder position="0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
         </a-entity>
-        
         <a-box id="objeto-diario" position="0 0.8 -6.5" scale="0.4 0.08 0.5" color="#a63a2b" class="interactable"></a-box>
 
         <a-entity id="armario" position="-2.7 0 -8.5">
@@ -189,6 +133,8 @@
             <a-box scale="1.4 0.3 2" color="#5c4033" position="0 0.15 0"></a-box>
             <a-box scale="1.3 0.15 1.9" color="#f4ebd0" position="0 0.35 0"></a-box>
             <a-box scale="1.4 0.8 0.1" color="#4a2f13" position="0 0.4 -0.95"></a-box>
+            
+            <a-image src="#char-anne" position="0 0.9 0" scale="1.2 1.2 1.2" material="transparent: true; alphaTest: 0.5; side: double;"></a-image>
         </a-entity>
 
 
@@ -218,7 +164,7 @@
         <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
 
 
-        <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
+        <a-entity id="camera-rig" position="0 1.6 0">
             <a-entity camera look-controls wasd-controls="acceleration: 65" id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"></a-cursor>
             </a-entity>
@@ -227,7 +173,6 @@
     </a-scene>
 
     <script>
-        // Mapeamento dos elementos estruturais da DOM
         const estante = document.querySelector('#estante-secreta');
         const diarioVirtual = document.querySelector('#objeto-diario');
         const interfaceDiario = document.querySelector('#interface-diario');
@@ -246,10 +191,6 @@
         const btnProximo = document.querySelector('#btn-proximo');
         const gibaContador = document.querySelector('#giba-contador');
 
-        // Estado inicial de controle da passagem da biblioteca
-        window.estanteGiroCompleto = false;
-
-        // Base de dados das páginas reais extraídas do diário
         const paginasDiario = [
             { data: "9 de Julho de 1942", texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."' },
             { data: "11 de Julho de 1942", texto: '"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda. Nossas janelas permanecem fechadas o tempo todo, mas o silêncio nos protege."' },
@@ -260,7 +201,6 @@
 
         let paginaAtual = 0;
 
-        // Gerenciador de renderização interna do Diário
         function atualizarModalDiario() {
             const dadosPagina = paginasDiario[paginaAtual];
             textoPagina.innerHTML = `<span class="data-diario">${dadosPagina.data}</span><p>${dadosPagina.texto}</p>`;
@@ -269,11 +209,9 @@
             btnProximo.disabled = paginaAtual === paginasDiario.length - 1;
         }
 
-        // Navegação de páginas do livro virtual
         btnAnterior.addEventListener('click', function() { if (paginaAtual > 0) { paginaAtual--; atualizarModalDiario(); } });
         btnProximo.addEventListener('click', function() { if (paginaAtual < paginasDiario.length - 1) { paginaAtual++; atualizarModalDiario(); } });
 
-        // Evento de leitura do Diário Vermelho
         diarioVirtual.addEventListener('click', function () {
             paginaAtual = 0;
             atualizarModalDiario();
@@ -282,20 +220,17 @@
             document.exitPointerLock();
         });
 
-        // Fechamento do Diário
         botaoFechar.addEventListener('click', function () {
             interfaceDiario.style.display = 'none';
             cameraEfeito.components['look-controls'].play();
         });
 
-        // Mecanismo de abertura da estante por gatilho de evento
         estante.addEventListener('click', function () {
             estante.emit('abrirPassagem');
-            window.estanteGiroCompleto = true;
             textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
         });
 
-        // Sistema de Teletransporte Físico dos Andares pelas Escadas
+        // Eventos de Teletransporte
         subir1.addEventListener('click', function () {
             cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
             textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
