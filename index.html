@@ -57,6 +57,9 @@
             <img id="tex-sotao" src="assets/sotao_parede.jpg">
             <img id="tex-vista" src="assets/vista_rua.jpg">
             
+            <img id="tex-anne-vestido" src="assets/anne_vestido.jpg">
+            <img id="tex-anne-rosto" src="assets/anne_rosto.jpg">
+            <img id="tex-anne-cabelo" src="assets/anne_cabelo.jpg">
             </a-assets>
 
         <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
@@ -135,21 +138,22 @@
             <a-box scale="1.4 0.8 0.1" color="#4a2f13" position="0 0.4 -0.95"></a-box>
             
             <a-entity id="anne-frank-3d" position="0 0.38 0.1" rotation="0 45 0" class="interactable">
-                <a-box position="0 0.25 0" scale="0.35 0.45 0.25" color="#4a6984"></a-box>
+    
+                <a-box position="0 0.25 0" scale="0.35 0.45 0.25" src="#tex-anne-vestido"></a-box>
                 
-                <a-sphere position="0 0.58 0" radius="0.13" color="#ffdbac"></a-sphere>
+                <a-sphere position="0 0.58 0" radius="0.13" src="#tex-anne-rosto" rotation="0 180 0"></a-sphere>
                 
-                <a-box position="0 0.62 -0.04" scale="0.28 0.15 0.24" color="#2b1d11"></a-box>
-                <a-box position="-0.12 0.56 0" scale="0.05 0.2 0.2" color="#2b1d11"></a-box>
-                <a-box position="0.12 0.56 0" scale="0.05 0.2 0.2" color="#2b1d11"></a-box>
+                <a-box position="0 0.62 -0.04" scale="0.28 0.15 0.24" src="#tex-anne-cabelo"></a-box>
+                <a-box position="-0.12 0.56 0" scale="0.05 0.2 0.2" src="#tex-anne-cabelo"></a-box>
+                <a-box position="0.12 0.56 0" scale="0.05 0.2 0.2" src="#tex-anne-cabelo"></a-box>
 
-                <a-box position="-0.08 0.05 0.2" scale="0.1 0.12 0.35" color="#4a6984" rotation="20 0 0"></a-box>
-                <a-box position="0.08 0.05 0.2" scale="0.1 0.12 0.35" color="#4a6984" rotation="20 0 0"></a-box>
+                <a-box position="-0.08 0.05 0.2" scale="0.1 0.12 0.35" src="#tex-anne-vestido" rotation="20 0 0"></a-box>
+                <a-box position="0.08 0.05 0.2" scale="0.1 0.12 0.35" src="#tex-anne-vestido" rotation="20 0 0"></a-box>
                 <a-box position="-0.08 -0.15 0.33" scale="0.09 0.3 0.09" color="#ffdbac"></a-box>
                 <a-box position="0.08 -0.15 0.33" scale="0.09 0.3 0.09" color="#ffdbac"></a-box>
 
-                <a-box position="-0.2 0.25 0.1" scale="0.08 0.25 0.08" color="#4a6984" rotation="-30 0 10"></a-box>
-                <a-box position="0.2 0.25 0.1" scale="0.08 0.25 0.08" color="#4a6984" rotation="-30 0 -10"></a-box>
+                <a-box position="-0.2 0.25 0.1" scale="0.08 0.25 0.08" src="#tex-anne-vestido" rotation="-30 0 10"></a-box>
+                <a-box position="0.2 0.25 0.1" scale="0.08 0.25 0.08" src="#tex-anne-vestido" rotation="-30 0 -10"></a-box>
 
                 <a-box position="0 0.22 0.22" scale="0.22 0.03 0.18" color="#d2b48c" rotation="15 0 0">
                     <a-box position="0 0.01 0" scale="0.2 0.02 0.16" color="#ffffff"></a-box>
