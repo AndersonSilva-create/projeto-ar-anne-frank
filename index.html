@@ -1,279 +1,2063 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anexo Secreto - Anne Frank Texturizada</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        #interface-diario {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 500px;
-            height: 65vh;
-            background-color: #f4ebd0;
-            border: 12px solid #5c4033;
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.7);
-            z-index: 9999;
-            padding: 30px;
-            box-sizing: border-box;
-            font-family: 'Georgia', serif;
-            color: #2b1d11;
-        }
-        .conteudo-diario { height: 75%; overflow-y: auto; line-height: 1.6; font-size: 1.1rem; font-style: italic; }
-        .data-diario { font-weight: bold; margin-bottom: 15px; display: block; }
-        .controles-diario { position: absolute; bottom: 20px; left: 30px; right: 30px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-diario { background-color: #5c4033; color: #f4ebd0; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; font-family: sans-serif; }
-        .btn-diario:disabled { background-color: #c2b69d; cursor: not-allowed; }
-        .contador-paginas { font-family: sans-serif; font-size: 0.9rem; color: #5c4033; font-weight: bold; }
-        #instrucoes { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-family: sans-serif; pointer-events: none; z-index: 999; text-align: center; }
-    </style>
+<title>Anexo Secreto - WebVR</title>
+
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+
+<style>
+
+html,
+body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Georgia, serif;
+}
+
+#hud{
+    position:fixed;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1000;
+
+    background:rgba(0,0,0,0.7);
+    color:white;
+
+    padding:10px 18px;
+    border-radius:8px;
+
+    font-size:14px;
+}
+
+#diarioModal{
+    display:none;
+
+    position:fixed;
+    inset:0;
+
+    z-index:2000;
+
+    background:rgba(0,0,0,0.7);
+
+    align-items:center;
+    justify-content:center;
+}
+
+#diarioContainer{
+
+    width:min(800px,90vw);
+    height:min(650px,85vh);
+
+    background:#f4ebd0;
+
+    border-radius:12px;
+
+    padding:30px;
+
+    box-sizing:border-box;
+
+    display:flex;
+    flex-direction:column;
+
+    box-shadow:0 0 30px rgba(0,0,0,0.5);
+}
+
+#diarioData{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+#diarioTexto{
+    flex:1;
+
+    font-size:20px;
+    line-height:1.8;
+
+    overflow:auto;
+}
+
+#diarioControles{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-top:20px;
+}
+
+#diarioControles button{
+
+    padding:10px 20px;
+
+    border:none;
+    border-radius:6px;
+
+    cursor:pointer;
+
+    font-size:16px;
+}
+
+#contadorPagina{
+    font-weight:bold;
+}
+
+button:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+}
+
+</style>
 </head>
+
 <body>
 
-    <div id="instrucoes">Use W,A,S,D para andar, Mouse para olhar. <br><b>Clique na Estante para abrir a passagem.</b></div>
+<div id="hud">
+    WASD para mover • Clique na estante secreta • Clique no diário vermelho • Use as escadas para mudar de andar
+</div>
 
-    <div id="interface-diario">
-        <div class="conteudo-diario" id="texto-pagina"></div>
-        <div class="controles-diario">
-            <button class="btn-diario" id="btn-anterior">Anterior</button>
-            <span class="contador-paginas" id="giba-contador">Pág. 1 / 5</span>
-            <button class="btn-diario" id="btn-proximo">Próximo</button>
-            <button class="btn-diario" id="btn-fechar">Fechar</button>
+<div id="diarioModal">
+
+    <div id="diarioContainer">
+
+        <div id="diarioData"></div>
+
+        <div id="diarioTexto"></div>
+
+        <div id="diarioControles">
+
+            <button id="btnAnterior">
+                Anterior
+            </button>
+
+            <span id="contadorPagina">
+            </span>
+
+            <button id="btnProximo">
+                Próximo
+            </button>
+
+            <button id="btnFechar">
+                Fechar
+            </button>
+
         </div>
+
     </div>
 
-    <a-scene background="color: #0d0d0d">
-        <a-assets>
-            <img id="tex-biblioteca" src="assets/biblioteca_parede.jpg">
-            <img id="tex-quarto" src="assets/quarto_parede.jpg">
-            <img id="tex-andar1" src="assets/andar1_parede.jpg">
-            <img id="tex-sotao" src="assets/sotao_parede.jpg">
-            <img id="tex-vista" src="assets/vista_rua.jpg">
-            
-            <img id="tex-anne-vestido" src="assets/anne_vestido.jpg">
-            <img id="tex-anne-rosto" src="assets/anne_rosto.jpg">
-            <img id="tex-anne-cabelo" src="assets/anne_cabelo.jpg">
-        </a-assets>
+</div>
 
-        <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
-        <a-entity light="type: directional; color: #ffeebb; intensity: 0.5" position="1 4 1"></a-entity>
+<a-scene>
 
-        <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#5c4033" material="side: double;"></a-plane> 
-        <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#f4f1ea" material="side: double;"></a-plane> 
-        
-        <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
-        <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca"></a-plane> 
-        <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca"></a-plane> 
-        
-        <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
-        <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double;"></a-plane>
-        <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double;"></a-plane>
+<a-assets>
 
-        <a-box id="estante-secreta" position="0 1.5 -1.9" scale="1.9 3 0.4" color="#5c4033" class="interactable"
-               animation="property: position; to: 1.8 1.5 -1.9; dur: 2000; startEvents: abrirPassagem">
-        </a-box>
+<img
+id="tex-biblioteca"
+src="assets/biblioteca_parede.jpg">
+
+<img
+id="tex-quarto"
+src="assets/quarto_parede.jpg">
+
+<img
+id="tex-andar1"
+src="assets/andar1_parede.jpg">
+
+<img
+id="tex-sotao"
+src="assets/sotao_parede.jpg">
+
+<img
+id="tex-vista"
+src="assets/vista_rua.jpg">
+
+<img
+id="tex-anne-vestido"
+src="assets/anne_vestido.jpg">
+
+<img
+id="tex-anne-rosto"
+src="assets/anne_rosto.jpg">
+
+<img
+id="tex-anne-cabelo"
+src="assets/anne_cabelo.jpg">
+
+</a-assets>
+
+<!-- CAMERA -->
+
+<a-entity
+id="camera-rig"
+position="0 1.6 0">
+
+    <a-entity
+    camera
+    look-controls
+    wasd-controls="acceleration: 65"
+    id="visao-usuario">
+
+        <a-cursor
+        raycaster="objects: .interactable"
+        color="#ffffff"
+        scale="0.5 0.5 0.5">
+        </a-cursor>
+
+    </a-entity>
+
+</a-entity>
+
+<!-- ILUMINAÇÃO -->
+
+<a-entity
+light="type:ambient; intensity:0.8">
+</a-entity>
+
+<a-entity
+light="type:directional; intensity:0.8"
+position="2 8 2">
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- TÉRREO - BIBLIOTECA -->
+<!-- ===================================================== -->
+
+<a-box
+position="0 -0.05 0"
+width="6"
+height="0.1"
+depth="4"
+color="#7a5b3a">
+</a-box>
+
+<a-box
+position="0 4 0"
+width="6"
+height="0.1"
+depth="4"
+color="#dddddd">
+</a-box>
+
+<a-box
+position="-3 2 0"
+width="0.1"
+height="4"
+depth="4"
+src="#tex-biblioteca">
+</a-box>
+
+<a-box
+position="3 2 0"
+width="0.1"
+height="4"
+depth="4"
+src="#tex-biblioteca">
+</a-box>
+
+<a-box
+position="0 2 2"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-biblioteca">
+</a-box>
+
+<a-box
+position="-2 2 -2"
+width="2"
+height="4"
+depth="0.1"
+src="#tex-biblioteca">
+</a-box>
+
+<a-box
+position="2 2 -2"
+width="2"
+height="4"
+depth="0.1"
+src="#tex-biblioteca">
+</a-box>
+
+<!-- ESTANTE SECRETA -->
+
+<a-box
+id="estante-secreta"
+class="interactable"
+position="0 1.5 -1.9"
+width="1.9"
+height="3"
+depth="0.4"
+color="#5a3c20">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- QUARTO PRINCIPAL -->
+<!-- ===================================================== -->
+
+<a-box
+position="0 -0.05 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#6e5237">
+</a-box>
+
+<a-box
+position="0 4 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#d0d0d0">
+</a-box>
+
+<a-box
+position="-3 2 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-quarto">
+</a-box>
+
+<a-box
+position="3 2 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-quarto">
+</a-box>
+
+<a-box
+position="0 2 -10"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-quarto">
+</a-box>
+
+<!-- MESA -->
+
+<a-entity position="0 0 -6.5">
+
+    <a-box
+    position="0 0.75 0"
+    width="1.6"
+    height="0.1"
+    depth="0.8"
+    color="#7a4d25">
+    </a-box>
+
+    <a-cylinder
+    position="-0.7 0.35 -0.3"
+    radius="0.04"
+    height="0.7"
+    color="#5f3819">
+    </a-cylinder>
+
+    <a-cylinder
+    position="0.7 0.35 -0.3"
+    radius="0.04"
+    height="0.7"
+    color="#5f3819">
+    </a-cylinder>
+
+    <a-cylinder
+    position="-0.7 0.35 0.3"
+    radius="0.04"
+    height="0.7"
+    color="#5f3819">
+    </a-cylinder>
+
+    <a-cylinder
+    position="0.7 0.35 0.3"
+    radius="0.04"
+    height="0.7"
+    color="#5f3819">
+    </a-cylinder>
+
+</a-entity>
+
+<!-- DIÁRIO -->
+
+<a-box
+id="objeto-diario"
+class="interactable"
+position="0 0.8 -6.5"
+width="0.4"
+height="0.08"
+depth="0.5"
+color="#aa0000">
+</a-box>
+
+<!-- ARMÁRIO -->
+
+<a-box
+position="-2.7 1.4 -8.5"
+width="0.6"
+height="2.8"
+depth="1"
+color="#5c3415">
+</a-box>
 
 
-        <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#3a2212" material="side: double;"></a-plane> 
-        <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
-        <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"></a-plane> 
-        <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"></a-plane> 
+<!-- ===================================================== -->
+<!-- SEGUNDO ANDAR -->
+<!-- ===================================================== -->
 
-        <a-entity id="mesinha" position="0 0 -6.5">
-            <a-box id="tampo-mesa" position="0 0.72 0" scale="0.8 0.05 0.8" color="#6e4720"></a-box>
-            <a-cylinder position="-0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
-            <a-cylinder position="0.35 0.36 -0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
-            <a-cylinder position="-0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
-            <a-cylinder position="0.35 0.36 0.35" radius="0.03" height="0.72" color="#5c4033"></a-cylinder>
-        </a-entity>
-        <a-box id="objeto-diario" position="0 0.8 -6.5" scale="0.4 0.08 0.5" color="#a63a2b" class="interactable"></a-box>
+<!-- Piso -->
 
-        <a-entity id="armario" position="-2.7 0 -8.5">
-            <a-box scale="0.6 2.8 1.4" color="#5c4033" position="0 1.4 0"></a-box>
-            <a-box scale="0.02 2.6 0.65" position="0.31 1.4 -0.33" color="#6e4720"></a-box>
-            <a-box scale="0.02 2.6 0.65" position="0.31 1.4 0.33" color="#6e4720"></a-box>
-        </a-entity>
+<a-box
+position="0 4.01 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#8b6a45">
+</a-box>
+
+<!-- Teto -->
+
+<a-box
+position="0 8 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#d9d9d9">
+</a-box>
+
+<!-- Paredes -->
+
+<a-box
+position="-3 6 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-andar1">
+</a-box>
+
+<a-box
+position="3 6 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-andar1">
+</a-box>
+
+<a-box
+position="0 6 -10"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-andar1">
+</a-box>
+
+<a-box
+position="0 6 -2"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-andar1">
+</a-box>
+
+<!-- JANELA -->
+
+<a-plane
+position="3 6 -6"
+rotation="0 -90 0"
+width="2"
+height="1.6"
+src="#tex-vista">
+</a-plane>
+
+<!-- MOLDURA -->
+
+<a-box
+position="2.95 6 -6"
+width="0.05"
+height="1.8"
+depth="2.2"
+color="#4f2f18">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- CAMA -->
+<!-- ===================================================== -->
+
+<a-entity position="0.8 4.01 -8.9">
+
+    <!-- base -->
+
+    <a-box
+    position="0 0.2 0"
+    width="1.8"
+    height="0.4"
+    depth="0.8"
+    color="#7c5736">
+    </a-box>
+
+    <!-- colchão -->
+
+    <a-box
+    position="0 0.5 0"
+    width="1.7"
+    height="0.2"
+    depth="0.75"
+    color="#ececec">
+    </a-box>
+
+    <!-- travesseiro -->
+
+    <a-box
+    position="-0.55 0.65 0"
+    width="0.4"
+    height="0.12"
+    depth="0.5"
+    color="#f5f5f5">
+    </a-box>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- ANNE FRANK LOW POLY -->
+<!-- ===================================================== -->
+
+<a-entity
+id="anne-frank-3d"
+class="interactable"
+position="0.8 4.01 -8.9">
+
+    <!-- pernas -->
+
+    <a-box
+    position="-0.12 0.45 0.05"
+    width="0.18"
+    height="0.5"
+    depth="0.18"
+    src="#tex-anne-vestido"
+    rotation="25 0 0">
+    </a-box>
+
+    <a-box
+    position="0.12 0.45 0.05"
+    width="0.18"
+    height="0.5"
+    depth="0.18"
+    src="#tex-anne-vestido"
+    rotation="25 0 0">
+    </a-box>
+
+    <!-- canelas -->
+
+    <a-box
+    position="-0.12 0.18 0.18"
+    width="0.14"
+    height="0.35"
+    depth="0.14"
+    color="#f0c6a5"
+    rotation="35 0 0">
+    </a-box>
+
+    <a-box
+    position="0.12 0.18 0.18"
+    width="0.14"
+    height="0.35"
+    depth="0.14"
+    color="#f0c6a5"
+    rotation="35 0 0">
+    </a-box>
+
+    <!-- tronco -->
+
+    <a-box
+    position="0 0.95 0"
+    width="0.45"
+    height="0.65"
+    depth="0.25"
+    src="#tex-anne-vestido">
+    </a-box>
+
+    <!-- pescoço -->
+
+    <a-cylinder
+    position="0 1.35 0"
+    radius="0.05"
+    height="0.08"
+    color="#f0c6a5">
+    </a-cylinder>
+
+    <!-- cabeça -->
+
+    <a-sphere
+    position="0 1.58 0"
+    radius="0.22"
+    src="#tex-anne-rosto"
+    rotation="0 180 0">
+    </a-sphere>
+
+    <!-- cabelo topo -->
+
+    <a-box
+    position="0 1.74 0"
+    width="0.35"
+    height="0.12"
+    depth="0.35"
+    src="#tex-anne-cabelo">
+    </a-box>
+
+    <!-- cabelo esquerdo -->
+
+    <a-box
+    position="-0.2 1.58 0"
+    width="0.08"
+    height="0.28"
+    depth="0.28"
+    src="#tex-anne-cabelo">
+    </a-box>
+
+    <!-- cabelo direito -->
+
+    <a-box
+    position="0.2 1.58 0"
+    width="0.08"
+    height="0.28"
+    depth="0.28"
+    src="#tex-anne-cabelo">
+    </a-box>
+
+    <!-- braço esquerdo -->
+
+    <a-box
+    position="-0.28 1.02 0.1"
+    width="0.12"
+    height="0.45"
+    depth="0.12"
+    src="#tex-anne-vestido"
+    rotation="45 0 40">
+    </a-box>
+
+    <!-- braço direito -->
+
+    <a-box
+    position="0.28 1.02 0.1"
+    width="0.12"
+    height="0.45"
+    depth="0.12"
+    src="#tex-anne-vestido"
+    rotation="45 0 -40">
+    </a-box>
+
+    <!-- mãos -->
+
+    <a-box
+    position="-0.18 0.78 0.22"
+    width="0.08"
+    height="0.08"
+    depth="0.08"
+    color="#f0c6a5">
+    </a-box>
+
+    <a-box
+    position="0.18 0.78 0.22"
+    width="0.08"
+    height="0.08"
+    depth="0.08"
+    color="#f0c6a5">
+    </a-box>
+
+    <!-- livro -->
+
+    <a-box
+    position="0 0.72 0.18"
+    width="0.34"
+    height="0.04"
+    depth="0.22"
+    color="#d8d0b8"
+    rotation="15 0 0">
+    </a-box>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- ESCADA TÉRREO -> ANDAR 1 -->
+<!-- ===================================================== -->
+
+<a-box
+position="2.2 1 -3"
+width="0.5"
+height="2"
+depth="1"
+color="#79553b">
+</a-box>
+
+<a-box
+id="subir-andar1"
+class="interactable"
+position="2.2 1.5 -3"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<a-box
+id="descer-terreo"
+class="interactable"
+position="2.2 5.5 -3"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- ESCADA ANDAR 1 -> SÓTÃO -->
+<!-- ===================================================== -->
+
+<a-box
+position="-2.2 5 -8"
+width="0.5"
+height="2"
+depth="1"
+color="#79553b">
+</a-box>
+
+<a-box
+id="subir-sotao"
+class="interactable"
+position="-2.2 5.5 -8"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<a-box
+id="descer-andar1"
+class="interactable"
+position="-2.2 9.5 -8"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- SÓTÃO -->
+<!-- ===================================================== -->
+
+<a-box
+position="0 8.01 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#7a5a38">
+</a-box>
+
+<a-box
+position="0 12 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#cfcfcf">
+</a-box>
+
+<a-box
+position="-3 10 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-sotao">
+</a-box>
+
+<a-box
+position="3 10 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-sotao">
+</a-box>
+
+<a-box
+position="0 10 -10"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-sotao">
+</a-box>
+
+<a-box
+position="0 10 -2"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-sotao">
+</a-box>
+
+<!-- vigas decorativas -->
+
+<a-box
+position="0 11.3 -6"
+width="6"
+height="0.15"
+depth="0.15"
+color="#5c3c20">
+</a-box>
+
+<a-box
+position="0 10.6 -6"
+width="6"
+height="0.15"
+depth="0.15"
+color="#5c3c20">
+</a-box>
+
+<a-box
+position="0 9.9 -6"
+width="6"
+height="0.15"
+depth="0.15"
+color="#5c3c20">
+</a-box>
 
 
-        <a-entity id="escada-complexa-1" position="-2.3 0 -4.5">
-            <a-box scale="0.1 6 0.1" color="#777" position="-0.3 3 0"></a-box>
-            <a-box scale="0.1 6 0.1" color="#777" position="0.3 3 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#777" position="0 0.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#777" position="0 1.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#777" position="0 2.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#777" position="0 3.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#777" position="0 4.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#777" position="0 5.5 0"></a-box>
+<!-- ===================================================== -->
+<!-- SEGUNDO ANDAR -->
+<!-- ===================================================== -->
 
-            <a-box id="btn-subir-1" class="interactable" position="0 2 0" scale="1 4 0.5" visible="false"></a-box>
-            <a-box id="btn-descer-1" class="interactable" position="0 5 0" scale="1 2 0.5" visible="false"></a-box>
-        </a-entity>
+<!-- Piso -->
+
+<a-box
+position="0 4.01 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#8b6a45">
+</a-box>
+
+<!-- Teto -->
+
+<a-box
+position="0 8 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#d9d9d9">
+</a-box>
+
+<!-- Paredes -->
+
+<a-box
+position="-3 6 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-andar1">
+</a-box>
+
+<a-box
+position="3 6 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-andar1">
+</a-box>
+
+<a-box
+position="0 6 -10"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-andar1">
+</a-box>
+
+<a-box
+position="0 6 -2"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-andar1">
+</a-box>
+
+<!-- JANELA -->
+
+<a-plane
+position="3 6 -6"
+rotation="0 -90 0"
+width="2"
+height="1.6"
+src="#tex-vista">
+</a-plane>
+
+<!-- MOLDURA -->
+
+<a-box
+position="2.95 6 -6"
+width="0.05"
+height="1.8"
+depth="2.2"
+color="#4f2f18">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- CAMA -->
+<!-- ===================================================== -->
+
+<a-entity position="0.8 4.01 -8.9">
+
+    <!-- base -->
+
+    <a-box
+    position="0 0.2 0"
+    width="1.8"
+    height="0.4"
+    depth="0.8"
+    color="#7c5736">
+    </a-box>
+
+    <!-- colchão -->
+
+    <a-box
+    position="0 0.5 0"
+    width="1.7"
+    height="0.2"
+    depth="0.75"
+    color="#ececec">
+    </a-box>
+
+    <!-- travesseiro -->
+
+    <a-box
+    position="-0.55 0.65 0"
+    width="0.4"
+    height="0.12"
+    depth="0.5"
+    color="#f5f5f5">
+    </a-box>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- ANNE FRANK LOW POLY -->
+<!-- ===================================================== -->
+
+<a-entity
+id="anne-frank-3d"
+class="interactable"
+position="0.8 4.01 -8.9">
+
+    <!-- pernas -->
+
+    <a-box
+    position="-0.12 0.45 0.05"
+    width="0.18"
+    height="0.5"
+    depth="0.18"
+    src="#tex-anne-vestido"
+    rotation="25 0 0">
+    </a-box>
+
+    <a-box
+    position="0.12 0.45 0.05"
+    width="0.18"
+    height="0.5"
+    depth="0.18"
+    src="#tex-anne-vestido"
+    rotation="25 0 0">
+    </a-box>
+
+    <!-- canelas -->
+
+    <a-box
+    position="-0.12 0.18 0.18"
+    width="0.14"
+    height="0.35"
+    depth="0.14"
+    color="#f0c6a5"
+    rotation="35 0 0">
+    </a-box>
+
+    <a-box
+    position="0.12 0.18 0.18"
+    width="0.14"
+    height="0.35"
+    depth="0.14"
+    color="#f0c6a5"
+    rotation="35 0 0">
+    </a-box>
+
+    <!-- tronco -->
+
+    <a-box
+    position="0 0.95 0"
+    width="0.45"
+    height="0.65"
+    depth="0.25"
+    src="#tex-anne-vestido">
+    </a-box>
+
+    <!-- pescoço -->
+
+    <a-cylinder
+    position="0 1.35 0"
+    radius="0.05"
+    height="0.08"
+    color="#f0c6a5">
+    </a-cylinder>
+
+    <!-- cabeça -->
+
+    <a-sphere
+    position="0 1.58 0"
+    radius="0.22"
+    src="#tex-anne-rosto"
+    rotation="0 180 0">
+    </a-sphere>
+
+    <!-- cabelo topo -->
+
+    <a-box
+    position="0 1.74 0"
+    width="0.35"
+    height="0.12"
+    depth="0.35"
+    src="#tex-anne-cabelo">
+    </a-box>
+
+    <!-- cabelo esquerdo -->
+
+    <a-box
+    position="-0.2 1.58 0"
+    width="0.08"
+    height="0.28"
+    depth="0.28"
+    src="#tex-anne-cabelo">
+    </a-box>
+
+    <!-- cabelo direito -->
+
+    <a-box
+    position="0.2 1.58 0"
+    width="0.08"
+    height="0.28"
+    depth="0.28"
+    src="#tex-anne-cabelo">
+    </a-box>
+
+    <!-- braço esquerdo -->
+
+    <a-box
+    position="-0.28 1.02 0.1"
+    width="0.12"
+    height="0.45"
+    depth="0.12"
+    src="#tex-anne-vestido"
+    rotation="45 0 40">
+    </a-box>
+
+    <!-- braço direito -->
+
+    <a-box
+    position="0.28 1.02 0.1"
+    width="0.12"
+    height="0.45"
+    depth="0.12"
+    src="#tex-anne-vestido"
+    rotation="45 0 -40">
+    </a-box>
+
+    <!-- mãos -->
+
+    <a-box
+    position="-0.18 0.78 0.22"
+    width="0.08"
+    height="0.08"
+    depth="0.08"
+    color="#f0c6a5">
+    </a-box>
+
+    <a-box
+    position="0.18 0.78 0.22"
+    width="0.08"
+    height="0.08"
+    depth="0.08"
+    color="#f0c6a5">
+    </a-box>
+
+    <!-- livro -->
+
+    <a-box
+    position="0 0.72 0.18"
+    width="0.34"
+    height="0.04"
+    depth="0.22"
+    color="#d8d0b8"
+    rotation="15 0 0">
+    </a-box>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- ESCADA TÉRREO -> ANDAR 1 -->
+<!-- ===================================================== -->
+
+<a-box
+position="2.2 1 -3"
+width="0.5"
+height="2"
+depth="1"
+color="#79553b">
+</a-box>
+
+<a-box
+id="subir-andar1"
+class="interactable"
+position="2.2 1.5 -3"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<a-box
+id="descer-terreo"
+class="interactable"
+position="2.2 5.5 -3"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- ESCADA ANDAR 1 -> SÓTÃO -->
+<!-- ===================================================== -->
+
+<a-box
+position="-2.2 5 -8"
+width="0.5"
+height="2"
+depth="1"
+color="#79553b">
+</a-box>
+
+<a-box
+id="subir-sotao"
+class="interactable"
+position="-2.2 5.5 -8"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<a-box
+id="descer-andar1"
+class="interactable"
+position="-2.2 9.5 -8"
+width="1"
+height="2"
+depth="1"
+opacity="0"
+transparent="true">
+</a-box>
+
+<!-- ===================================================== -->
+<!-- SÓTÃO -->
+<!-- ===================================================== -->
+
+<a-box
+position="0 8.01 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#7a5a38">
+</a-box>
+
+<a-box
+position="0 12 -6"
+width="6"
+height="0.1"
+depth="8"
+color="#cfcfcf">
+</a-box>
+
+<a-box
+position="-3 10 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-sotao">
+</a-box>
+
+<a-box
+position="3 10 -6"
+width="0.1"
+height="4"
+depth="8"
+src="#tex-sotao">
+</a-box>
+
+<a-box
+position="0 10 -10"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-sotao">
+</a-box>
+
+<a-box
+position="0 10 -2"
+width="6"
+height="4"
+depth="0.1"
+src="#tex-sotao">
+</a-box>
+
+<!-- vigas decorativas -->
+
+<a-box
+position="0 11.3 -6"
+width="6"
+height="0.15"
+depth="0.15"
+color="#5c3c20">
+</a-box>
+
+<a-box
+position="0 10.6 -6"
+width="6"
+height="0.15"
+depth="0.15"
+color="#5c3c20">
+</a-box>
+
+<a-box
+position="0 9.9 -6"
+width="6"
+height="0.15"
+depth="0.15"
+color="#5c3c20">
+</a-box>
 
 
-        <a-plane position="1 4.01 -6" rotation="-90 0 0" width="4" height="8" color="#5c4033" material="side: double;"></a-plane> 
-        <a-plane position="-2 4.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#5c4033" material="side: double;"></a-plane> 
-        <a-plane position="-2 4.01 -3" rotation="-90 0 0" width="2" height="2" color="#5c4033" material="side: double;"></a-plane> 
-        
-        <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1"></a-plane>
-        <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1"></a-plane>
-        <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1"></a-plane>
+</a-scene>
 
-        <a-plane position="3 6 -3.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1"></a-plane> 
-        <a-plane position="3 6 -8.5" rotation="0 -90 0" width="3" height="4" src="#tex-andar1"></a-plane> 
-        <a-plane position="3 4.6 -6" rotation="0 -90 0" width="2" height="1.2" src="#tex-andar1"></a-plane> 
-        <a-plane position="3 7.4 -6" rotation="0 -90 0" width="2" height="1.2" src="#tex-andar1"></a-plane> 
+<script>
 
-        <a-plane position="3.01 6 -6" rotation="0 -90 0" width="2" height="1.6" src="#tex-vista" color="#a0c0d0" material="side: double;"></a-plane>
+/* ===================================================== */
+/* CONSTANTES */
+/* ===================================================== */
 
-        <a-entity id="cama-andar1" position="0.8 4.01 -8.9">
-            <a-box scale="1.4 0.3 2" color="#5c4033" position="0 0.15 0"></a-box>
-            <a-box scale="1.3 0.15 1.9" color="#f4ebd0" position="0 0.35 0"></a-box>
-            <a-box scale="1.4 0.8 0.1" color="#4a2f13" position="0 0.4 -0.95"></a-box>
-            
-            <a-entity id="anne-frank-3d" position="0 0.38 0.1" rotation="0 45 0" class="interactable">
-                <a-box position="0 0.25 0" scale="0.35 0.45 0.25" src="#tex-anne-vestido"></a-box>
-                
-                <a-sphere position="0 0.58 0" radius="0.13" src="#tex-anne-rosto" rotation="0 180 0"></a-sphere>
-                
-                <a-box position="0 0.62 -0.04" scale="0.28 0.15 0.24" src="#tex-anne-cabelo"></a-box>
-                <a-box position="-0.12 0.56 0" scale="0.05 0.2 0.2" src="#tex-anne-cabelo"></a-box>
-                <a-box position="0.12 0.56 0" scale="0.05 0.2 0.2" src="#tex-anne-cabelo"></a-box>
+const PAGINAS_DIARIO = [
 
-                <a-box position="-0.08 0.05 0.2" scale="0.1 0.12 0.35" src="#tex-anne-vestido" rotation="20 0 0"></a-box>
-                <a-box position="0.08 0.05 0.2" scale="0.1 0.12 0.35" src="#tex-anne-vestido" rotation="20 0 0"></a-box>
-                <a-box position="-0.08 -0.15 0.33" scale="0.09 0.3 0.09" color="#ffdbac"></a-box>
-                <a-box position="0.08 -0.15 0.33" scale="0.09 0.3 0.09" color="#ffdbac"></a-box>
+{
+data: "9 de Julho de 1942",
+texto:
+"Ficou combinado que partiríamos no dia 16 de julho. Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."
+},
 
-                <a-box position="-0.2 0.25 0.1" scale="0.08 0.25 0.08" src="#tex-anne-vestido" rotation="-30 0 10"></a-box>
-                <a-box position="0.2 0.25 0.1" scale="0.08 0.25 0.08" src="#tex-anne-vestido" rotation="-30 0 -10"></a-box>
+{
+data: "11 de Julho de 1942",
+texto:
+"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda..."
+},
 
-                <a-box position="0 0.22 0.22" scale="0.22 0.03 0.18" color="#d2b48c" rotation="15 0 0">
-                    <a-box position="0 0.01 0" scale="0.2 0.02 0.16" color="#ffffff"></a-box>
-                </a-box>
-            </a-entity>
+{
+data: "1 de Outubro de 1942",
+texto:
+"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador..."
+},
 
-            <a-box position="-0.3 0.38 -0.4" scale="0.25 0.05 0.2" color="#8b0000" rotation="0 12 0"></a-box>
-            <a-box position="-0.28 0.42 -0.41" scale="0.23 0.04 0.19" color="#4682b4" rotation="0 -5 0"></a-box>
-        </a-entity>
+{
+data: "19 de Novembro de 1942",
+texto:
+"Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos, e para os quais tememos o pior. E tudo isto por quê? Porque são judeus..."
+},
+
+{
+data: "6 de Junho de 1944",
+texto:
+"É o Dia D. A invasão começou. Os Aliados desembarcaram na Normandia. O rádio fala em notícias de esperança. Será que a libertação está próxima?..."
+}
+
+];
+
+/* ===================================================== */
+/* REFERÊNCIAS DOM */
+/* ===================================================== */
+
+const cameraRig =
+document.getElementById("camera-rig");
+
+const cameraUsuario =
+document.getElementById("visao-usuario");
+
+const estanteSecreta =
+document.getElementById("estante-secreta");
+
+const objetoDiario =
+document.getElementById("objeto-diario");
+
+const modalDiario =
+document.getElementById("diarioModal");
+
+const diarioData =
+document.getElementById("diarioData");
+
+const diarioTexto =
+document.getElementById("diarioTexto");
+
+const contadorPagina =
+document.getElementById("contadorPagina");
+
+const btnAnterior =
+document.getElementById("btnAnterior");
+
+const btnProximo =
+document.getElementById("btnProximo");
+
+const btnFechar =
+document.getElementById("btnFechar");
+
+/* ===================================================== */
+/* ESTADO GLOBAL */
+/* ===================================================== */
+
+let paginaAtual = 0;
+
+let estanteAberta = false;
+
+/* ===================================================== */
+/* UTILIDADES */
+/* ===================================================== */
+
+function atualizarPaginaDiario(){
+
+    const pagina =
+    PAGINAS_DIARIO[paginaAtual];
+
+    diarioData.textContent =
+    pagina.data;
+
+    diarioTexto.textContent =
+    pagina.texto;
+
+    contadorPagina.textContent =
+    `Pág. ${paginaAtual + 1} / ${PAGINAS_DIARIO.length}`;
+
+    btnAnterior.disabled =
+    paginaAtual === 0;
+
+    btnProximo.disabled =
+    paginaAtual === PAGINAS_DIARIO.length - 1;
+}
+
+/* ===================================================== */
+/* CONTROLES DE CÂMERA */
+/* ===================================================== */
+
+function pausarCamera(){
+
+    if(
+        cameraUsuario.components["look-controls"]
+    ){
+        cameraUsuario
+        .components["look-controls"]
+        .pause();
+    }
+
+    if(document.exitPointerLock){
+        document.exitPointerLock();
+    }
+
+}
+
+function ativarCamera(){
+
+    if(
+        cameraUsuario.components["look-controls"]
+    ){
+        cameraUsuario
+        .components["look-controls"]
+        .play();
+    }
+
+}
+
+/* ===================================================== */
+/* DIÁRIO */
+/* ===================================================== */
+
+function abrirDiario(){
+
+    paginaAtual = 0;
+
+    atualizarPaginaDiario();
+
+    pausarCamera();
+
+    modalDiario.style.display =
+    "flex";
+
+}
+
+function fecharDiario(){
+
+    modalDiario.style.display =
+    "none";
+
+    ativarCamera();
+
+}
+
+/* ===================================================== */
+/* BOTÕES DO DIÁRIO */
+/* ===================================================== */
+
+btnAnterior.addEventListener(
+"click",
+function(){
+
+    if(paginaAtual > 0){
+
+        paginaAtual--;
+
+        atualizarPaginaDiario();
+
+    }
+
+}
+);
+
+btnProximo.addEventListener(
+"click",
+function(){
+
+    if(
+        paginaAtual <
+        PAGINAS_DIARIO.length - 1
+    ){
+
+        paginaAtual++;
+
+        atualizarPaginaDiario();
+
+    }
+
+}
+);
+
+btnFechar.addEventListener(
+"click",
+function(){
+
+    fecharDiario();
+
+}
+);
+
+/* ===================================================== */
+/* CLIQUE NO DIÁRIO VERMELHO */
+/* ===================================================== */
+
+objetoDiario.addEventListener(
+"click",
+function(){
+
+    abrirDiario();
+
+}
+);
+
+/* ===================================================== */
+/* ANNE FRANK */
+/* Preparado para futuras interações */
+/* ===================================================== */
+
+const anneFrank =
+document.getElementById(
+"anne-frank-3d"
+);
+
+anneFrank.addEventListener(
+"click",
+function(){
+
+    console.log(
+    "Anne Frank clicada"
+    );
+
+}
+);
 
 
-        <a-entity id="escada-complexa-2" position="2.3 4 -4.5">
-            <a-box scale="0.1 6 0.1" color="#666" position="-0.3 3 0"></a-box>
-            <a-box scale="0.1 6 0.1" color="#666" position="0.3 3 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#666" position="0 0.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#666" position="0 1.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#666" position="0 2.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#666" position="0 3.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#666" position="0 4.5 0"></a-box>
-            <a-box scale="0.7 0.05 0.05" color="#666" position="0 5.5 0"></a-box>
+/* ===================================================== */
+/* HUD */
+/* ===================================================== */
 
-            <a-box id="btn-subir-2" class="interactable" position="0 2 0" scale="1 4 0.5" visible="false"></a-box>
-            <a-box id="btn-descer-2" class="interactable" position="0 5 0" scale="1 2 0.5" visible="false"></a-box>
-        </a-entity>
+const hud =
+document.getElementById("hud");
+
+function atualizarHUD(texto){
+
+    hud.textContent = texto;
+
+}
+
+/* ===================================================== */
+/* ANIMAÇÃO DA ESTANTE SECRETA */
+/* ===================================================== */
+
+function abrirEstante(){
+
+    estanteSecreta.setAttribute(
+    "animation",
+    {
+        property: "position",
+        to: "1.8 1.5 -1.9",
+        dur: 1500,
+        easing: "easeInOutQuad"
+    });
+
+    estanteAberta = true;
+
+    atualizarHUD(
+    "Passagem revelada. Entre no Anexo Secreto."
+    );
+
+}
+
+function fecharEstante(){
+
+    estanteSecreta.setAttribute(
+    "animation",
+    {
+        property: "position",
+        to: "0 1.5 -1.9",
+        dur: 1500,
+        easing: "easeInOutQuad"
+    });
+
+    estanteAberta = false;
+
+    atualizarHUD(
+    "Clique na estante para abrir a passagem."
+    );
+
+}
+
+function alternarEstante(){
+
+    if(estanteAberta){
+
+        fecharEstante();
+
+    }
+    else{
+
+        abrirEstante();
+
+    }
+
+}
+
+/* ===================================================== */
+/* EVENTO DA ESTANTE */
+/* ===================================================== */
+
+estanteSecreta.addEventListener(
+"click",
+function(){
+
+    alternarEstante();
+
+}
+);
+
+/* ===================================================== */
+/* TELETRANSPORTE */
+/* ===================================================== */
+
+function teleportar(x,y,z){
+
+    cameraRig.setAttribute(
+    "position",
+    {
+        x:x,
+        y:y,
+        z:z
+    });
+
+}
+
+/* ===================================================== */
+/* REFERÊNCIAS DAS ESCADAS */
+/* ===================================================== */
+
+const subirAndar1 =
+document.getElementById(
+"subir-andar1"
+);
+
+const descerTerreo =
+document.getElementById(
+"descer-terreo"
+);
+
+const subirSotao =
+document.getElementById(
+"subir-sotao"
+);
+
+const descerAndar1 =
+document.getElementById(
+"descer-andar1"
+);
+
+/* ===================================================== */
+/* ESCADA 1 */
+/* TÉRREO -> SEGUNDO ANDAR */
+/* ===================================================== */
+
+subirAndar1.addEventListener(
+"click",
+function(){
+
+    teleportar(
+    2.2,
+    5.6,
+    -3
+    );
+
+    atualizarHUD(
+    "Segundo andar."
+    );
+
+}
+);
+
+descerTerreo.addEventListener(
+"click",
+function(){
+
+    teleportar(
+    2.2,
+    1.6,
+    -3
+    );
+
+    atualizarHUD(
+    "Térreo."
+    );
+
+}
+);
+
+/* ===================================================== */
+/* ESCADA 2 */
+/* SEGUNDO ANDAR -> SÓTÃO */
+/* ===================================================== */
+
+subirSotao.addEventListener(
+"click",
+function(){
+
+    teleportar(
+    -2.2,
+    9.6,
+    -8
+    );
+
+    atualizarHUD(
+    "Sótão."
+    );
+
+}
+);
+
+descerAndar1.addEventListener(
+"click",
+function(){
+
+    teleportar(
+    -2.2,
+    5.6,
+    -8
+    );
+
+    atualizarHUD(
+    "Segundo andar."
+    );
+
+}
+);
+
+/* ===================================================== */
+/* SISTEMA DE MENSAGENS CONTEXTUAIS */
+/* ===================================================== */
+
+function mensagemInicial(){
+
+    atualizarHUD(
+    "Use WASD para andar. Clique na estante secreta para revelar a passagem."
+    );
+
+}
+
+function mensagemBiblioteca(){
+
+    atualizarHUD(
+    "Biblioteca. Procure a estante secreta."
+    );
+
+}
+
+function mensagemQuarto(){
+
+    atualizarHUD(
+    "Quarto Principal. Clique no diário vermelho."
+    );
+
+}
+
+function mensagemAndar1(){
+
+    atualizarHUD(
+    "Segundo andar. Anne Frank está sentada sobre a cama."
+    );
+
+}
+
+function mensagemSotao(){
+
+    atualizarHUD(
+    "Sótão. Espaço utilizado como armazenamento."
+    );
+
+}
+
+/* ===================================================== */
+/* DETECÇÃO SIMPLES DE ALTURA */
+/* ===================================================== */
+
+setInterval(function(){
+
+    const posicao =
+    cameraRig.getAttribute(
+    "position"
+    );
+
+    if(!posicao){
+        return;
+    }
+
+    if(posicao.y < 4){
+
+        mensagemBiblioteca();
+
+        return;
+    }
+
+    if(
+        posicao.y >= 4 &&
+        posicao.y < 8
+    ){
+
+        mensagemAndar1();
+
+        return;
+    }
+
+    if(posicao.y >= 8){
+
+        mensagemSotao();
+
+    }
+
+},3000);
+
+/* ===================================================== */
+/* PREPARAÇÃO PARA MÓDULOS FUTUROS */
+/* ===================================================== */
+
+const Modulos = {
+
+    dialogos:false,
+
+    colisoes:false,
+
+    audio:false,
+
+    narracao:false,
+
+    inventario:false
+
+};
+
+function registrarModulo(
+nome,
+estado
+){
+
+    Modulos[nome] = estado;
+
+}
+
+function moduloAtivo(
+nome
+){
+
+    return Modulos[nome] === true;
+
+}
 
 
-        <a-plane position="-1 8.01 -6" rotation="-90 0 0" width="4" height="8" color="#3a2212" material="side: double;"></a-plane> 
-        <a-plane position="2 8.01 -7.5" rotation="-90 0 0" width="2" height="5" color="#3a2212" material="side: double;"></a-plane> 
-        <a-plane position="2 8.01 -3" rotation="-90 0 0" width="2" height="2" color="#3a2212" material="side: double;"></a-plane> 
+/* ===================================================== */
+/* FECHAR DIÁRIO COM ESC */
+/* ===================================================== */
 
-        <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao"></a-plane>
-        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"></a-box>
-        <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao"></a-plane>
-        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao"></a-plane>
-        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#f4f1ea" material="side: double;"></a-plane> 
+document.addEventListener(
+"keydown",
+function(event){
 
+    if(
+        event.key === "Escape" &&
+        modalDiario.style.display === "flex"
+    ){
 
-        <a-entity id="camera-rig" position="0 1.6 0">
-            <a-entity camera look-controls wasd-controls="acceleration: 65" id="visao-usuario">
-                <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"></a-cursor>
-            </a-entity>
-        </a-entity>
+        fecharDiario();
 
-    </a-scene>
+    }
 
-    <script>
-        const estante = document.querySelector('#estante-secreta');
-        const diarioVirtual = document.querySelector('#objeto-diario');
-        const interfaceDiario = document.querySelector('#interface-diario');
-        const botaoFechar = document.querySelector('#btn-fechar');
-        const cameraEfeito = document.querySelector('#visao-usuario');
-        const cameraRig = document.querySelector('#camera-rig');
-        
-        const subir1 = document.querySelector('#btn-subir-1');
-        const descer1 = document.querySelector('#btn-descer-1');
-        const subir2 = document.querySelector('#btn-subir-2');
-        const descer2 = document.querySelector('#btn-descer-2');
-        const textoInstrucoes = document.querySelector('#instrucoes');
+}
+);
 
-        const textoPagina = document.querySelector('#texto-pagina');
-        const btnAnterior = document.querySelector('#btn-anterior');
-        const btnProximo = document.querySelector('#btn-proximo');
-        const gibaContador = document.querySelector('#giba-contador');
+/* ===================================================== */
+/* BLOQUEIO DE MOVIMENTO QUANDO O DIÁRIO ESTÁ ABERTO */
+/* ===================================================== */
 
-        const paginasDiario = [
-            { data: "9 de Julho de 1942", texto: '"Ficou combinado que partiríamos no dia 16 de julho... Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada..."' },
-            { data: "11 de Julho de 1942", texto: '"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda. Nossas janelas permanecem fechadas o tempo todo, mas o silêncio nos protege."' },
-            { data: "1 de Outubro de 1942", texto: '"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador. O pavor que sinto dos barulhos da noite me faz perceber o quão frágil é a nossa segurança aqui dentro."' },
-            { data: "19 de Novembro de 1942", texto: '"Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos, e para os quais tememos o pior. E tudo isto por quê? Porque são judeus... Sinto-me má por estar numa cama quente, enquanto as minhas amigas mais queridas foram jogadas em campos de classificação."' },
-            { data: "6 de Junho de 1944", texto: '"É o Dia D! A invasão começou! Os Aliados desembarcaram na Normandia. O rádio fala em notícias de esperança. Será que a libertação está próxima? Este ano de 1944 nos trará a vitória? Oh, Kitty, a ideia de poder voltar para a escola em setembro me faz chorar de alegria!"' }
-        ];
+function desativarMovimento(){
 
-        let paginaAtual = 0;
+    cameraUsuario.removeAttribute(
+    "wasd-controls"
+    );
 
-        function atualizarModalDiario() {
-            const dadosPagina = paginasDiario[paginaAtual];
-            textoPagina.innerHTML = `<span class="data-diario">${dadosPagina.data}</span><p>${dadosPagina.texto}</p>`;
-            gibaContador.innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
-            btnAnterior.disabled = paginaAtual === 0;
-            btnProximo.disabled = paginaAtual === paginasDiario.length - 1;
-        }
+}
 
-        btnAnterior.addEventListener('click', function() { if (paginaAtual > 0) { paginaAtual--; atualizarModalDiario(); } });
-        btnProximo.addEventListener('click', function() { if (paginaAtual < paginasDiario.length - 1) { paginaAtual++; atualizarModalDiario(); } });
+function ativarMovimento(){
 
-        diarioVirtual.addEventListener('click', function () {
-            paginaAtual = 0;
-            atualizarModalDiario();
-            interfaceDiario.style.display = 'block';
-            cameraEfeito.components['look-controls'].pause();
-            document.exitPointerLock();
-        });
+    cameraUsuario.setAttribute(
+    "wasd-controls",
+    "acceleration: 65"
+    );
 
-        botaoFechar.addEventListener('click', function () {
-            interfaceDiario.style.display = 'none';
-            cameraEfeito.components['look-controls'].play();
-        });
+}
 
-        estante.addEventListener('click', function () {
-            estante.emit('abrirPassagem');
-            textoInstrucoes.innerHTML = "A passagem abriu. Siga em frente.";
-        });
+/* ===================================================== */
+/* SOBRESCREVER ABERTURA/FECHAMENTO */
+/* ===================================================== */
 
-        // Eventos de Teletransporte
-        subir1.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
-            textoInstrucoes.innerHTML = "2º Andar. Olhe ao redor.";
-        });
-        descer1.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0 1.6 -5.5'); 
-            textoInstrucoes.innerHTML = "De volta ao Quarto Principal.";
-        });
+const abrirDiarioOriginal =
+abrirDiario;
 
-        subir2.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '-0.5 9.6 -5.5'); 
-            textoInstrucoes.innerHTML = "O Sótão.";
-        });
-        descer2.addEventListener('click', function () {
-            cameraRig.setAttribute('position', '0.5 5.6 -5.5'); 
-            textoInstrucoes.innerHTML = "De volta ao 2º Andar.";
-        });
-    </script>
+abrirDiario = function(){
+
+    abrirDiarioOriginal();
+
+    desativarMovimento();
+
+};
+
+const fecharDiarioOriginal =
+fecharDiario;
+
+fecharDiario = function(){
+
+    fecharDiarioOriginal();
+
+    ativarMovimento();
+
+};
+
+/* ===================================================== */
+/* FECHAR AO CLICAR FORA */
+/* ===================================================== */
+
+modalDiario.addEventListener(
+"click",
+function(event){
+
+    if(
+        event.target === modalDiario
+    ){
+
+        fecharDiario();
+
+    }
+
+}
+);
+
+/* ===================================================== */
+/* EVENTOS DA CENA */
+/* ===================================================== */
+
+const cena =
+document.querySelector(
+"a-scene"
+);
+
+cena.addEventListener(
+"loaded",
+function(){
+
+    console.log(
+    "Cena carregada."
+    );
+
+    mensagemInicial();
+
+}
+);
+
+/* ===================================================== */
+/* VISIBILIDADE DA ABA */
+/* ===================================================== */
+
+document.addEventListener(
+"visibilitychange",
+function(){
+
+    if(document.hidden){
+
+        console.log(
+        "Aplicação em segundo plano."
+        );
+
+    }else{
+
+        console.log(
+        "Aplicação ativa."
+        );
+
+    }
+
+}
+);
+
+/* ===================================================== */
+/* SEGURANÇA */
+/* ===================================================== */
+
+window.addEventListener(
+"error",
+function(event){
+
+    console.error(
+    "Erro capturado:",
+    event.error
+    );
+
+}
+);
+
+/* ===================================================== */
+/* FUNÇÕES AUXILIARES FUTURAS */
+/* ===================================================== */
+
+function abrirDialogo(
+titulo,
+texto
+){
+
+    console.log(
+    "Dialogo:",
+    titulo,
+    texto
+    );
+
+}
+
+function tocarAudio(
+arquivo
+){
+
+    console.log(
+    "Audio:",
+    arquivo
+    );
+
+}
+
+function iniciarNarracao(
+texto
+){
+
+    console.log(
+    "Narracao:",
+    texto
+    );
+
+}
+
+function adicionarObjetoInventario(
+idObjeto
+){
+
+    console.log(
+    "Inventario:",
+    idObjeto
+    );
+
+}
+
+/* ===================================================== */
+/* API GLOBAL OPCIONAL */
+/* ===================================================== */
+
+window.AnexoSecreto = {
+
+    abrirDiario,
+
+    fecharDiario,
+
+    teleportar,
+
+    abrirEstante,
+
+    fecharEstante,
+
+    alternarEstante,
+
+    registrarModulo,
+
+    moduloAtivo
+
+};
+
+/* ===================================================== */
+/* ESTADO INICIAL */
+/* ===================================================== */
+
+atualizarPaginaDiario();
+
+mensagemInicial();
+
+console.log(
+"Anexo Secreto iniciado."
+);
+
+</script>
+
 </body>
 </html>
