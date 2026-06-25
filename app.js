@@ -17,7 +17,11 @@ const CONFIG = {
 
     yTerreo: 1.6,
     yAndar1: 5.6,
-    ySotao: 9.6
+    ySotao: 9.6,
+
+    posTerreo: { x: 0, z: -6 },
+    posAndar1: { x: -2.3, z: -4.5 },
+    posSotao: { x: 2.3, z: -4.5 }
 
 };
 
@@ -45,6 +49,117 @@ const STATE = {
     objetoInspecionado: null
 
 };
+
+const anneAudioPanel =
+    document.getElementById(
+        "anne-audio-panel"
+    );
+
+const annePlay =
+    document.getElementById(
+        "anne-play"
+    );
+
+const annePause =
+    document.getElementById(
+        "anne-pause"
+    );
+
+const anneStop =
+    document.getElementById(
+        "anne-stop"
+    );
+
+const anneAudio =
+    document.getElementById(
+        "audio-anne"
+    );
+
+function verificarAlvoAnne() {
+
+    const cursor =
+        document.querySelector(
+            "a-cursor"
+        );
+
+    if (
+        !cursor ||
+        !cursor.components.raycaster
+    ) {
+        return;
+    }
+
+    const hits =
+        cursor.components.raycaster
+            .intersections;
+
+    let olhandoAnne =
+        false;
+
+    if (hits.length) {
+
+        const alvo =
+            hits[0].object.el;
+
+        if (
+            alvo &&
+            alvo.closest &&
+            alvo.closest("#anne-frank-3d")
+        ) {
+
+            olhandoAnne =
+                true;
+
+        }
+
+    }
+
+    if (olhandoAnne) {
+
+        anneAudioPanel
+            .classList
+            .add("visible");
+
+    }
+
+    else {
+
+        anneAudioPanel
+            .classList
+            .remove("visible");
+
+    }
+
+}
+
+annePlay.addEventListener(
+    "click",
+    () => {
+
+        anneAudio.play();
+
+    }
+);
+
+annePause.addEventListener(
+    "click",
+    () => {
+
+        anneAudio.pause();
+
+    }
+);
+
+anneStop.addEventListener(
+    "click",
+    () => {
+
+        anneAudio.pause();
+
+        anneAudio.currentTime = 0;
+
+    }
+);
 
 /* ====================================== */
 /* CACHE DOM */
@@ -236,6 +351,18 @@ const OBJETOS = {
 /* ====================================== */
 /* UTILITÁRIOS */
 /* ====================================== */
+
+function animationLoop() {
+
+    atualizarJoystick();
+
+    verificarAlvoAnne();
+
+    requestAnimationFrame(
+        animationLoop
+    );
+
+}
 
 function atualizarHUD(texto) {
 
@@ -614,7 +741,9 @@ function fadeOut() {
 /* ====================================== */
 
 async function teleportar(
-    destinoY
+    destinoY,
+    destinoX = null,
+    destinoZ = null
 ) {
 
     await fadeIn();
@@ -623,9 +752,9 @@ async function teleportar(
         getRigPosition();
 
     setRigPosition(
-        pos.x,
+        destinoX ?? pos.x,
         destinoY,
-        pos.z
+        destinoZ ?? pos.z
     );
 
     await fadeOut();
@@ -677,7 +806,9 @@ subirAndar1.addEventListener(
     () => {
 
         teleportar(
-            CONFIG.yAndar1
+            CONFIG.yAndar1,
+            CONFIG.posAndar1.x,
+            CONFIG.posAndar1.z
         );
 
     }
@@ -688,7 +819,9 @@ subirSotao.addEventListener(
     () => {
 
         teleportar(
-            CONFIG.ySotao
+            CONFIG.ySotao,
+            CONFIG.posSotao.x,
+            CONFIG.posSotao.z
         );
 
     }
@@ -699,7 +832,9 @@ descerAndar1.addEventListener(
     () => {
 
         teleportar(
-            CONFIG.yTerreo
+            CONFIG.yTerreo,
+            CONFIG.posTerreo.x,
+            CONFIG.posTerreo.z
         );
 
     }
@@ -710,7 +845,9 @@ descerSotao.addEventListener(
     () => {
 
         teleportar(
-            CONFIG.yAndar1
+            CONFIG.yAndar1,
+            CONFIG.posAndar1.x,
+            CONFIG.posAndar1.z
         );
 
     }
@@ -738,7 +875,9 @@ document.addEventListener(
         ) {
 
             teleportar(
-                CONFIG.yAndar1
+                CONFIG.yAndar1,
+                CONFIG.posAndar1.x,
+                CONFIG.posAndar1.z
             );
 
             return;
@@ -750,7 +889,9 @@ document.addEventListener(
         ) {
 
             teleportar(
-                CONFIG.yTerreo
+                CONFIG.yTerreo,
+                CONFIG.posTerreo.x,
+                CONFIG.posTerreo.z
             );
 
         }
