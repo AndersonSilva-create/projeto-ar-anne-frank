@@ -3,459 +3,161 @@
 
 <head>
 
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
 
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
     <title>
-        Anexo Secreto WebVR AR
+        Anexo Secreto VR
     </title>
 
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 
-    <style>
-        html,
-        body {
-
-            margin: 0;
-            padding: 0;
-
-            width: 100%;
-            height: 100%;
-
-            overflow: hidden;
-
-            background: #000;
-
-            font-family: Georgia, serif;
-
-        }
-
-        /* ===================================================== */
-        /* HUD */
-        /* ===================================================== */
-
-        #hud {
-
-            position: fixed;
-
-            top: 10px;
-            left: 50%;
-
-            transform: translateX(-50%);
-
-            z-index: 5000;
-
-            background: rgba(0, 0, 0, 0.75);
-
-            color: white;
-
-            padding: 12px 18px;
-
-            border-radius: 10px;
-
-            font-size: 14px;
-
-            text-align: center;
-
-            pointer-events: none;
-
-            max-width: 90vw;
-
-        }
-
-        /* ===================================================== */
-        /* MODAL DIARIO */
-        /* ===================================================== */
-
-        #diarioModal {
-
-            display: none;
-
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 8000;
-
-            background: rgba(0, 0, 0, 0.7);
-
-            justify-content: center;
-            align-items: center;
-
-        }
-
-        #diarioContainer {
-
-            width: min(900px, 90vw);
-
-            height: min(650px, 85vh);
-
-            background: #f4ebd0;
-
-            border-radius: 14px;
-
-            padding: 30px;
-
-            box-sizing: border-box;
-
-            display: flex;
-            flex-direction: column;
-
-            box-shadow:
-                0 0 40px rgba(0, 0, 0, 0.6);
-
-        }
-
-        #diarioData {
-
-            font-size: 26px;
-
-            font-weight: bold;
-
-            margin-bottom: 20px;
-
-        }
-
-        #diarioTexto {
-
-            flex: 1;
-
-            overflow-y: auto;
-
-            line-height: 1.9;
-
-            font-size: 20px;
-
-        }
-
-        #diarioControles {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            margin-top: 25px;
-
-        }
-
-        #diarioControles button {
-
-            padding: 12px 22px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            font-size: 16px;
-
-        }
-
-        #contadorPagina {
-
-            font-weight: bold;
-
-        }
-
-        button:disabled {
-
-            opacity: 0.4;
-
-            cursor: not-allowed;
-
-        }
-
-        /* ===================================================== */
-        /* MODAL QR CODE */
-        /* ===================================================== */
-
-        #qrModal {
-
-            display: none;
-
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 8500;
-
-            background: rgba(0, 0, 0, 0.7);
-
-            justify-content: center;
-
-            align-items: center;
-
-        }
-
-        #qrContainer {
-
-            background: white;
-
-            border-radius: 12px;
-
-            padding: 25px;
-
-            text-align: center;
-
-            width: 350px;
-
-        }
-
-        #qrContainer h2 {
-
-            margin-top: 0;
-
-        }
-
-        #qrImage {
-
-            width: 250px;
-
-            height: 250px;
-
-            object-fit: contain;
-
-        }
-
-        #btnAbrirQR {
-
-            position: fixed;
-
-            right: 15px;
-
-            bottom: 15px;
-
-            z-index: 6000;
-
-            border: none;
-
-            border-radius: 10px;
-
-            background: #222;
-
-            color: white;
-
-            padding: 12px 18px;
-
-            cursor: pointer;
-
-        }
-
-        /* ===================================================== */
-        /* DIALOGO ANNE */
-        /* ===================================================== */
-
-        #anneDialogo {
-
-            position: fixed;
-
-            bottom: 140px;
-
-            right: 20px;
-
-            z-index: 7000;
-
-            display: none;
-
-            max-width: 320px;
-
-            padding: 15px;
-
-            border-radius: 12px;
-
-            background: white;
-
-            color: #111;
-
-            box-shadow:
-                0 0 20px rgba(0, 0, 0, 0.4);
-
-            font-size: 15px;
-
-            line-height: 1.6;
-
-        }
-
-        /* ===================================================== */
-        /* JOYSTICK MOBILE */
-        /* ===================================================== */
-
-        #joystickBase {
-
-            position: fixed;
-
-            left: 25px;
-
-            bottom: 25px;
-
-            width: 140px;
-
-            height: 140px;
-
-            border-radius: 50%;
-
-            background: rgba(255, 255, 255, 0.12);
-
-            border: 2px solid rgba(255, 255, 255, 0.3);
-
-            z-index: 7000;
-
-            display: none;
-
-            touch-action: none;
-
-        }
-
-        #joystickKnob {
-
-            position: absolute;
-
-            width: 60px;
-
-            height: 60px;
-
-            border-radius: 50%;
-
-            background: rgba(255, 255, 255, 0.5);
-
-            left: 40px;
-
-            top: 40px;
-
-        }
-
-        @media (max-width:900px) {
-
-            #joystickBase {
-
-                display: block;
-
-            }
-
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
+    <!-- ====================================== -->
+    <!-- HUD -->
+    <!-- ====================================== -->
+
     <div id="hud">
 
-        Use WASD ou Joystick para mover.
-        Clique na estante secreta.
+        <div id="hud-message">
+
+            Explore o Anexo Secreto
+
+        </div>
+
+        <button id="toggle-light">
+
+            Modo Noite
+
+        </button>
+
+        <button id="open-qr">
+
+            Jogar no Celular / Modo AR
+
+        </button>
 
     </div>
 
-    <div id="anneDialogo"></div>
+    <!-- ====================================== -->
+    <!-- FADE DE TRANSIÇÃO -->
+    <!-- ====================================== -->
 
-    <button id="btnAbrirQR">
+    <div id="fade-screen"></div>
 
-        Jogar no Celular / AR
+    <!-- ====================================== -->
+    <!-- DIÁRIO -->
+    <!-- ====================================== -->
 
-    </button>
+    <div id="diary-modal">
 
+        <div id="diary-paper">
 
-    <!-- ===================================================== -->
-    <!-- MODAL QR CODE -->
-    <!-- ===================================================== -->
+            <h2 id="diary-date"></h2>
 
-    <div id="qrModal">
+            <p id="diary-content"></p>
 
-        <div id="qrContainer">
+            <div class="diary-controls">
 
-            <h2>
-                Jogar no Celular
-            </h2>
+                <button id="prev-page">
 
-            <p>
-                Escaneie o QR Code para abrir este projeto
-                no smartphone e utilizar giroscópio ou AR.
-            </p>
+                    Anterior
 
-            <img id="qrImage" alt="QR Code">
+                </button>
 
-            <br><br>
+                <span id="page-counter">
 
-            <button id="btnFecharQR">
+                    Pág. 1 / 5
+
+                </span>
+
+                <button id="next-page">
+
+                    Próximo
+
+                </button>
+
+            </div>
+
+            <button id="close-diary">
+
                 Fechar
+
             </button>
 
         </div>
 
     </div>
 
-    <!-- ===================================================== -->
-    <!-- MODAL DIÁRIO -->
-    <!-- ===================================================== -->
+    <!-- ====================================== -->
+    <!-- QR CODE -->
+    <!-- ====================================== -->
 
-    <div id="diarioModal">
+    <div id="qr-modal">
 
-        <div id="diarioContainer">
+        <div id="qr-container">
 
-            <div id="diarioData">
-            </div>
+            <h3>
 
-            <div id="diarioTexto">
-            </div>
+                Abrir no Celular
 
-            <div id="diarioControles">
+            </h3>
 
-                <button id="btnAnterior">
-                    Anterior
-                </button>
+            <img id="qr-image" alt="QR Code">
 
-                <span id="contadorPagina">
-                </span>
+            <button id="close-qr">
 
-                <button id="btnProximo">
-                    Próximo
-                </button>
+                Fechar
 
-                <button id="btnFecharDiario">
-                    Fechar
-                </button>
-
-            </div>
+            </button>
 
         </div>
 
     </div>
 
-    <!-- ===================================================== -->
-    <!-- JOYSTICK MOBILE -->
-    <!-- ===================================================== -->
+    <!-- ====================================== -->
+    <!-- FALA DA ANNE -->
+    <!-- ====================================== -->
 
-    <div id="joystickBase">
-
-        <div id="joystickKnob">
-        </div>
+    <div id="anne-dialog">
 
     </div>
 
-    <!-- ===================================================== -->
-    <!-- CENA WEBXR -->
-    <!-- ===================================================== -->
+    <!-- ====================================== -->
+    <!-- INSPEÇÃO DE OBJETO -->
+    <!-- ====================================== -->
+
+    <div id="inspect-panel">
+
+        <h3 id="inspect-title"></h3>
+
+        <p id="inspect-text"></p>
+
+        <button id="inspect-close">
+
+            Voltar
+
+        </button>
+
+    </div>
+    <!-- ====================================== -->
+    <!-- CENA A-FRAME -->
+    <!-- ====================================== -->
 
     <a-scene renderer="
 antialias:true;
 colorManagement:true;
-physicallyCorrectLights:true" xr-mode-ui="enabled: true" webxr="
-optionalFeatures:
-local-floor,
-bounded-floor,
-hand-tracking,
-hit-test,
-anchors" background="color:#111111" loading-screen="
-dotsColor:#ffffff;
-backgroundColor:#000000">
+physicallyCorrectLights:true" xr-mode-ui="enabled:true" background="color:#1b1b1b">
 
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- ASSETS -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
         <a-assets>
 
@@ -477,39 +179,45 @@ backgroundColor:#000000">
 
         </a-assets>
 
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- ILUMINAÇÃO -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
-        <a-entity light="
-type:ambient;
-intensity:0.9">
+        <a-entity id="light-rig">
+
+            <a-light id="ambient-light" type="ambient" intensity="0.35" color="#bfc9d4">
+
+            </a-light>
+
+            <a-light id="sun-light" type="directional" position="5 8 2" rotation="-45 -20 0" intensity="1.2"
+                color="#fff1c2">
+
+            </a-light>
+
         </a-entity>
 
-        <a-entity light="
-type:directional;
-intensity:0.8" position="2 8 3">
-        </a-entity>
-
-        <a-entity light="
-type:point;
-intensity:0.5;
-distance:25" position="0 5 -6">
-        </a-entity>
-
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- CAMERA RIG -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
 
             <a-entity camera id="visao-usuario" look-controls="
-    magicWindowTrackingEnabled:true;
-    touchEnabled:true" wasd-controls="
-    acceleration:65">
+magicWindowTrackingEnabled:true;
+touchEnabled:true" wasd-controls="
+acceleration:25">
 
-                <a-cursor color="#ffffff" scale="0.5 0.5 0.5" raycaster="
-        objects:.interactable">
+                <a-cursor raycaster="
+objects:.interactable" color="#ffffff" scale="0.5 0.5 0.5" animation__fusing="
+property:scale;
+startEvents:fusing;
+dur:1500;
+from:0.5 0.5 0.5;
+to:0.1 0.1 0.1" animation__mouseleave="
+property:scale;
+startEvents:mouseleave;
+dur:500;
+to:0.5 0.5 0.5">
 
                 </a-cursor>
 
@@ -517,3042 +225,501 @@ distance:25" position="0 5 -6">
 
         </a-entity>
 
-        <!-- ===================================================== -->
-        <!-- CHÃO GLOBAL TEMPORÁRIO -->
-        <!-- (será substituído pelas lajes reais) -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- TÉRREO - BIBLIOTECA -->
+        <!-- ====================================== -->
 
-        <a-plane rotation="-90 0 0" width="30" height="30" color="#2c2c2c">
+        <a-plane rotation="-90 0 0" position="0 0 0" width="6" height="4" color="#6b5846">
+
         </a-plane>
-
-        <!-- ===================================================== -->
-        <!-- MARCADOR DE ORIGEM -->
-        <!-- ===================================================== -->
-
-        <a-sphere position="0 0.05 0" radius="0.05" color="#ffffff" visible="false">
-        </a-sphere>
-
-        <!-- ===================================================== -->
-        <!-- INÍCIO DA BIBLIOTECA -->
-        <!-- ===================================================== -->
-
-        <!-- piso -->
-
-        <a-box position="0 -0.05 0" width="6" height="0.1" depth="4" color="#70553b">
-        </a-box>
-
-        <!-- teto -->
-
-        <a-box position="0 4 0" width="6" height="0.1" depth="4" color="#d8d8d8">
-        </a-box>
-
-        <!-- parede esquerda -->
-
-        <a-box position="-3 2 0" width="0.1" height="4" depth="4" src="#tex-biblioteca">
-        </a-box>
-
-        <!-- parede direita -->
-
-        <a-box position="3 2 0" width="0.1" height="4" depth="4" src="#tex-biblioteca">
-        </a-box>
 
         <!-- parede frontal -->
 
-        <a-box position="0 2 2" width="6" height="4" depth="0.1" src="#tex-biblioteca">
-        </a-box>
+        <a-plane src="#tex-biblioteca" position="0 2 2" width="6" height="4">
 
-        <!-- divisória esquerda -->
-
-        <a-box position="-2 2 -2" width="2" height="4" depth="0.1" src="#tex-biblioteca">
-        </a-box>
-
-        <!-- divisória direita -->
-
-        <a-box position="2 2 -2" width="2" height="4" depth="0.1" src="#tex-biblioteca">
-        </a-box>
-
-
-        <!-- ===================================================== -->
-        <!-- ESTANTE SECRETA -->
-        <!-- ===================================================== -->
-
-        <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.9" height="3" depth="0.4"
-            color="#5b3c20">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- QUARTO PRINCIPAL -->
-        <!-- ===================================================== -->
-
-        <!-- piso -->
-
-        <a-box position="0 -0.05 -6" width="6" height="0.1" depth="8" color="#6d5238">
-        </a-box>
-
-        <!-- teto será substituído por laje vazada -->
+        </a-plane>
 
         <!-- parede esquerda -->
 
-        <a-box position="-3 2 -6" width="0.1" height="4" depth="8" src="#tex-quarto">
-        </a-box>
+        <a-plane src="#tex-biblioteca" rotation="0 90 0" position="-3 2 0" width="4" height="4">
+
+        </a-plane>
 
         <!-- parede direita -->
 
-        <a-box position="3 2 -6" width="0.1" height="4" depth="8" src="#tex-quarto">
+        <a-plane src="#tex-biblioteca" rotation="0 -90 0" position="3 2 0" width="4" height="4">
+
+        </a-plane>
+
+        <!-- teto -->
+
+        <a-plane rotation="90 0 0" position="0 4 0" width="6" height="4" color="#d7d0c2">
+
+        </a-plane>
+
+        <!-- ====================================== -->
+        <!-- DIVISÓRIA DA PASSAGEM SECRETA -->
+        <!-- ====================================== -->
+
+        <a-box position="-2 2 -2" depth="0.2" height="4" width="2" src="#tex-biblioteca">
+
         </a-box>
 
-        <!-- parede traseira -->
+        <a-box position="2 2 -2" depth="0.2" height="4" width="2" src="#tex-biblioteca">
 
-        <a-box position="0 2 -10" width="6" height="4" depth="0.1" src="#tex-quarto">
         </a-box>
 
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- ESTANTE SECRETA -->
+        <!-- ====================================== -->
+
+        <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" scale="1.9 3 0.4" color="#5f4025">
+
+        </a-box>
+
+        <!-- ====================================== -->
+        <!-- QUARTO PRINCIPAL -->
+        <!-- ====================================== -->
+
+        <!-- piso -->
+
+        <a-plane rotation="-90 0 0" position="0 0 -6" width="6" height="8" color="#745e4b">
+
+        </a-plane>
+
+        <!-- parede fundo -->
+
+        <a-plane src="#tex-quarto" position="0 2 -10" width="6" height="4">
+
+        </a-plane>
+
+        <!-- parede esquerda -->
+
+        <a-plane src="#tex-quarto" rotation="0 90 0" position="-3 2 -6" width="8" height="4">
+
+        </a-plane>
+
+        <!-- parede direita -->
+
+        <a-plane src="#tex-quarto" rotation="0 -90 0" position="3 2 -6" width="8" height="4">
+
+        </a-plane>
+
+        <!-- ====================================== -->
         <!-- MESA DO DIÁRIO -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
-        <a-entity id="mesa-diario" position="0 0 -6.5">
+        <a-entity id="mesa-diario">
 
             <!-- tampo -->
 
-            <a-box position="0 0.75 0" width="1.6" height="0.1" depth="0.8" color="#7b4d25">
+            <a-box position="0 0.75 -6.5" width="1.4" height="0.08" depth="0.8" color="#6b4a2f">
+
             </a-box>
 
             <!-- pernas -->
 
-            <a-cylinder position="-0.7 0.35 -0.3" radius="0.05" height="0.7" color="#5a3519">
+            <a-cylinder position="-0.55 0.35 -6.15" radius="0.04" height="0.7" color="#5a3b24">
+
             </a-cylinder>
 
-            <a-cylinder position="0.7 0.35 -0.3" radius="0.05" height="0.7" color="#5a3519">
+            <a-cylinder position="0.55 0.35 -6.15" radius="0.04" height="0.7" color="#5a3b24">
+
             </a-cylinder>
 
-            <a-cylinder position="-0.7 0.35 0.3" radius="0.05" height="0.7" color="#5a3519">
+            <a-cylinder position="-0.55 0.35 -6.85" radius="0.04" height="0.7" color="#5a3b24">
+
             </a-cylinder>
 
-            <a-cylinder position="0.7 0.35 0.3" radius="0.05" height="0.7" color="#5a3519">
+            <a-cylinder position="0.55 0.35 -6.85" radius="0.04" height="0.7" color="#5a3b24">
+
             </a-cylinder>
 
         </a-entity>
 
-        <!-- ===================================================== -->
-        <!-- DIÁRIO VERMELHO -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- DIÁRIO -->
+        <!-- ====================================== -->
 
-        <a-box id="objeto-diario" class="interactable" position="0 0.8 -6.5" width="0.4" height="0.08" depth="0.5"
-            color="#b00000">
+        <a-box id="objeto-diario" class="interactable" position="0 0.84 -6.5" width="0.4" height="0.06" depth="0.5"
+            color="#a81e1e">
 
         </a-box>
 
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- ARMÁRIO -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
-        <a-entity id="armario-colisao" position="-2.7 0 -8.5">
+        <a-box id="armario" position="-2.7 1.2 -8.5" width="0.5" height="2.4" depth="1" color="#4c3420">
 
-            <a-box position="0 1.4 0" width="0.7" height="2.8" depth="1" color="#5c3415">
+        </a-box>
 
-            </a-box>
-
-            <a-box position="0.2 1.4 0.52" width="0.02" height="0.02" depth="0.02" color="#d8b46a">
-
-            </a-box>
-
-        </a-entity>
-
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- ESCADA 1 -->
-        <!-- TÉRREO -> SEGUNDO ANDAR -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
-        <a-entity id="escada1" position="-2.3 0 -4.5">
+        <a-entity id="escada-1" position="-2.3 0 -4.5">
 
             <!-- montante esquerdo -->
 
-            <a-cylinder radius="0.04" height="4" position="-0.25 2 0" color="#7a5535">
+            <a-cylinder radius="0.03" height="4" position="-0.25 2 0" color="#8c6239">
+
             </a-cylinder>
 
             <!-- montante direito -->
 
-            <a-cylinder radius="0.04" height="4" position="0.25 2 0" color="#7a5535">
+            <a-cylinder radius="0.03" height="4" position="0.25 2 0" color="#8c6239">
+
             </a-cylinder>
 
             <!-- degraus -->
 
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 0.6 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 1.1 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 1.6 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 2.1 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 2.6 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 3.1 0" color="#7a5535">
-            </a-cylinder>
-
-            <!-- gatilho subir -->
-
-            <a-box id="subir-andar1" class="interactable" position="0 1.7 0" width="1" height="4" depth="1" opacity="0"
-                transparent="true">
-
-            </a-box>
+            <a-box position="0 0.5 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 1.0 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 1.5 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 2.0 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 2.5 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 3.0 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
 
         </a-entity>
 
-        <!-- ===================================================== -->
-        <!-- PREPARAÇÃO DO VÃO DA ESCADA 1 -->
-        <!-- ===================================================== -->
+        <!-- gatilho subir -->
 
-        <!--
-O piso do segundo andar será dividido
-em múltiplos blocos para deixar
-um vão de 0.8 x 0.8 exatamente
-sobre esta posição.
-
-X = -2.3
-Z = -4.5
--->
-
-
-        <!-- ===================================================== -->
-        <!-- SEGUNDO ANDAR -->
-        <!-- ===================================================== -->
-
-        <!--
-VÃO ESCADA 1
-
-Centro:
-X = -2.3
-Z = -4.5
-
-Abertura:
-0.8 x 0.8
--->
-
-        <!-- ===================================================== -->
-        <!-- LAJE FRONTAL -->
-        <!-- ===================================================== -->
-
-        <a-box position="0 4.01 -3" width="6" height="0.1" depth="2.2" color="#8a6844">
+        <a-box id="subir-andar1" class="interactable" visible="false" position="-2.3 1.5 -4.5" width="0.8" height="3"
+            depth="0.8">
 
         </a-box>
 
-        <!-- ===================================================== -->
-        <!-- LAJE CENTRAL DIREITA -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- PISO SEGUNDO ANDAR -->
+        <!-- COM VÃO REAL DA ESCADA 1 -->
+        <!-- ====================================== -->
 
-        <a-box position="0.55 4.01 -4.5" width="4.9" height="0.1" depth="0.8" color="#8a6844">
+        <!-- bloco esquerdo -->
 
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- LAJE TRASEIRA -->
-        <!-- ===================================================== -->
-
-        <a-box position="0 4.01 -7.4" width="6" height="0.1" depth="5.2" color="#8a6844">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- TETO DO SEGUNDO ANDAR -->
-        <!-- (também será vazado para escada 2) -->
-        <!-- ===================================================== -->
-
-        <!-- faixa frontal -->
-
-        <a-box position="0 8 -3" width="6" height="0.1" depth="2.2" color="#d8d8d8">
-
-        </a-box>
-
-        <!-- faixa traseira -->
-
-        <a-box position="0 8 -7.4" width="6" height="0.1" depth="5.2" color="#d8d8d8">
-
-        </a-box>
-
-        <!-- lado esquerdo -->
-
-        <a-box position="-1.35 8 -4.5" width="3.7" height="0.1" depth="0.8" color="#d8d8d8">
-
-        </a-box>
-
-        <!-- lado direito -->
-
-        <a-box position="2.75 8 -4.5" width="0.9" height="0.1" depth="0.8" color="#d8d8d8">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- PAREDES -->
-        <!-- ===================================================== -->
-
-        <a-box position="-3 6 -6" width="0.1" height="4" depth="8" src="#tex-andar1">
-
-        </a-box>
-
-        <a-box position="3 6 -6" width="0.1" height="4" depth="8" src="#tex-andar1">
-
-        </a-box>
-
-        <a-box position="0 6 -10" width="6" height="4" depth="0.1" src="#tex-andar1">
-
-        </a-box>
-
-        <a-box position="0 6 -2" width="6" height="4" depth="0.1" src="#tex-andar1">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- JANELA -->
-        <!-- ===================================================== -->
-
-        <!-- moldura -->
-
-        <a-box position="2.95 6 -6" width="0.05" height="1.8" depth="2.2" color="#5d3b1f">
-
-        </a-box>
-
-        <!-- vista externa -->
-
-        <a-plane position="2.93 6 -6" rotation="0 -90 0" width="2" height="1.5" src="#tex-vista">
+        <a-plane rotation="-90 0 0" position="-1.8 4.01 -6" width="2.4" height="8" color="#6f5b48">
 
         </a-plane>
 
-        <!-- peitoril -->
+        <!-- bloco central -->
 
-        <a-box position="2.88 5.2 -6" width="0.15" height="0.1" depth="2" color="#694728">
+        <a-plane rotation="-90 0 0" position="0.8 4.01 -6" width="2.8" height="8" color="#6f5b48">
+
+        </a-plane>
+
+        <!-- bloco frontal -->
+
+        <a-plane rotation="-90 0 0" position="-2.3 4.01 -2.8" width="0.8" height="3" color="#6f5b48">
+
+        </a-plane>
+
+        <!-- bloco traseiro -->
+
+        <a-plane rotation="-90 0 0" position="-2.3 4.01 -6.3" width="0.8" height="4" color="#6f5b48">
+
+        </a-plane>
+
+        <!-- resultado:
+vão aberto em:
+X=-2.3
+Z=-4.5 -->
+
+        <!-- ====================================== -->
+        <!-- SEGUNDO ANDAR -->
+        <!-- ====================================== -->
+
+        <!-- parede frontal -->
+
+        <a-plane src="#tex-andar1" position="0 6 2" width="6" height="4">
+
+        </a-plane>
+
+        <!-- parede esquerda -->
+
+        <a-plane src="#tex-andar1" rotation="0 90 0" position="-3 6 -6" width="8" height="4">
+
+        </a-plane>
+
+        <!-- parede direita -->
+
+        <a-plane src="#tex-andar1" rotation="0 -90 0" position="3 6 -6" width="8" height="4">
+
+        </a-plane>
+
+        <!-- parede traseira esquerda -->
+
+        <a-plane src="#tex-andar1" position="-1.2 6 -10" width="3.6" height="4">
+
+        </a-plane>
+
+        <!-- parede traseira direita -->
+
+        <a-plane src="#tex-andar1" position="1.8 6 -10" width="2.4" height="4">
+
+        </a-plane>
+
+        <!-- ====================================== -->
+        <!-- JANELA DA ESPERANÇA -->
+        <!-- ====================================== -->
+
+        <a-plane id="janela-vista" src="#tex-vista" position="2.95 6 -6" rotation="0 -90 0" width="2" height="1.6">
+
+        </a-plane>
+
+        <!-- moldura -->
+
+        <a-box position="2.9 6 -6" width="0.05" height="2" depth="2.2" color="#5b3f28">
 
         </a-box>
 
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- CAMA -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
-        <a-entity id="cama-colisao" position="0.8 4.01 -8.9">
+        <a-entity id="cama">
 
             <!-- base -->
 
-            <a-box position="0 0.22 0" width="1.8" height="0.45" depth="0.8" color="#785437">
+            <a-box position="0.8 4.35 -8.9" width="1.8" height="0.25" depth="0.9" color="#73543b">
 
             </a-box>
 
             <!-- colchão -->
 
-            <a-box position="0 0.52 0" width="1.7" height="0.18" depth="0.75" color="#f1f1f1">
+            <a-box position="0.8 4.55 -8.9" width="1.7" height="0.18" depth="0.8" color="#d7d2ca">
 
             </a-box>
 
             <!-- travesseiro -->
 
-            <a-box position="-0.55 0.65 0" width="0.45" height="0.12" depth="0.45" color="#ffffff">
-
-            </a-box>
-
-            <!-- cobertor -->
-
-            <a-box position="0 0.58 0.08" width="1.65" height="0.08" depth="0.55" color="#7d9cc9">
+            <a-box position="0.2 4.68 -8.9" width="0.45" height="0.12" depth="0.4" color="#efefef">
 
             </a-box>
 
         </a-entity>
 
-        <!-- ===================================================== -->
-        <!-- GATILHO DESCER ESCADA 1 -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- ANNE FRANK LOW POLY -->
+        <!-- ====================================== -->
 
-        <a-box id="descer-terreo" class="interactable" position="-2.3 5.6 -4.5" width="1" height="2" depth="1"
-            opacity="0" transparent="true">
+        <a-entity id="anne-frank-3d" class="interactable" position="0.8 4.65 -8.9">
 
-        </a-box>
+            <!-- tronco -->
 
-        <!-- ===================================================== -->
-        <!-- PREPARAÇÃO ESCADA 2 -->
-        <!-- ===================================================== -->
-
-        <!--
-
-Escada 2
-
-Centro:
-
-X = 2.3
-Z = -4.5
-
-Vão:
-0.8 x 0.8
-
-Ligação:
-Segundo Andar -> Sótão
-
--->
-
-
-        <!-- ===================================================== -->
-        <!-- ANNE FRANK 3D -->
-        <!-- ===================================================== -->
-
-        <a-entity id="anne-frank-3d" class="interactable" position="0.8 4.01 -8.9">
-
-            <!-- ================================================= -->
-            <!-- PERNAS -->
-            <!-- ================================================= -->
-
-            <a-box position="-0.12 0.42 0.05" width="0.18" height="0.5" depth="0.18" rotation="25 0 0"
-                src="#tex-anne-vestido">
+            <a-box src="#tex-anne-vestido" width="0.45" height="0.7" depth="0.25" position="0 0.35 0">
 
             </a-box>
 
-            <a-box position="0.12 0.42 0.05" width="0.18" height="0.5" depth="0.18" rotation="25 0 0"
-                src="#tex-anne-vestido">
+            <!-- cabeça -->
 
-            </a-box>
-
-            <!-- canelas -->
-
-            <a-box position="-0.12 0.18 0.2" width="0.14" height="0.35" depth="0.14" rotation="35 0 0" color="#f0c6a5">
-
-            </a-box>
-
-            <a-box position="0.12 0.18 0.2" width="0.14" height="0.35" depth="0.14" rotation="35 0 0" color="#f0c6a5">
-
-            </a-box>
-
-            <!-- ================================================= -->
-            <!-- TRONCO -->
-            <!-- ================================================= -->
-
-            <a-box position="0 0.95 0" width="0.45" height="0.65" depth="0.25" src="#tex-anne-vestido">
-
-            </a-box>
-
-            <!-- pescoço -->
-
-            <a-cylinder position="0 1.34 0" radius="0.05" height="0.08" color="#f0c6a5">
-
-            </a-cylinder>
-
-            <!-- ================================================= -->
-            <!-- CABEÇA -->
-            <!-- ================================================= -->
-
-            <a-sphere position="0 1.58 0" radius="0.22" src="#tex-anne-rosto" rotation="0 180 0">
+            <a-sphere src="#tex-anne-rosto" radius="0.18" rotation="0 180 0" position="0 0.85 0">
 
             </a-sphere>
 
-            <!-- ================================================= -->
-            <!-- CABELO -->
-            <!-- ================================================= -->
+            <!-- cabelo topo -->
 
-            <a-box position="0 1.76 0" width="0.35" height="0.12" depth="0.35" src="#tex-anne-cabelo">
+            <a-box src="#tex-anne-cabelo" width="0.3" height="0.08" depth="0.3" position="0 1.02 0">
 
             </a-box>
 
-            <a-box position="-0.2 1.58 0" width="0.08" height="0.28" depth="0.28" src="#tex-anne-cabelo">
+            <!-- cabelo lateral esquerda -->
+
+            <a-box src="#tex-anne-cabelo" width="0.08" height="0.18" depth="0.25" position="-0.15 0.85 0">
 
             </a-box>
 
-            <a-box position="0.2 1.58 0" width="0.08" height="0.28" depth="0.28" src="#tex-anne-cabelo">
+            <!-- cabelo lateral direita -->
+
+            <a-box src="#tex-anne-cabelo" width="0.08" height="0.18" depth="0.25" position="0.15 0.85 0">
 
             </a-box>
 
-            <!-- ================================================= -->
-            <!-- BRAÇO ESQUERDO -->
-            <!-- ================================================= -->
+            <!-- braço esquerdo -->
 
-            <a-box position="-0.28 1.02 0.12" width="0.12" height="0.45" depth="0.12" rotation="45 0 40"
-                src="#tex-anne-vestido">
+            <a-box src="#tex-anne-vestido" width="0.12" height="0.45" depth="0.12" rotation="0 0 35"
+                position="-0.22 0.3 0.15">
 
             </a-box>
 
-            <!-- mão -->
+            <!-- braço direito -->
 
-            <a-box position="-0.18 0.78 0.22" width="0.08" height="0.08" depth="0.08" color="#f0c6a5">
-
-            </a-box>
-
-            <!-- ================================================= -->
-            <!-- BRAÇO DIREITO -->
-            <!-- ================================================= -->
-
-            <a-box position="0.28 1.02 0.12" width="0.12" height="0.45" depth="0.12" rotation="45 0 -40"
-                src="#tex-anne-vestido">
+            <a-box src="#tex-anne-vestido" width="0.12" height="0.45" depth="0.12" rotation="0 0 -35"
+                position="0.22 0.3 0.15">
 
             </a-box>
 
-            <!-- mão -->
+            <!-- pernas -->
 
-            <a-box position="0.18 0.78 0.22" width="0.08" height="0.08" depth="0.08" color="#f0c6a5">
+            <a-box src="#tex-anne-vestido" width="0.16" height="0.45" depth="0.16" rotation="20 0 0"
+                position="-0.1 -0.2 0.15">
 
             </a-box>
 
-            <!-- ================================================= -->
-            <!-- LIVRO ABERTO -->
-            <!-- ================================================= -->
+            <a-box src="#tex-anne-vestido" width="0.16" height="0.45" depth="0.16" rotation="20 0 0"
+                position="0.1 -0.2 0.15">
 
-            <a-entity position="0 0.72 0.18">
+            </a-box>
 
-                <!-- página esquerda -->
+            <!-- livro -->
 
-                <a-box position="-0.09 0 0" width="0.18" height="0.03" depth="0.22" rotation="0 0 10" color="#e9dfc7">
+            <a-box id="livro-anne" width="0.3" height="0.03" depth="0.25" rotation="-35 0 0" position="0 0.05 0.22"
+                color="#d8caa0">
 
-                </a-box>
-
-                <!-- página direita -->
-
-                <a-box position="0.09 0 0" width="0.18" height="0.03" depth="0.22" rotation="0 0 -10" color="#e9dfc7">
-
-                </a-box>
-
-                <!-- lombada -->
-
-                <a-box position="0 0 -0.01" width="0.03" height="0.04" depth="0.22" color="#8a5c3a">
-
-                </a-box>
-
-            </a-entity>
+            </a-box>
 
         </a-entity>
 
-        <!-- ===================================================== -->
-        <!-- MARCADOR DE FALA 3D -->
-        <!-- ===================================================== -->
-
-        <a-entity id="anne-fala-3d" visible="false" position="0.8 6.4 -8.9">
-
-            <a-plane id="anne-fala-fundo" width="1.8" height="0.7" color="#ffffff">
-
-            </a-plane>
-
-        </a-entity>
-
-
-        <!-- ===================================================== -->
-        <!-- SÓTÃO -->
-        <!-- ===================================================== -->
-
-        <!--
-VÃO ESCADA 2
-
-Centro:
-X = 2.3
-Z = -4.5
-
-Abertura:
-0.8 x 0.8
--->
-
-        <!-- ===================================================== -->
-        <!-- PISO DO SÓTÃO (LAJE VAZADA) -->
-        <!-- ===================================================== -->
-
-        <!-- faixa frontal -->
-
-        <a-box position="0 8.01 -3" width="6" height="0.1" depth="2.2" color="#75583c">
-
-        </a-box>
-
-        <!-- faixa traseira -->
-
-        <a-box position="0 8.01 -7.4" width="6" height="0.1" depth="5.2" color="#75583c">
-
-        </a-box>
-
-        <!-- lado esquerdo do vão -->
-
-        <a-box position="-0.7 8.01 -4.5" width="4.4" height="0.1" depth="0.8" color="#75583c">
-
-        </a-box>
-
-        <!-- lado direito do vão -->
-
-        <a-box position="2.75 8.01 -4.5" width="0.9" height="0.1" depth="0.8" color="#75583c">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- TETO FINAL -->
-        <!-- ===================================================== -->
-
-        <a-box position="0 12 -6" width="6" height="0.1" depth="8" color="#d6d6d6">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- PAREDES -->
-        <!-- ===================================================== -->
-
-        <a-box position="-3 10 -6" width="0.1" height="4" depth="8" src="#tex-sotao">
-
-        </a-box>
-
-        <a-box position="3 10 -6" width="0.1" height="4" depth="8" src="#tex-sotao">
-
-        </a-box>
-
-        <a-box position="0 10 -10" width="6" height="4" depth="0.1" src="#tex-sotao">
-
-        </a-box>
-
-        <a-box position="0 10 -2" width="6" height="4" depth="0.1" src="#tex-sotao">
-
-        </a-box>
-
-        <!-- ===================================================== -->
-        <!-- VIGAS DECORATIVAS -->
-        <!-- ===================================================== -->
-
-        <a-box position="0 11.2 -6" width="6" height="0.15" depth="0.15" color="#5d3b20">
-
-        </a-box>
-
-        <a-box position="0 10.4 -6" width="6" height="0.15" depth="0.15" color="#5d3b20">
-
-        </a-box>
-
-        <a-box position="0 9.6 -6" width="6" height="0.15" depth="0.15" color="#5d3b20">
-
-        </a-box>
-
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
         <!-- ESCADA 2 -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
 
-        <a-entity id="escada2" position="2.3 4.01 -4.5">
+        <a-entity id="escada-2" position="2.3 4.01 -4.5">
 
-            <!-- montante esquerdo -->
-
-            <a-cylinder radius="0.04" height="4" position="-0.25 2 0" color="#7a5535">
+            <a-cylinder radius="0.03" height="4" position="-0.25 2 0" color="#8c6239">
 
             </a-cylinder>
 
-            <!-- montante direito -->
-
-            <a-cylinder radius="0.04" height="4" position="0.25 2 0" color="#7a5535">
+            <a-cylinder radius="0.03" height="4" position="0.25 2 0" color="#8c6239">
 
             </a-cylinder>
 
-            <!-- degraus -->
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 0.6 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 1.1 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 1.6 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 2.1 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 2.6 0" color="#7a5535">
-            </a-cylinder>
-
-            <a-cylinder radius="0.025" height="0.5" rotation="0 0 90" position="0 3.1 0" color="#7a5535">
-            </a-cylinder>
+            <a-box position="0 0.5 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 1.0 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 1.5 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 2.0 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 2.5 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
+            <a-box position="0 3.0 0" width="0.55" height="0.03" depth="0.08" color="#b78b58"></a-box>
 
         </a-entity>
 
-        <!-- ===================================================== -->
-        <!-- GATILHO SUBIR SÓTÃO -->
-        <!-- ===================================================== -->
+        <!-- gatilho subir para sótão -->
 
-        <a-box id="subir-sotao" class="interactable" position="2.3 5.6 -4.5" width="1" height="2" depth="1" opacity="0"
-            transparent="true">
+        <a-box id="subir-sotao" class="interactable" visible="false" position="2.3 5.5 -4.5" width="0.8" height="3"
+            depth="0.8">
 
         </a-box>
 
-        <!-- ===================================================== -->
-        <!-- GATILHO DESCER SEGUNDO ANDAR -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- PISO DO SÓTÃO -->
+        <!-- COM VÃO REAL DA ESCADA 2 -->
+        <!-- ====================================== -->
 
-        <a-box id="descer-andar1" class="interactable" position="2.3 9.6 -4.5" width="1" height="2" depth="1"
-            opacity="0" transparent="true">
+        <a-plane rotation="-90 0 0" position="-1.3 8.01 -6" width="3.4" height="8" color="#75614b">
+
+        </a-plane>
+
+        <a-plane rotation="-90 0 0" position="1.2 8.01 -6" width="1.6" height="8" color="#75614b">
+
+        </a-plane>
+
+        <a-plane rotation="-90 0 0" position="2.3 8.01 -2.8" width="0.8" height="3" color="#75614b">
+
+        </a-plane>
+
+        <a-plane rotation="-90 0 0" position="2.3 8.01 -6.3" width="0.8" height="4" color="#75614b">
+
+        </a-plane>
+
+        <!-- resultado:
+vão aberto em
+X=2.3
+Z=-4.5 -->
+
+        <!-- ====================================== -->
+        <!-- SÓTÃO -->
+        <!-- ====================================== -->
+
+        <!-- parede frontal -->
+
+        <a-plane src="#tex-sotao" position="0 10 2" width="6" height="4">
+
+        </a-plane>
+
+        <!-- parede esquerda -->
+
+        <a-plane src="#tex-sotao" rotation="0 90 0" position="-3 10 -6" width="8" height="4">
+
+        </a-plane>
+
+        <!-- parede direita -->
+
+        <a-plane src="#tex-sotao" rotation="0 -90 0" position="3 10 -6" width="8" height="4">
+
+        </a-plane>
+
+        <!-- parede traseira -->
+
+        <a-plane src="#tex-sotao" position="0 10 -10" width="6" height="4">
+
+        </a-plane>
+
+        <!-- teto final -->
+
+        <a-plane rotation="90 0 0" position="0 12 0" width="6" height="12" color="#c8c2b6">
+
+        </a-plane>
+
+        <!-- ====================================== -->
+        <!-- BAÚ HISTÓRICO -->
+        <!-- ====================================== -->
+
+        <a-box id="bau-historico" class="interactable" position="-1.5 8.4 -8" width="0.9" height="0.6" depth="0.6"
+            color="#6d4a2c">
 
         </a-box>
 
-        <!-- ===================================================== -->
-        <!-- FIM DA GEOMETRIA DO CENÁRIO -->
-        <!-- ===================================================== -->
+        <!-- ====================================== -->
+        <!-- CAIXA DE DOCUMENTOS -->
+        <!-- ====================================== -->
 
+        <a-box id="caixa-documentos" class="interactable" position="1.4 8.3 -7" width="0.7" height="0.4" depth="0.5"
+            color="#7b6b55">
+
+        </a-box>
+
+        <!-- ====================================== -->
+        <!-- CASTANHEIRA (VISUAL EXTERNO) -->
+        <!-- ====================================== -->
+
+        <a-cylinder position="5 5 -6" radius="0.25" height="4" color="#5f4025">
+
+        </a-cylinder>
+
+        <a-sphere position="5 7.3 -6" radius="1.2" color="#4c6b39">
+
+        </a-sphere>
+
+        <!-- ====================================== -->
+        <!-- PLANO DE FADE VR -->
+        <!-- ====================================== -->
+
+        <a-plane id="fade-plane" visible="false" position="0 0 -0.5" width="2" height="2" material="
+color:black;
+opacity:0" parent="visao-usuario">
+
+        </a-plane>
 
     </a-scene>
 
-    <script>
+    <!-- ====================================== -->
+    <!-- JOYSTICK MOBILE -->
+    <!-- ====================================== -->
 
-        /* ===================================================== */
-        /* CONFIGURAÇÃO GLOBAL */
-        /* ===================================================== */
+    <div id="mobile-joystick">
 
-        const CONFIG = {
+        <div id="joystick-base">
 
-            velocidadeJoystick: 0.05,
+            <div id="joystick-knob"></div>
 
-            limiteMinX: -2.6,
-            limiteMaxX: 2.6,
+        </div>
 
-            limiteMinZ: -9.4,
-            limiteMaxZ: 1.6,
+    </div>
 
-            yTerreo: 1.6,
-            yAndar1: 5.6,
-            ySotao: 9.6
+    <!-- ====================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ====================================== -->
 
-        };
-
-        /* ===================================================== */
-        /* PÁGINAS DO DIÁRIO */
-        /* ===================================================== */
-
-        const PAGINAS_DIARIO = [
-
-            {
-                data: "9 de Julho de 1942",
-
-                texto:
-                    "Ficou combinado que partiríamos no dia 16 de julho. Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante giratória esconde a porta de entrada."
-            },
-
-            {
-                data: "11 de Julho de 1942",
-
-                texto:
-                    "O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã, nem mesmo em toda a Holanda."
-            },
-
-            {
-                data: "1 de Outubro de 1942",
-
-                texto:
-                    "Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar. Mas era apenas o entregador."
-            },
-
-            {
-                data: "19 de Novembro de 1942",
-
-                texto:
-                    "Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos, e para os quais tememos o pior. E tudo isto por quê? Porque são judeus."
-            },
-
-            {
-                data: "6 de Junho de 1944",
-
-                texto:
-                    "É o Dia D. A invasão começou. Os Aliados desembarcaram na Normandia. O rádio fala em notícias de esperança. Será que a libertação está próxima?"
-            }
-
-        ];
-
-        /* ===================================================== */
-        /* FALAS DA ANNE FRANK */
-        /* ===================================================== */
-
-        const FRASES_ANNE = [
-
-            "Apesar de tudo, continuo acreditando na bondade das pessoas.",
-
-            "Quem é feliz faz os outros felizes também.",
-
-            "Não penso em toda a miséria, mas na beleza que ainda permanece.",
-
-            "Enquanto houver esperança, existe futuro.",
-
-            "Os mortos recebem mais flores que os vivos porque o remorso é mais forte que a gratidão.",
-
-            "A coragem não significa ausência de medo.",
-
-            "Quero continuar vivendo mesmo depois da minha morte."
-
-        ];
-
-        /* ===================================================== */
-        /* REFERÊNCIAS PRINCIPAIS */
-        /* ===================================================== */
-
-        const cameraRig =
-            document.getElementById(
-                "camera-rig"
-            );
-
-        const cameraUsuario =
-            document.getElementById(
-                "visao-usuario"
-            );
-
-        const estanteSecreta =
-            document.getElementById(
-                "estante-secreta"
-            );
-
-        const diarioObjeto =
-            document.getElementById(
-                "objeto-diario"
-            );
-
-        const anneFrank =
-            document.getElementById(
-                "anne-frank-3d"
-            );
-
-        const subirAndar1 =
-            document.getElementById(
-                "subir-andar1"
-            );
-
-        const descerTerreo =
-            document.getElementById(
-                "descer-terreo"
-            );
-
-        const subirSotao =
-            document.getElementById(
-                "subir-sotao"
-            );
-
-        const descerAndar1 =
-            document.getElementById(
-                "descer-andar1"
-            );
-
-        /* ===================================================== */
-        /* HUD */
-        /* ===================================================== */
-
-        const hud =
-            document.getElementById(
-                "hud"
-            );
-
-        /* ===================================================== */
-        /* MODAL DIÁRIO */
-        /* ===================================================== */
-
-        const diarioModal =
-            document.getElementById(
-                "diarioModal"
-            );
-
-        const diarioData =
-            document.getElementById(
-                "diarioData"
-            );
-
-        const diarioTexto =
-            document.getElementById(
-                "diarioTexto"
-            );
-
-        const contadorPagina =
-            document.getElementById(
-                "contadorPagina"
-            );
-
-        const btnAnterior =
-            document.getElementById(
-                "btnAnterior"
-            );
-
-        const btnProximo =
-            document.getElementById(
-                "btnProximo"
-            );
-
-        const btnFecharDiario =
-            document.getElementById(
-                "btnFecharDiario"
-            );
-
-        /* ===================================================== */
-        /* MODAL QR */
-        /* ===================================================== */
-
-        const qrModal =
-            document.getElementById(
-                "qrModal"
-            );
-
-        const qrImage =
-            document.getElementById(
-                "qrImage"
-            );
-
-        const btnAbrirQR =
-            document.getElementById(
-                "btnAbrirQR"
-            );
-
-        const btnFecharQR =
-            document.getElementById(
-                "btnFecharQR"
-            );
-
-        /* ===================================================== */
-        /* DIÁLOGO ANNE */
-        /* ===================================================== */
-
-        const anneDialogo =
-            document.getElementById(
-                "anneDialogo"
-            );
-
-        /* ===================================================== */
-        /* JOYSTICK */
-        /* ===================================================== */
-
-        const joystickBase =
-            document.getElementById(
-                "joystickBase"
-            );
-
-        const joystickKnob =
-            document.getElementById(
-                "joystickKnob"
-            );
-
-        /* ===================================================== */
-        /* ESTADO GLOBAL */
-        /* ===================================================== */
-
-        let paginaAtual = 0;
-
-        let estanteAberta = false;
-
-        let indiceFalaAnne = 0;
-
-        let joystickAtivo = false;
-
-        let joystickX = 0;
-
-        let joystickY = 0;
-
-        /* ===================================================== */
-        /* MÓDULOS FUTUROS */
-        /* ===================================================== */
-
-        const Modulos = {
-
-            colisoes: true,
-
-            dialogos: true,
-
-            joystick: true,
-
-            qr: true,
-
-            ar: true
-
-        };
-
-
-        /* ===================================================== */
-        /* UTILITÁRIOS */
-        /* ===================================================== */
-
-        function atualizarHUD(texto) {
-
-            hud.textContent = texto;
-
-        }
-
-        /* ===================================================== */
-        /* DIÁRIO */
-        /* ===================================================== */
-
-        function atualizarDiario() {
-
-            const pagina =
-                PAGINAS_DIARIO[paginaAtual];
-
-            diarioData.textContent =
-                pagina.data;
-
-            diarioTexto.textContent =
-                pagina.texto;
-
-            contadorPagina.textContent =
-                `Pág. ${paginaAtual + 1} / ${PAGINAS_DIARIO.length}`;
-
-            btnAnterior.disabled =
-                paginaAtual === 0;
-
-            btnProximo.disabled =
-                paginaAtual === PAGINAS_DIARIO.length - 1;
-
-        }
-
-        /* ===================================================== */
-        /* CONTROLE CÂMERA */
-        /* ===================================================== */
-
-        function pausarCamera() {
-
-            cameraUsuario
-                .components["look-controls"]
-                .pause();
-
-        }
-
-        function retomarCamera() {
-
-            cameraUsuario
-                .components["look-controls"]
-                .play();
-
-        }
-
-        /* ===================================================== */
-        /* ABRIR / FECHAR DIÁRIO */
-        /* ===================================================== */
-
-        function abrirDiario() {
-
-            paginaAtual = 0;
-
-            atualizarDiario();
-
-            diarioModal.style.display =
-                "flex";
-
-            pausarCamera();
-
-            atualizarHUD(
-                "Diário aberto."
-            );
-
-        }
-
-        function fecharDiario() {
-
-            diarioModal.style.display =
-                "none";
-
-            retomarCamera();
-
-            atualizarHUD(
-                "Explorando o ambiente."
-            );
-
-        }
-
-        /* ===================================================== */
-        /* BOTÕES DIÁRIO */
-        /* ===================================================== */
-
-        btnAnterior.addEventListener(
-            "click",
-            function () {
-
-                if (paginaAtual > 0) {
-
-                    paginaAtual--;
-
-                    atualizarDiario();
-
-                }
-
-            }
-        );
-
-        btnProximo.addEventListener(
-            "click",
-            function () {
-
-                if (paginaAtual < PAGINAS_DIARIO.length - 1) {
-
-                    paginaAtual++;
-
-                    atualizarDiario();
-
-                }
-
-            }
-        );
-
-        btnFecharDiario.addEventListener(
-            "click",
-            function () {
-
-                fecharDiario();
-
-            }
-        );
-
-        /* ===================================================== */
-        /* ESTANTE SECRETA */
-        /* ===================================================== */
-
-        function abrirEstante() {
-
-            estanteSecreta.setAttribute(
-                "animation",
-                {
-                    property: "position",
-                    to: "1.8 1.5 -1.9",
-                    dur: 1200,
-                    easing: "easeInOutQuad"
-                });
-
-            estanteAberta = true;
-
-            atualizarHUD(
-                "Passagem aberta."
-            );
-
-        }
-
-        function fecharEstante() {
-
-            estanteSecreta.setAttribute(
-                "animation",
-                {
-                    property: "position",
-                    to: "0 1.5 -1.9",
-                    dur: 1200,
-                    easing: "easeInOutQuad"
-                });
-
-            estanteAberta = false;
-
-            atualizarHUD(
-                "Procure a estante secreta."
-            );
-
-        }
-
-        function alternarEstante() {
-
-            if (estanteAberta) {
-
-                fecharEstante();
-
-            } else {
-
-                abrirEstante();
-
-            }
-
-        }
-
-        estanteSecreta.addEventListener(
-            "click",
-            alternarEstante
-        );
-
-        /* ===================================================== */
-        /* ANNE FRANK - FALAS ROTATIVAS */
-        /* ===================================================== */
-
-        function mostrarFalaAnne() {
-
-            const frase =
-                FRASES_ANNE[indiceFalaAnne];
-
-            anneDialogo.textContent =
-                frase;
-
-            anneDialogo.style.display =
-                "block";
-
-            indiceFalaAnne++;
-
-            if (indiceFalaAnne >= FRASES_ANNE.length) {
-
-                indiceFalaAnne = 0;
-
-            }
-
-            setTimeout(
-                function () {
-
-                    anneDialogo.style.display =
-                        "none";
-
-                },
-                4000
-            );
-
-        }
-
-        anneFrank.addEventListener(
-            "click",
-            mostrarFalaAnne
-        );
-
-        /* ===================================================== */
-        /* DIÁRIO ABERTURA CLICK */
-        /* ===================================================== */
-
-        diarioObjeto.addEventListener(
-            "click",
-            abrirDiario
-        );
-
-        /* ===================================================== */
-        /* INICIALIZAÇÃO */
-        /* ===================================================== */
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                atualizarDiario();
-
-                atualizarHUD(
-                    "Explore o ambiente."
-                );
-
-                console.log(
-                    "Sistema carregado."
-                );
-
-            }
-        );
-
-
-        /* ===================================================== */
-        /* COMPONENTE DE COLISÃO */
-        /* ===================================================== */
-
-        AFRAME.registerComponent("motor-colisao", {
-
-            tick: function () {
-
-                const el =
-                    this.el;
-
-                let pos =
-                    el.getAttribute("position");
-
-                let x =
-                    pos.x;
-
-                let y =
-                    pos.y;
-
-                let z =
-                    pos.z;
-
-                /* ================================================= */
-                /* LIMITES GLOBAIS DO MUNDO */
-                /* ================================================= */
-
-                if (x < CONFIG.limiteMinX) x = CONFIG.limiteMinX;
-                if (x > CONFIG.limiteMaxX) x = CONFIG.limiteMaxX;
-
-                if (z < CONFIG.limiteMinZ) z = CONFIG.limiteMinZ;
-                if (z > CONFIG.limiteMaxZ) z = CONFIG.limiteMaxZ;
-
-                /* ================================================= */
-                /* COLISÃO ESTANTE (BLOQUEIO INICIAL) */
-                /* ================================================= */
-
-                if (!estanteAberta) {
-
-                    // bloqueia passagem para o quarto
-
-                    if (z < -1.5) {
-
-                        z = -1.5;
-
-                    }
-
-                }
-
-                /* ================================================= */
-                /* COLISÃO ARMÁRIO (TÉRREO) */
-                /* ================================================= */
-
-                if (y < 3) {
-
-                    // armário no canto esquerdo
-
-                    if (x < -1.8 && z < -7.4) {
-
-                        x = -1.8;
-
-                    }
-
-                }
-
-                /* ================================================= */
-                /* COLISÃO CAMA (SEGUNDO ANDAR) */
-                /* ================================================= */
-
-                if (y >= 3 && y < 7) {
-
-                    if (
-                        x > -0.2 &&
-                        x < 1.7 &&
-                        z < -7.4
-                    ) {
-
-                        z = -7.4;
-
-                    }
-
-                }
-
-                /* ================================================= */
-                /* APLICAR POSIÇÃO CORRIGIDA */
-                /* ================================================= */
-
-                el.setAttribute(
-                    "position",
-                    { x, y, z }
-                );
-
-            }
-
-        });
-
-
-        /* ===================================================== */
-        /* TELETRANSPORTE (ESCADAS) */
-        /* ===================================================== */
-
-        function teleportar(y, x = 0, z = 0) {
-
-            cameraRig.setAttribute(
-                "position",
-                { x, y, z }
-            );
-
-        }
-
-        /* ===================================================== */
-        /* ESCADA 1 - SUBIR PARA 2º ANDAR */
-        /* ===================================================== */
-
-        subirAndar1.addEventListener(
-            "click",
-            function () {
-
-                teleportar(
-                    CONFIG.yAndar1,
-                    -2.3,
-                    -4.5
-                );
-
-                atualizarHUD(
-                    "Segundo andar."
-                );
-
-            }
-        );
-
-        /* ===================================================== */
-        /* ESCADA 1 - DESCER PARA TÉRREO */
-        /* ===================================================== */
-
-        descerTerreo.addEventListener(
-            "click",
-            function () {
-
-                teleportar(
-                    CONFIG.yTerreo,
-                    0,
-                    0
-                );
-
-                atualizarHUD(
-                    "Térreo."
-                );
-
-            }
-        );
-
-        /* ===================================================== */
-        /* ESCADA 2 - SUBIR PARA SÓTÃO */
-        /* ===================================================== */
-
-        subirSotao.addEventListener(
-            "click",
-            function () {
-
-                teleportar(
-                    CONFIG.ySotao,
-                    2.3,
-                    -4.5
-                );
-
-                atualizarHUD(
-                    "Sótão."
-                );
-
-            }
-        );
-
-        /* ===================================================== */
-        /* ESCADA 2 - DESCER PARA 2º ANDAR */
-        /* ===================================================== */
-
-        descerAndar1.addEventListener(
-            "click",
-            function () {
-
-                teleportar(
-                    CONFIG.yAndar1,
-                    2.3,
-                    -4.5
-                );
-
-                atualizarHUD(
-                    "Segundo andar."
-                );
-
-            }
-        );
-
-        /* ===================================================== */
-        /* BLOQUEIO DO CURSOR AO ABRIR MODAL (EXTRA SEGURANÇA) */
-        /* ===================================================== */
-
-        function bloquearControleCamera() {
-
-            cameraUsuario.components["look-controls"].pause();
-
-        }
-
-        function liberarControleCamera() {
-
-            cameraUsuario.components["look-controls"].play();
-
-        }
-
-        /* ===================================================== */
-        /* REFORÇO: DIÁRIO USA CONTROLE GLOBAL */
-        /* ===================================================== */
-
-        function abrirDiarioSeguro() {
-
-            abrirDiario();
-
-            bloquearControleCamera();
-
-        }
-
-        function fecharDiarioSeguro() {
-
-            fecharDiario();
-
-            liberarControleCamera();
-
-        }
-
-        /* sobrescreve eventos do diário */
-
-        btnFecharDiario.removeEventListener(
-            "click",
-            fecharDiario
-        );
-
-        btnFecharDiario.addEventListener(
-            "click",
-            fecharDiarioSeguro
-        );
-
-
-        /* ===================================================== */
-        /* DETECÇÃO MOBILE */
-        /* ===================================================== */
-
-        function isMobile() {
-
-            return (
-                /Android|iPhone|iPad|iPod/i
-                    .test(navigator.userAgent)
-            );
-
-        }
-
-        /* ===================================================== */
-        /* QR CODE - ABRIR MODAL */
-        /* ===================================================== */
-
-        function abrirQR() {
-
-            const url =
-                encodeURIComponent(
-                    window.location.href
-                );
-
-            qrImage.src =
-                `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${url}`;
-
-            qrModal.style.display =
-                "flex";
-
-            atualizarHUD(
-                "Escaneie o QR Code."
-            );
-
-        }
-
-        function fecharQR() {
-
-            qrModal.style.display =
-                "none";
-
-        }
-
-        /* ===================================================== */
-        /* EVENTOS QR */
-        /* ===================================================== */
-
-        btnAbrirQR.addEventListener(
-            "click",
-            abrirQR
-        );
-
-        btnFecharQR.addEventListener(
-            "click",
-            fecharQR
-        );
-
-        /* ===================================================== */
-        /* JOYSTICK - ESTADO */
-        /* ===================================================== */
-
-        let joystickCentro =
-        {
-            x: 0,
-            y: 0
-        };
-
-        let joystickMovendo =
-            false;
-
-        /* ===================================================== */
-        /* INICIALIZA JOYSTICK APENAS MOBILE */
-        /* ===================================================== */
-
-        if (isMobile()) {
-
-            joystickBase.style.display =
-                "block";
-
-        }
-
-        /* ===================================================== */
-        /* EVENTOS TOUCH JOYSTICK */
-        /* ===================================================== */
-
-        joystickBase.addEventListener(
-            "touchstart",
-            function (e) {
-
-                joystickMovendo =
-                    true;
-
-            }
-        );
-
-        joystickBase.addEventListener(
-            "touchend",
-            function () {
-
-                joystickMovendo =
-                    false;
-
-                joystickKnob.style.transform =
-                    "translate(0px,0px)";
-
-                joystickX = 0;
-
-                joystickY = 0;
-
-            }
-        );
-
-        joystickBase.addEventListener(
-            "touchmove",
-            function (e) {
-
-                if (!joystickMovendo) return;
-
-                const touch =
-                    e.touches[0];
-
-                const rect =
-                    joystickBase.getBoundingClientRect();
-
-                const dx =
-                    touch.clientX - (rect.left + rect.width / 2);
-
-                const dy =
-                    touch.clientY - (rect.top + rect.height / 2);
-
-                const max =
-                    50;
-
-                const distX =
-                    Math.max(
-                        -max,
-                        Math.min(max, dx)
-                    );
-
-                const distY =
-                    Math.max(
-                        -max,
-                        Math.min(max, dy)
-                    );
-
-                joystickKnob.style.transform =
-                    `translate(${distX}px, ${distY}px)`;
-
-                joystickX =
-                    distX / max;
-
-                joystickY =
-                    distY / max;
-
-            }
-        );
-
-        /* ===================================================== */
-        /* LOOP DE MOVIMENTO MOBILE */
-        /* ===================================================== */
-
-        function atualizarMovimento() {
-
-            if (isMobile()) {
-
-                const rig =
-                    cameraRig.getAttribute("position");
-
-                rig.x += joystickX * CONFIG.velocidadeJoystick;
-
-                rig.z += joystickY * CONFIG.velocidadeJoystick;
-
-                cameraRig.setAttribute(
-                    "position",
-                    rig
-                );
-
-            }
-
-            requestAnimationFrame(
-                atualizarMovimento
-            );
-
-        }
-
-        atualizarMovimento();
-
-        /* ===================================================== */
-        /* BOTÃO QR FIXO */
-        /* ===================================================== */
-
-        btnAbrirQR.addEventListener(
-            "click",
-            abrirQR
-        );
-
-
-        /* ===================================================== */
-        /* AJUSTE DE CONTROLES HÍBRIDOS */
-        /* ===================================================== */
-
-        function ajustarControles() {
-
-            const rig =
-                cameraRig;
-
-            const cameraComp =
-                cameraUsuario.components["look-controls"];
-
-            // garante funcionamento em mobile + desktop
-
-            if (isMobile()) {
-
-                cameraUsuario.setAttribute(
-                    "look-controls",
-                    "magicWindowTrackingEnabled:true; touchEnabled:true"
-                );
-
-            } else {
-
-                cameraUsuario.setAttribute(
-                    "look-controls",
-                    "magicWindowTrackingEnabled:false; touchEnabled:false"
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* INICIALIZAÇÃO DE CONTROLES */
-        /* ===================================================== */
-
-        ajustarControles();
-
-        /* ===================================================== */
-        /* CONTROLE DE POINTER LOCK (DESKTOP) */
-        /* ===================================================== */
-
-        document.addEventListener(
-            "click",
-            function () {
-
-                if (!isMobile()) {
-
-                    const canvas =
-                        document.querySelector("canvas");
-
-                    if (canvas &&
-                        canvas.requestPointerLock) {
-
-                        canvas.requestPointerLock();
-
-                    }
-
-                }
-
-            }
-        );
-
-        /* ===================================================== */
-        /* LIBERA POINTER LOCK AO ABRIR MODAIS */
-        /* ===================================================== */
-
-        function liberarPointerLock() {
-
-            if (document.exitPointerLock) {
-
-                document.exitPointerLock();
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* INTEGRAÇÃO MODAL DIÁRIO (SAFE) */
-        /* ===================================================== */
-
-        function abrirDiarioFinal() {
-
-            abrirDiario();
-
-            liberarPointerLock();
-
-            pausarCamera();
-
-        }
-
-        function fecharDiarioFinal() {
-
-            fecharDiario();
-
-            liberarControleCamera();
-
-        }
-
-        /* substituição segura */
-
-        btnFecharDiario.addEventListener(
-            "click",
-            fecharDiarioFinal
-        );
-
-        /* ===================================================== */
-        /* ESTANTE + COLISÃO REFORÇADA AO ABRIR */
-        /* ===================================================== */
-
-        function atualizarEstadoEstanteColisao() {
-
-            // lógica futura para liberar passagem
-
-            if (estanteAberta) {
-
-                atualizarHUD(
-                    "Passagem liberada."
-                );
-
-            } else {
-
-                atualizarHUD(
-                    "Estante bloqueia passagem."
-                );
-
-            }
-
-        }
-
-        /* sobrescreve toggle da estante */
-
-        estanteSecreta.removeEventListener(
-            "click",
-            alternarEstante
-        );
-
-        estanteSecreta.addEventListener(
-            "click",
-            function () {
-
-                alternarEstante();
-
-                atualizarEstadoEstanteColisao();
-
-            }
-        );
-
-        /* ===================================================== */
-        /* LOOP DE SINCRONIZAÇÃO FINAL */
-        /* ===================================================== */
-
-        function loopSistema() {
-
-            // aqui pode evoluir física futura
-
-            requestAnimationFrame(loopSistema);
-
-        }
-
-        loopSistema();
-
-        /* ===================================================== */
-        /* LOG FINAL */
-        /* ===================================================== */
-
-        console.log(
-            "Sistema WebVR/AR inicializado com sucesso."
-        );
-
-
-        /* ===================================================== */
-        /* MOVIMENTO PADRÃO (KEYBOARD + JOYSTICK) */
-        /* ===================================================== */
-
-        function aplicarMovimentoBase() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            // teclado WASD já é nativo do A-Frame,
-            // aqui ajustamos apenas correções globais
-
-            cameraRig.setAttribute(
-                "position",
-                rig
-            );
-
-        }
-
-        /* ===================================================== */
-        /* SINCRONIZAÇÃO JOYSTICK + COLISÃO */
-        /* ===================================================== */
-
-        function movimentoJoystickIntegrado() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            let x =
-                rig.x + (joystickX * CONFIG.velocidadeJoystick);
-
-            let z =
-                rig.z + (joystickY * CONFIG.velocidadeJoystick);
-
-            let y =
-                rig.y;
-
-            /* ================================================= */
-            /* LIMITES BÁSICOS REFORÇADOS */
-            /* ================================================= */
-
-            if (x < CONFIG.limiteMinX) x = CONFIG.limiteMinX;
-            if (x > CONFIG.limiteMaxX) x = CONFIG.limiteMaxX;
-
-            if (z < CONFIG.limiteMinZ) z = CONFIG.limiteMinZ;
-            if (z > CONFIG.limiteMaxZ) z = CONFIG.limiteMaxZ;
-
-            /* ================================================= */
-            /* REFORÇO ESTANTE */
-            /* ================================================= */
-
-            if (!estanteAberta && z < -1.5) {
-
-                z = -1.5;
-
-            }
-
-            /* ================================================= */
-            /* ATUALIZAÇÃO FINAL */
-            /* ================================================= */
-
-            cameraRig.setAttribute(
-                "position",
-                { x, y, z }
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP PRINCIPAL DE MOVIMENTO */
-        /* ===================================================== */
-
-        function loopMovimento() {
-
-            movimentoJoystickIntegrado();
-
-            requestAnimationFrame(loopMovimento);
-
-        }
-
-        loopMovimento();
-
-        /* ===================================================== */
-        /* CORREÇÃO DE “DESLIZAMENTO” EM ESCADAS */
-        /* ===================================================== */
-
-        function corrigirEscadas() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            // garante que ao subir/descer não haja drift lateral
-
-            if (
-                Math.abs(rig.x - (-2.3)) < 0.8 &&
-                Math.abs(rig.z - (-4.5)) < 0.8
-            ) {
-                rig.x = -2.3;
-                rig.z = -4.5;
-            }
-
-            cameraRig.setAttribute(
-                "position",
-                rig
-            );
-
-        }
-
-        /* ===================================================== */
-        /* INTEGRAÇÃO COM COLISÃO GLOBAL */
-        /* ===================================================== */
-
-        function loopColisaoIntegrado() {
-
-            corrigirEscadas();
-
-            requestAnimationFrame(loopColisaoIntegrado);
-
-        }
-
-        loopColisaoIntegrado();
-
-        /* ===================================================== */
-        /* PROTEÇÃO CONTRA TUNELAMENTO (ANTI-CLIP) */
-        /* ===================================================== */
-
-        function antiClipFix() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            // evita atravessar paredes rapidamente
-
-            const maxStep =
-                0.15;
-
-            rig.x =
-                Math.max(
-                    CONFIG.limiteMinX,
-                    Math.min(CONFIG.limiteMaxX, rig.x)
-                );
-
-            rig.z =
-                Math.max(
-                    CONFIG.limiteMinZ,
-                    Math.min(CONFIG.limiteMaxZ, rig.z)
-                );
-
-            cameraRig.setAttribute(
-                "position",
-                rig
-            );
-
-        }
-
-        /* integrado no loop principal */
-
-        setInterval(
-            antiClipFix,
-            50
-        );
-
-
-        /* ===================================================== */
-        /* SISTEMA DE ANDARES (DETECÇÃO SIMPLES POR ALTURA) */
-        /* ===================================================== */
-
-        function getAndarAtual() {
-
-            const y =
-                cameraRig.getAttribute("position").y;
-
-            if (y < 3) return "terreo";
-
-            if (y >= 3 && y < 7) return "andar1";
-
-            return "sotao";
-
-        }
-
-        /* ===================================================== */
-        /* BLOQUEIO INTELIGENTE POR ANDAR */
-        /* ===================================================== */
-
-        function aplicarBloqueiosPorAndar() {
-
-            const andar =
-                getAndarAtual();
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            /* ============================= */
-            /* ARMÁRIO (TÉRREO) */
-            /* ============================= */
-
-            if (andar === "terreo") {
-
-                if (rig.x < -1.8 && rig.z < -7.4) {
-
-                    rig.x = -1.8;
-
-                }
-
-            }
-
-            /* ============================= */
-            /* CAMA (SEGUNDO ANDAR) */
-            /* ============================= */
-
-            if (andar === "andar1") {
-
-                if (
-                    rig.x > -0.2 &&
-                    rig.x < 1.7 &&
-                    rig.z < -7.4
-                ) {
-                    rig.z = -7.4;
-                }
-
-            }
-
-            cameraRig.setAttribute(
-                "position",
-                rig
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE REGRAS DE ANDAR */
-        /* ===================================================== */
-
-        function loopAndares() {
-
-            aplicarBloqueiosPorAndar();
-
-            requestAnimationFrame(loopAndares);
-
-        }
-
-        loopAndares();
-
-        /* ===================================================== */
-        /* ESTANTE: LIBERAÇÃO REAL DE PASSAGEM */
-        /* ===================================================== */
-
-        function verificarPassagemEstante() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            if (estanteAberta) {
-
-                // permite passagem
-
-                return;
-
-            }
-
-            // bloqueio físico reforçado
-
-            if (rig.z < -1.5) {
-
-                rig.z = -1.5;
-
-                cameraRig.setAttribute(
-                    "position",
-                    rig
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE SEGURANÇA DA ESTANTE */
-        /* ===================================================== */
-
-        function loopEstante() {
-
-            verificarPassagemEstante();
-
-            requestAnimationFrame(loopEstante);
-
-        }
-
-        loopEstante();
-
-        /* ===================================================== */
-        /* SINCRONIZAÇÃO HUD DINÂMICA */
-        /* ===================================================== */
-
-        function atualizarHUDEstado() {
-
-            const andar =
-                getAndarAtual();
-
-            let texto =
-                "Exploração ativa";
-
-            if (andar === "terreo") {
-
-                texto =
-                    "Térreo - Biblioteca";
-
-            }
-
-            if (andar === "andar1") {
-
-                texto =
-                    "2º Andar - Quarto";
-
-            }
-
-            if (andar === "sotao") {
-
-                texto =
-                    "Sótão";
-
-            }
-
-            hud.textContent =
-                texto;
-
-        }
-
-        /* ===================================================== */
-        /* LOOP FINAL DE HUD */
-        /* ===================================================== */
-
-        function loopHUD() {
-
-            atualizarHUDEstado();
-
-            requestAnimationFrame(loopHUD);
-
-        }
-
-        loopHUD();
-
-        /* ===================================================== */
-        /* SINCRONIZAÇÃO FINAL DE INTERAÇÕES */
-        /* ===================================================== */
-
-        function sincronizarSistema() {
-
-            // reserva para futuras expansões:
-            // inventário, puzzles, eventos
-
-            requestAnimationFrame(sincronizarSistema);
-
-        }
-
-        sincronizarSistema();
-
-        /* ===================================================== */
-        /* DEBUG FINAL */
-        /* ===================================================== */
-
-        console.log(
-            "Camadas de gameplay integradas: andares, colisão e HUD ativos."
-        );
-
-
-        /* ===================================================== */
-        /* OTIMIZAÇÃO DE LOOPS (UNIFICAÇÃO LEVE) */
-        /* ===================================================== */
-
-        let ultimoFrame = 0;
-
-        function loopUnificado(timestamp) {
-
-            const delta =
-                timestamp - ultimoFrame;
-
-            ultimoFrame =
-                timestamp;
-
-            /* ============================= */
-            /* MOVIMENTO */
-            /* ============================= */
-
-            movimentoJoystickIntegrado();
-
-            /* ============================= */
-            /* COLISÃO GLOBAL */
-            /* ============================= */
-
-            aplicarBloqueiosPorAndar();
-
-            verificarPassagemEstante();
-
-            /* ============================= */
-            /* HUD */
-            /* ============================= */
-
-            atualizarHUDEstado();
-
-            requestAnimationFrame(loopUnificado);
-
-        }
-
-        requestAnimationFrame(loopUnificado);
-
-        /* ===================================================== */
-        /* CORREÇÃO DE INPUT DIAGONAL (JOYSTICK NORMALIZAÇÃO) */
-        /* ===================================================== */
-
-        function normalizarJoystick() {
-
-            let x =
-                joystickX;
-
-            let y =
-                joystickY;
-
-            const magnitude =
-                Math.sqrt(x * x + y * y);
-
-            if (magnitude > 1) {
-
-                joystickX =
-                    x / magnitude;
-
-                joystickY =
-                    y / magnitude;
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE NORMALIZAÇÃO */
-        /* ===================================================== */
-
-        function loopJoystickFix() {
-
-            normalizarJoystick();
-
-            requestAnimationFrame(loopJoystickFix);
-
-        }
-
-        loopJoystickFix();
-
-        /* ===================================================== */
-        /* CORREÇÃO DE POINTER LOCK CONFLITUOSO */
-        /* ===================================================== */
-
-        document.addEventListener(
-            "pointerlockchange",
-            function () {
-
-                const ativo =
-                    document.pointerLockElement !== null;
-
-                if (ativo) {
-
-                    atualizarHUD(
-                        "Modo imersivo ativado"
-                    );
-
-                } else {
-
-                    atualizarHUD(
-                        "Controle livre"
-                    );
-
-                }
-
-            }
-        );
-
-        /* ===================================================== */
-        /* DETECÇÃO DE SUPORTE WEBXR */
-        /* ===================================================== */
-
-        function checarWebXR() {
-
-            if (navigator.xr) {
-
-                console.log(
-                    "WebXR disponível"
-                );
-
-            } else {
-
-                console.log(
-                    "WebXR não suportado - fallback ativo"
-                );
-
-            }
-
-        }
-
-        checarWebXR();
-
-        /* ===================================================== */
-        /* CORREÇÃO DE LOOK-CONTROLS EM MOBILE */
-        /* ===================================================== */
-
-        function corrigirLookControls() {
-
-            const comp =
-                cameraUsuario.components["look-controls"];
-
-            if (!comp) return;
-
-            // evita travamentos em mudança de orientação
-
-            if (isMobile()) {
-
-                cameraUsuario.setAttribute(
-                    "look-controls",
-                    "magicWindowTrackingEnabled:true; touchEnabled:true"
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE ESTABILIZAÇÃO */
-        /* ===================================================== */
-
-        function loopEstabilidade() {
-
-            corrigirLookControls();
-
-            requestAnimationFrame(loopEstabilidade);
-
-        }
-
-        loopEstabilidade();
-
-        /* ===================================================== */
-        /* LIMPEZA DE PERFORMANCE (GC FRIENDLY TICK) */
-        /* ===================================================== */
-
-        function loopPerformance() {
-
-            // evita acumular estados pesados
-
-            // placeholder para futura otimização
-
-            requestAnimationFrame(loopPerformance);
-
-        }
-
-        loopPerformance();
-
-        /* ===================================================== */
-        /* LOG FINAL DA CAMADA */
-        /* ===================================================== */
-
-        console.log(
-            "Camada de estabilização WebXR ativa"
-        );
-
-
-        /* ===================================================== */
-        /* SINCRONIZAÇÃO FINAL DE CONTROLES */
-        /* ===================================================== */
-
-        function sincronizarControles() {
-
-            // garante que joystick e WASD não entrem em conflito lógico
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            cameraRig.setAttribute(
-                "position",
-                rig
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE CONTROLES UNIFICADO */
-        /* ===================================================== */
-
-        function loopControles() {
-
-            sincronizarControles();
-
-            requestAnimationFrame(loopControles);
-
-        }
-
-        loopControles();
-
-        /* ===================================================== */
-        /* CORREÇÃO DE CLIQUE EM VR/AR (A-FRAME RAYCAST FIX) */
-        /* ===================================================== */
-
-        function corrigirRaycast() {
-
-            const cursor =
-                document.querySelector("a-cursor");
-
-            if (!cursor) return;
-
-            cursor.setAttribute(
-                "raycaster",
-                "objects: .interactable; interval: 100"
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE RAYCAST ESTÁVEL */
-        /* ===================================================== */
-
-        function loopRaycast() {
-
-            corrigirRaycast();
-
-            requestAnimationFrame(loopRaycast);
-
-        }
-
-        loopRaycast();
-
-        /* ===================================================== */
-        /* ESTANTE - REFORÇO DE INTERAÇÃO FÍSICA */
-        /* ===================================================== */
-
-        function reforcarEstante() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            // colisão adicional para evitar atravessar por micro-ajustes
-
-            if (!estanteAberta && rig.z < -1.45) {
-
-                rig.z = -1.45;
-
-                cameraRig.setAttribute(
-                    "position",
-                    rig
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE SEGURANÇA DA ESTANTE */
-        /* ===================================================== */
-
-        function loopEstanteSegura() {
-
-            reforcarEstante();
-
-            requestAnimationFrame(loopEstanteSegura);
-
-        }
-
-        loopEstanteSegura();
-
-        /* ===================================================== */
-        /* INTERAÇÃO ANNE FRANK - ESTABILIZAÇÃO */
-        /* ===================================================== */
-
-        function estabilizarAnne() {
-
-            if (!anneFrank) return;
-
-            // garante clique consistente mesmo em mobile/VR
-
-            anneFrank.setAttribute(
-                "class",
-                "interactable"
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP ANNE */
-        /* ===================================================== */
-
-        function loopAnne() {
-
-            estabilizarAnne();
-
-            requestAnimationFrame(loopAnne);
-
-        }
-
-        loopAnne();
-
-        /* ===================================================== */
-        /* AJUSTE FINAL DE INPUT HÍBRIDO */
-        /* ===================================================== */
-
-        function inputHibrido() {
-
-            if (isMobile()) {
-
-                // mobile prioriza joystick
-
-                cameraUsuario.setAttribute(
-                    "wasd-controls",
-                    "enabled:false"
-                );
-
-            } else {
-
-                cameraUsuario.setAttribute(
-                    "wasd-controls",
-                    "enabled:true; acceleration:65"
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* LOOP INPUT FINAL */
-        /* ===================================================== */
-
-        function loopInput() {
-
-            inputHibrido();
-
-            requestAnimationFrame(loopInput);
-
-        }
-
-        loopInput();
-
-        /* ===================================================== */
-        /* LOG DE INTEGRAÇÃO FINAL */
-        /* ===================================================== */
-
-        console.log(
-            "Sistema de controles totalmente integrado"
-        );
-
-
-        /* ===================================================== */
-        /* SISTEMA CENTRAL DE SINCRONIZAÇÃO */
-        /* ===================================================== */
-
-        function sistemaCentral() {
-
-            const rig =
-                cameraRig.getAttribute("position");
-
-            /* ============================= */
-            /* NORMALIZAÇÃO FINAL DE POSIÇÃO */
-            /* ============================= */
-
-            if (rig.x < CONFIG.limiteMinX) rig.x = CONFIG.limiteMinX;
-            if (rig.x > CONFIG.limiteMaxX) rig.x = CONFIG.limiteMaxX;
-
-            if (rig.z < CONFIG.limiteMinZ) rig.z = CONFIG.limiteMinZ;
-            if (rig.z > CONFIG.limiteMaxZ) rig.z = CONFIG.limiteMaxZ;
-
-            /* ============================= */
-            /* REFORÇO ESTANTE */
-            /* ============================= */
-
-            if (!estanteAberta && rig.z < -1.5) {
-
-                rig.z = -1.5;
-
-            }
-
-            /* ============================= */
-            /* SINCRONIZAÇÃO FINAL */
-            /* ============================= */
-
-            cameraRig.setAttribute(
-                "position",
-                rig
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP CENTRAL OTIMIZADO (SUBSTITUI VÁRIOS LOOPS) */
-        /* ===================================================== */
-
-        let frameAnterior = 0;
-
-        function loopCentral(t) {
-
-            const delta =
-                t - frameAnterior;
-
-            frameAnterior = t;
-
-            /* ============================= */
-            /* INPUT */
-            /* ============================= */
-
-            sincronizarControles();
-
-            inputHibrido();
-
-            /* ============================= */
-            /* MOVIMENTO */
-            /* ============================= */
-
-            movimentoJoystickIntegrado();
-
-            /* ============================= */
-            /* COLISÃO */
-            /* ============================= */
-
-            aplicarBloqueiosPorAndar();
-
-            verificarPassagemEstante();
-
-            reforcarEstante();
-
-            /* ============================= */
-            /* SISTEMA CENTRAL */
-            /* ============================= */
-
-            sistemaCentral();
-
-            /* ============================= */
-            /* UI */
-            /* ============================= */
-
-            atualizarHUDEstado();
-
-            requestAnimationFrame(loopCentral);
-
-        }
-
-        /* ===================================================== */
-        /* DESATIVA LOOPS ANTIGOS (GARANTIA DE CONSISTÊNCIA) */
-        /* ===================================================== */
-
-        function desativarLoopsAntigos() {
-
-            console.log(
-                "Consolidando loops do sistema..."
-            );
-
-            // os loops anteriores continuam existindo,
-            // mas agora são ignorados logicamente
-
-        }
-
-        /* ===================================================== */
-        /* INICIALIZAÇÃO FINAL DA CAMADA */
-        /* ===================================================== */
-
-        desativarLoopsAntigos();
-
-        requestAnimationFrame(loopCentral);
-
-        /* ===================================================== */
-        /* CONSISTÊNCIA DE ESTADO GLOBAL */
-        /* ===================================================== */
-
-        function sincronizarEstado() {
-
-            if (paginaAtual < 0)
-                paginaAtual = 0;
-
-            if (paginaAtual >
-                PAGINAS_DIARIO.length - 1)
-                paginaAtual =
-                    PAGINAS_DIARIO.length - 1;
-
-            if (indiceFalaAnne < 0)
-                indiceFalaAnne = 0;
-
-            if (joystickX > 1)
-                joystickX = 1;
-
-            if (joystickY > 1)
-                joystickY = 1;
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE CONSISTÊNCIA */
-        /* ===================================================== */
-
-        function loopConsistencia() {
-
-            sincronizarEstado();
-
-            requestAnimationFrame(loopConsistencia);
-
-        }
-
-        loopConsistencia();
-
-        /* ===================================================== */
-        /* HARD RESET DE SEGURANÇA (FALLBACK) */
-        /* ===================================================== */
-
-        function resetSistema() {
-
-            cameraRig.setAttribute(
-                "position",
-                {
-                    x: 0,
-                    y: 1.6,
-                    z: 0
-                }
-            );
-
-            joystickX = 0;
-            joystickY = 0;
-
-            estanteAberta = false;
-
-            fecharDiario();
-
-            atualizarHUD(
-                "Sistema reinicializado"
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOG FINAL DA CONSOLIDAÇÃO */
-        /* ===================================================== */
-
-        console.log(
-            "Camada de consolidação ativa"
-        );
-
-
-        /* ===================================================== */
-        /* AJUSTE FINAL WEBXR / AR */
-        /* ===================================================== */
-
-        function ajustarWebXRFinal() {
-
-            const scene =
-                document.querySelector("a-scene");
-
-            if (!scene) return;
-
-            // garante UI de XR ativa
-
-            scene.setAttribute(
-                "xr-mode-ui",
-                "enabled:true"
-            );
-
-        }
-
-        /* ===================================================== */
-        /* REFORÇO DE GIROSCÓPIO MOBILE */
-        /* ===================================================== */
-
-        function reforcarGiroscopio() {
-
-            if (!isMobile()) return;
-
-            cameraUsuario.setAttribute(
-                "look-controls",
-                "magicWindowTrackingEnabled:true; touchEnabled:true"
-            );
-
-        }
-
-        /* ===================================================== */
-        /* LOOP DE SENSORES */
-        /* ===================================================== */
-
-        function loopSensores() {
-
-            reforcarGiroscopio();
-
-            requestAnimationFrame(loopSensores);
-
-        }
-
-        loopSensores();
-
-        /* ===================================================== */
-        /* CORREÇÃO POINTER LOCK + TOUCH CONFLITO */
-        /* ===================================================== */
-
-        function gerenciarPointerLock() {
-
-            if (isMobile()) return;
-
-            const ativo =
-                document.pointerLockElement !== null;
-
-            if (!ativo) {
-
-                // evita travamento do mouse em desktop
-
-                document.body.style.cursor =
-                    "default";
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* LOOP POINTER LOCK */
-        /* ===================================================== */
-
-        function loopPointerLock() {
-
-            gerenciarPointerLock();
-
-            requestAnimationFrame(loopPointerLock);
-
-        }
-
-        loopPointerLock();
-
-        /* ===================================================== */
-        /* QR CODE - ATUALIZAÇÃO SEGURA */
-        /* ===================================================== */
-
-        function atualizarQRCode() {
-
-            if (!qrModal ||
-                qrModal.style.display !== "flex") return;
-
-            const url =
-                encodeURIComponent(
-                    window.location.href
-                );
-
-            qrImage.src =
-                `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${url}`;
-
-        }
-
-        /* ===================================================== */
-        /* LOOP QR */
-        /* ===================================================== */
-
-        function loopQR() {
-
-            atualizarQRCode();
-
-            requestAnimationFrame(loopQR);
-
-        }
-
-        loopQR();
-
-        /* ===================================================== */
-        /* AJUSTE FINAL DE PERFORMANCE VISUAL */
-        /* ===================================================== */
-
-        function polimentoVisual() {
-
-            const scene =
-                document.querySelector("a-scene");
-
-            if (scene) {
-
-                scene.setAttribute(
-                    "renderer",
-                    "antialias:true;colorManagement:true;physicallyCorrectLights:true"
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* EXECUÇÃO FINAL DO POLIMENTO */
-        /* ===================================================== */
-
-        polimentoVisual();
-
-        /* ===================================================== */
-        /* CHECK FINAL DO SISTEMA */
-        /* ===================================================== */
-
-        function checkFinal() {
-
-            console.log(
-                "WebVR/AR Anexo Secreto: camada final ativa"
-            );
-
-        }
-
-        checkFinal();
-
-
-        /* ===================================================== */
-        /* VALIDAÇÃO GERAL DO SISTEMA */
-        /* ===================================================== */
-
-        function validarSistema() {
-
-            const verificacoes = [
-
-                cameraRig,
-                cameraUsuario,
-                estanteSecreta,
-                diarioObjeto,
-                anneFrank,
-                joystickBase,
-                joystickKnob
-
-            ];
-
-            for (const item of verificacoes) {
-
-                if (!item) {
-
-                    console.warn(
-                        "Elemento ausente no sistema"
-                    );
-
-                }
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* FALLBACK DE EMERGÊNCIA */
-        /* ===================================================== */
-
-        function fallbackSeguranca() {
-
-            try {
-
-                if (!cameraRig) {
-
-                    console.error(
-                        "CameraRig não encontrado"
-                    );
-
-                }
-
-                if (typeof AFRAME === "undefined") {
-
-                    console.error(
-                        "A-Frame não carregado"
-                    );
-
-                }
-
-            } catch (e) {
-
-                console.error(
-                    "Erro no fallback",
-                    e
-                );
-
-            }
-
-        }
-
-        /* ===================================================== */
-        /* INICIALIZAÇÃO FINAL UNIFICADA */
-        /* ===================================================== */
-
-        function inicializarSistemaFinal() {
-
-            validarSistema();
-
-            ajustarControles();
-
-            checarWebXR();
-
-            atualizarDiario();
-
-            atualizarHUD("Sistema inicializado");
-
-            console.log(
-                "=== ANEXO SECRETO PRONTO ==="
-            );
-
-        }
-
-        /* ===================================================== */
-        /* RESET GLOBAL FINAL (EM CASO DE ERRO) */
-        /* ===================================================== */
-
-        window.addEventListener(
-            "error",
-            function (e) {
-
-                console.error(
-                    "Erro global capturado:",
-                    e.message
-                );
-
-                resetSistema();
-
-            }
-        );
-
-        /* ===================================================== */
-        /* EXECUÇÃO FINAL */
-        /* ===================================================== */
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                fallbackSeguranca();
-
-                inicializarSistemaFinal();
-
-            }
-        );
-
-        /* ===================================================== */
-        /* GARANTIA DE EXECUÇÃO DO LOOP PRINCIPAL */
-        /* ===================================================== */
-
-        requestAnimationFrame(loopCentral);
-
-        /* ===================================================== */
-        /* FINAL DO SCRIPT */
-        /* ===================================================== */
-
-    </script>
+    <script src="app.js"></script>
 
 </body>
 

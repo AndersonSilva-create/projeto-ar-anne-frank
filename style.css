@@ -1,0 +1,682 @@
+/* ===================================== */
+/* RESET */
+/* ===================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Georgia, serif;
+    background:#111;
+}
+
+/* ===================================== */
+/* HUD */
+/* ===================================== */
+
+#hud{
+
+    position:fixed;
+
+    top:15px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:flex;
+    gap:12px;
+    align-items:center;
+
+    z-index:9999;
+
+    background:rgba(20,20,20,0.82);
+
+    backdrop-filter:blur(8px);
+
+    border-radius:12px;
+
+    padding:10px 16px;
+
+    color:#fff;
+
+    border:1px solid rgba(255,255,255,0.15);
+
+}
+
+#hud-message{
+
+    min-width:220px;
+
+    text-align:center;
+
+    font-size:14px;
+
+}
+
+/* ===================================== */
+/* BOTÕES */
+/* ===================================== */
+
+#hud button,
+#close-diary,
+#close-qr,
+#prev-page,
+#next-page,
+#inspect-close{
+
+    cursor:pointer;
+
+    border:none;
+
+    border-radius:8px;
+
+    padding:10px 14px;
+
+    background:#3f5d78;
+
+    color:#fff;
+
+    font-size:14px;
+
+    transition:.25s;
+
+}
+
+#hud button:hover,
+#close-diary:hover,
+#close-qr:hover,
+#prev-page:hover,
+#next-page:hover,
+#inspect-close:hover{
+
+    transform:translateY(-2px);
+
+    filter:brightness(1.15);
+
+}
+
+button:disabled{
+
+    opacity:.45;
+
+    cursor:not-allowed;
+
+}
+
+/* ===================================== */
+/* FADE */
+/* ===================================== */
+
+#fade-screen{
+
+    position:fixed;
+
+    inset:0;
+
+    background:#000;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    z-index:20000;
+
+    transition:opacity .45s ease;
+
+}
+
+#fade-screen.active{
+
+    opacity:1;
+
+}
+
+/* ===================================== */
+/* AFRAME */
+/* ===================================== */
+
+a-scene{
+
+    width:100%;
+    height:100%;
+
+}
+
+canvas{
+
+    outline:none;
+
+}
+/* ===================================== */
+/* MODAL DIÁRIO */
+/* ===================================== */
+
+#diary-modal{
+
+    position:fixed;
+
+    inset:0;
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:rgba(0,0,0,0.75);
+
+    z-index:15000;
+
+}
+
+#diary-modal.active{
+
+    display:flex;
+
+}
+
+#diary-paper{
+
+    width:min(90vw,700px);
+
+    min-height:500px;
+
+    padding:40px;
+
+    background:#f4ebd0;
+
+    color:#2d2419;
+
+    border-radius:10px;
+
+    box-shadow:
+    0 0 50px rgba(0,0,0,.5);
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+#diary-date{
+
+    margin-bottom:25px;
+
+    text-align:center;
+
+    font-size:28px;
+
+}
+
+#diary-content{
+
+    flex:1;
+
+    line-height:1.8;
+
+    font-size:18px;
+
+    white-space:pre-line;
+
+}
+
+.diary-controls{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:25px;
+
+    margin-bottom:15px;
+
+}
+
+#page-counter{
+
+    font-weight:bold;
+
+    font-size:15px;
+
+}
+
+/* ===================================== */
+/* MODAL QR */
+/* ===================================== */
+
+#qr-modal{
+
+    position:fixed;
+
+    inset:0;
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:rgba(0,0,0,.75);
+
+    z-index:16000;
+
+}
+
+#qr-modal.active{
+
+    display:flex;
+
+}
+
+#qr-container{
+
+    background:#ffffff;
+
+    color:#222;
+
+    padding:30px;
+
+    border-radius:12px;
+
+    text-align:center;
+
+    min-width:320px;
+
+}
+
+#qr-container h3{
+
+    margin-bottom:20px;
+
+}
+
+#qr-image{
+
+    width:250px;
+
+    height:250px;
+
+    object-fit:contain;
+
+    display:block;
+
+    margin:auto;
+
+    margin-bottom:20px;
+
+}
+
+/* ===================================== */
+/* INSPEÇÃO */
+/* ===================================== */
+
+#inspect-panel{
+
+    position:fixed;
+
+    inset:0;
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    flex-direction:column;
+
+    background:rgba(0,0,0,.8);
+
+    z-index:17000;
+
+    color:white;
+
+    text-align:center;
+
+    padding:40px;
+
+}
+
+#inspect-panel.active{
+
+    display:flex;
+
+}
+
+#inspect-title{
+
+    font-size:32px;
+
+    margin-bottom:20px;
+
+}
+
+#inspect-text{
+
+    max-width:800px;
+
+    line-height:1.8;
+
+    margin-bottom:30px;
+
+    font-size:18px;
+
+}
+/* ===================================== */
+/* BALÃO DE FALA DA ANNE */
+/* ===================================== */
+
+#anne-dialog{
+
+    position:fixed;
+
+    left:50%;
+
+    bottom:120px;
+
+    transform:translateX(-50%);
+
+    max-width:600px;
+
+    padding:16px 22px;
+
+    border-radius:16px;
+
+    background:rgba(255,255,255,0.96);
+
+    color:#222;
+
+    text-align:center;
+
+    line-height:1.6;
+
+    font-size:16px;
+
+    box-shadow:
+    0 8px 30px rgba(0,0,0,.35);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:
+    opacity .3s ease,
+    transform .3s ease;
+
+    z-index:18000;
+
+}
+
+#anne-dialog.active{
+
+    opacity:1;
+
+    transform:
+    translateX(-50%)
+    translateY(-8px);
+
+}
+
+/* ===================================== */
+/* JOYSTICK MOBILE */
+/* ===================================== */
+
+#mobile-joystick{
+
+    position:fixed;
+
+    left:25px;
+
+    bottom:25px;
+
+    width:140px;
+
+    height:140px;
+
+    display:none;
+
+    z-index:20000;
+
+    touch-action:none;
+
+}
+
+#joystick-base{
+
+    position:relative;
+
+    width:140px;
+
+    height:140px;
+
+    border-radius:50%;
+
+    background:
+    rgba(255,255,255,0.12);
+
+    border:
+    2px solid rgba(255,255,255,0.25);
+
+    backdrop-filter:blur(4px);
+
+}
+
+#joystick-knob{
+
+    position:absolute;
+
+    left:40px;
+
+    top:40px;
+
+    width:60px;
+
+    height:60px;
+
+    border-radius:50%;
+
+    background:
+    rgba(255,255,255,0.75);
+
+    box-shadow:
+    0 0 20px rgba(0,0,0,.25);
+
+}
+
+/* ===================================== */
+/* ANIMAÇÕES */
+/* ===================================== */
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes fadeOut{
+
+    from{
+
+        opacity:1;
+
+    }
+
+    to{
+
+        opacity:0;
+
+    }
+
+}
+
+@keyframes pulse{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.05);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+
+/* ===================================== */
+/* RESPONSIVO */
+/* ===================================== */
+
+@media (max-width:900px){
+
+    #hud{
+
+        width:95vw;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+    }
+
+    #hud-message{
+
+        width:100%;
+
+        min-width:auto;
+
+    }
+
+    #diary-paper{
+
+        width:95vw;
+
+        min-height:70vh;
+
+        padding:24px;
+
+    }
+
+    #diary-date{
+
+        font-size:22px;
+
+    }
+
+    #diary-content{
+
+        font-size:16px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    #mobile-joystick{
+
+        display:block;
+
+    }
+
+    #anne-dialog{
+
+        width:90vw;
+
+        font-size:15px;
+
+    }
+
+    #qr-image{
+
+        width:220px;
+
+        height:220px;
+
+    }
+
+}
+
+@media (max-width:480px){
+
+    #hud{
+
+        top:8px;
+
+        gap:8px;
+
+        padding:8px;
+
+    }
+
+    #hud button{
+
+        font-size:12px;
+
+        padding:8px 10px;
+
+    }
+
+    #diary-content{
+
+        font-size:15px;
+
+        line-height:1.6;
+
+    }
+
+    #inspect-title{
+
+        font-size:24px;
+
+    }
+
+    #inspect-text{
+
+        font-size:15px;
+
+    }
+
+}
+
+/* ===================================== */
+/* VR / XR */
+/* ===================================== */
+
+.a-enter-vr-button{
+
+    border-radius:10px !important;
+
+}
+
+.a-orientation-modal{
+
+    font-family:inherit !important;
+
+}
