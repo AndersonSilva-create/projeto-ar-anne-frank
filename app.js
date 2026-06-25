@@ -51,101 +51,110 @@ const STATE = {
 /* ====================================== */
 
 const HUD =
-document.getElementById("hud-message");
+    document.getElementById("hud-message");
 
 const fadeScreen =
-document.getElementById("fade-screen");
+    document.getElementById("fade-screen");
 
 const diaryModal =
-document.getElementById("diary-modal");
+    document.getElementById("diary-modal");
 
 const diaryDate =
-document.getElementById("diary-date");
+    document.getElementById("diary-date");
 
 const diaryContent =
-document.getElementById("diary-content");
+    document.getElementById("diary-content");
 
 const prevPageBtn =
-document.getElementById("prev-page");
+    document.getElementById("prev-page");
 
 const nextPageBtn =
-document.getElementById("next-page");
+    document.getElementById("next-page");
 
 const pageCounter =
-document.getElementById("page-counter");
+    document.getElementById("page-counter");
 
 const closeDiaryBtn =
-document.getElementById("close-diary");
+    document.getElementById("close-diary");
 
 const qrModal =
-document.getElementById("qr-modal");
+    document.getElementById("qr-modal");
 
 const qrImage =
-document.getElementById("qr-image");
+    document.getElementById("qr-image");
 
 const closeQrBtn =
-document.getElementById("close-qr");
+    document.getElementById("close-qr");
 
 const anneDialog =
-document.getElementById("anne-dialog");
+    document.getElementById("anne-dialog");
 
 const inspectPanel =
-document.getElementById("inspect-panel");
+    document.getElementById("inspect-panel");
 
 const inspectTitle =
-document.getElementById("inspect-title");
+    document.getElementById("inspect-title");
 
 const inspectText =
-document.getElementById("inspect-text");
+    document.getElementById("inspect-text");
 
 const inspectClose =
-document.getElementById("inspect-close");
+    document.getElementById("inspect-close");
 
 const toggleLightBtn =
-document.getElementById("toggle-light");
+    document.getElementById("toggle-light");
 
 const openQrBtn =
-document.getElementById("open-qr");
+    document.getElementById("open-qr");
 
 /* ====================================== */
 /* ELEMENTOS A-FRAME */
 /* ====================================== */
 
 const cameraRig =
-document.getElementById("camera-rig");
+    document.getElementById("camera-rig");
 
 const camera =
-document.getElementById("visao-usuario");
+    document.getElementById("visao-usuario");
 
 const estante =
-document.getElementById("estante-secreta");
+    document.getElementById("estante-secreta");
 
 const diario =
-document.getElementById("objeto-diario");
+    document.getElementById("objeto-diario");
 
 const anne =
-document.getElementById("anne-frank-3d");
+    document.getElementById("anne-frank-3d");
 
 const subirAndar1 =
-document.getElementById("subir-andar1");
+    document.getElementById("subir-andar1");
 
 const subirSotao =
-document.getElementById("subir-sotao");
+    document.getElementById("subir-sotao");
+
+const descerAndar1 =
+    document.getElementById("descer-andar1");
+
+const descerSotao =
+    document.getElementById("descer-sotao");
 
 const armario =
-document.getElementById("armario");
+    document.getElementById("armario");
 
 const bauHistorico =
-document.getElementById("bau-historico");
+    document.getElementById("bau-historico");
 
 const caixaDocumentos =
-document.getElementById("caixa-documentos");
+    document.getElementById("caixa-documentos");
 
 const ambientLight =
-document.getElementById("ambient-light");
+    document.getElementById("ambient-light");
 
 const sunLight =
-document.getElementById("sun-light");
+    document.getElementById("sun-light");
+
+const mobileAction =
+    document.getElementById("mobile-action");
 
 /* ====================================== */
 /* DIÁRIO */
@@ -153,30 +162,30 @@ document.getElementById("sun-light");
 
 const PAGINAS_DIARIO = [
 
-{
-data:"9 de Julho de 1942",
-texto:"Ficou combinado que partiríamos no dia 16 de julho. Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante escondia a porta de entrada."
-},
+    {
+        data: "9 de Julho de 1942",
+        texto: "Ficou combinado que partiríamos no dia 16 de julho. Mas a passagem teve de ser antecipada. O esconderijo era no prédio dos escritórios do papai. Uma estante escondia a porta de entrada."
+    },
 
-{
-data:"11 de Julho de 1942",
-texto:"O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã."
-},
+    {
+        data: "11 de Julho de 1942",
+        texto: "O Anexo Secreto é o esconderijo ideal. Embora seja úmido e inclinado, você não encontrará outro local tão confortavelmente decorado em toda Amsterdã."
+    },
 
-{
-data:"1 de Outubro de 1942",
-texto:"Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar."
-},
+    {
+        data: "1 de Outubro de 1942",
+        texto: "Ontem apanhei um susto terrível. Às oito horas da noite, a campainha tocou forte. Pensei logo que fosse alguém vindo nos buscar."
+    },
 
-{
-data:"19 de Novembro de 1942",
-texto:"Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos e para os quais tememos o pior."
-},
+    {
+        data: "19 de Novembro de 1942",
+        texto: "Poderíamos fechar os olhos perante toda essa miséria, mas pensamos naqueles que nos eram queridos e para os quais tememos o pior."
+    },
 
-{
-data:"6 de Junho de 1944",
-texto:"É o Dia D. Os Aliados desembarcaram na Normandia. O rádio fala em esperança. Será que a libertação está próxima?"
-}
+    {
+        data: "6 de Junho de 1944",
+        texto: "É o Dia D. Os Aliados desembarcaram na Normandia. O rádio fala em esperança. Será que a libertação está próxima?"
+    }
 
 ];
 
@@ -186,15 +195,15 @@ texto:"É o Dia D. Os Aliados desembarcaram na Normandia. O rádio fala em esper
 
 const FALAS_ANNE = [
 
-"Apesar de tudo, continuo acreditando na bondade das pessoas.",
+    "Apesar de tudo, continuo acreditando na bondade das pessoas.",
 
-"Enquanto houver esperança, existe um motivo para continuar.",
+    "Enquanto houver esperança, existe um motivo para continuar.",
 
-"Os pensamentos podem viajar para lugares que ninguém consegue prender.",
+    "Os pensamentos podem viajar para lugares que ninguém consegue prender.",
 
-"Quero continuar vivendo mesmo depois da minha morte.",
+    "Quero continuar vivendo mesmo depois da minha morte.",
 
-"A liberdade parece pequena apenas para quem nunca a perdeu."
+    "A liberdade parece pequena apenas para quem nunca a perdeu."
 
 ];
 
@@ -204,21 +213,21 @@ const FALAS_ANNE = [
 
 const OBJETOS = {
 
-    bau:{
+    bau: {
 
-        titulo:"Baú Histórico",
+        titulo: "Baú Histórico",
 
         texto:
-        "Este baú representa os poucos pertences que muitas famílias escondidas conseguiam preservar durante a guerra."
+            "Este baú representa os poucos pertences que muitas famílias escondidas conseguiam preservar durante a guerra."
 
     },
 
-    documentos:{
+    documentos: {
 
-        titulo:"Documentos",
+        titulo: "Documentos",
 
         texto:
-        "Papéis, registros e cartas eram frequentemente escondidos para evitar perseguições e preservar identidades."
+            "Papéis, registros e cartas eram frequentemente escondidos para evitar perseguições e preservar identidades."
 
     }
 
@@ -228,37 +237,37 @@ const OBJETOS = {
 /* UTILITÁRIOS */
 /* ====================================== */
 
-function atualizarHUD(texto){
+function atualizarHUD(texto) {
 
     HUD.textContent = texto;
 
 }
 
-function isMobile(){
+function isMobile() {
 
     return (
         /Android|iPhone|iPad|iPod/i
-        .test(navigator.userAgent)
+            .test(navigator.userAgent)
     );
 
 }
 
-function clamp(valor,min,max){
+function clamp(valor, min, max) {
 
     return Math.max(
         min,
-        Math.min(max,valor)
+        Math.min(max, valor)
     );
 
 }
 
-function getRigPosition(){
+function getRigPosition() {
 
     return cameraRig.object3D.position;
 
 }
 
-function setRigPosition(x,y,z){
+function setRigPosition(x, y, z) {
 
     cameraRig.setAttribute(
         "position",
@@ -268,81 +277,81 @@ function setRigPosition(x,y,z){
 }
 
 console.log(
-"Configuração inicial carregada."
+    "Configuração inicial carregada."
 );
 
 /* ====================================== */
 /* DIÁRIO */
 /* ====================================== */
 
-function atualizarDiario(){
+function atualizarDiario() {
 
     const pagina =
-    PAGINAS_DIARIO[
+        PAGINAS_DIARIO[
         STATE.paginaAtual
-    ];
+        ];
 
     diaryDate.textContent =
-    pagina.data;
+        pagina.data;
 
     diaryContent.textContent =
-    pagina.texto;
+        pagina.texto;
 
     pageCounter.textContent =
-    `Pág. ${STATE.paginaAtual + 1} / ${PAGINAS_DIARIO.length}`;
+        `Pág. ${STATE.paginaAtual + 1} / ${PAGINAS_DIARIO.length}`;
 
     prevPageBtn.disabled =
-    STATE.paginaAtual === 0;
+        STATE.paginaAtual === 0;
 
     nextPageBtn.disabled =
-    STATE.paginaAtual ===
-    PAGINAS_DIARIO.length - 1;
+        STATE.paginaAtual ===
+        PAGINAS_DIARIO.length - 1;
 
 }
 
-function abrirDiario(){
+function abrirDiario() {
 
     STATE.diarioAberto =
-    true;
+        true;
 
     atualizarDiario();
 
     diaryModal.classList.add(
-    "active"
+        "active"
     );
 
-    if(
+    if (
         document.exitPointerLock
-    ){
+    ) {
         document.exitPointerLock();
     }
 
     atualizarHUD(
-    "Lendo o diário..."
+        "Lendo o diário..."
     );
 
 }
 
-function fecharDiario(){
+function fecharDiario() {
 
     STATE.diarioAberto =
-    false;
+        false;
 
     diaryModal.classList.remove(
-    "active"
+        "active"
     );
 
     atualizarHUD(
-    "Explore o Anexo Secreto"
+        "Explore o Anexo Secreto"
     );
 
 }
 
-function paginaAnterior(){
+function paginaAnterior() {
 
-    if(
+    if (
         STATE.paginaAtual > 0
-    ){
+    ) {
 
         STATE.paginaAtual--;
 
@@ -352,12 +361,12 @@ function paginaAnterior(){
 
 }
 
-function paginaSeguinte(){
+function paginaSeguinte() {
 
-    if(
+    if (
         STATE.paginaAtual <
         PAGINAS_DIARIO.length - 1
-    ){
+    ) {
 
         STATE.paginaAtual++;
 
@@ -367,45 +376,76 @@ function paginaSeguinte(){
 
 }
 
+function executarInteracaoCursor() {
+
+    const cursor =
+        document.querySelector(
+            "a-cursor"
+        );
+
+    if (
+        !cursor ||
+        !cursor.components.raycaster
+    ) {
+        return;
+    }
+
+    const intersecoes =
+        cursor.components.raycaster
+            .intersections;
+
+    if (
+        !intersecoes.length
+    ) {
+        return;
+    }
+
+    intersecoes[0]
+        .object
+        .el
+        .emit("click");
+
+}
+
 /* ====================================== */
 /* INSPEÇÃO */
 /* ====================================== */
 
 function abrirInspecao(
-titulo,
-texto
-){
+    titulo,
+    texto
+) {
 
     STATE.objetoInspecionado =
-    titulo;
+        titulo;
 
     inspectTitle.textContent =
-    titulo;
+        titulo;
 
     inspectText.textContent =
-    texto;
+        texto;
 
     inspectPanel.classList.add(
-    "active"
+        "active"
     );
 
     atualizarHUD(
-    "Objeto histórico"
+        "Objeto histórico"
     );
 
 }
 
-function fecharInspecao(){
+function fecharInspecao() {
 
     STATE.objetoInspecionado =
-    null;
+        null;
 
     inspectPanel.classList.remove(
-    "active"
+        "active"
     );
 
     atualizarHUD(
-    "Explore o ambiente"
+        "Explore o ambiente"
     );
 
 }
@@ -416,42 +456,42 @@ function fecharInspecao(){
 
 let anneTimeout = null;
 
-function mostrarFalaAnne(){
+function mostrarFalaAnne() {
 
     const fala =
-    FALAS_ANNE[
+        FALAS_ANNE[
         STATE.falaAtualAnne
-    ];
+        ];
 
     anneDialog.textContent =
-    fala;
+        fala;
 
     anneDialog.classList.add(
-    "active"
+        "active"
     );
 
     clearTimeout(
-    anneTimeout
+        anneTimeout
     );
 
     anneTimeout =
-    setTimeout(
-    () => {
+        setTimeout(
+            () => {
 
-        anneDialog.classList.remove(
-        "active"
+                anneDialog.classList.remove(
+                    "active"
+                );
+
+            },
+            5000
         );
-
-    },
-    5000
-    );
 
     STATE.falaAtualAnne++;
 
-    if(
+    if (
         STATE.falaAtualAnne >=
         FALAS_ANNE.length
-    ){
+    ) {
 
         STATE.falaAtualAnne = 0;
 
@@ -464,23 +504,23 @@ function mostrarFalaAnne(){
 /* ====================================== */
 
 diario.addEventListener(
-"click",
-abrirDiario
+    "click",
+    abrirDiario
 );
 
 closeDiaryBtn.addEventListener(
-"click",
-fecharDiario
+    "click",
+    fecharDiario
 );
 
 prevPageBtn.addEventListener(
-"click",
-paginaAnterior
+    "click",
+    paginaAnterior
 );
 
 nextPageBtn.addEventListener(
-"click",
-paginaSeguinte
+    "click",
+    paginaSeguinte
 );
 
 /* ====================================== */
@@ -488,32 +528,32 @@ paginaSeguinte
 /* ====================================== */
 
 bauHistorico.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-    abrirInspecao(
-        OBJETOS.bau.titulo,
-        OBJETOS.bau.texto
-    );
+        abrirInspecao(
+            OBJETOS.bau.titulo,
+            OBJETOS.bau.texto
+        );
 
-}
+    }
 );
 
 caixaDocumentos.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-    abrirInspecao(
-        OBJETOS.documentos.titulo,
-        OBJETOS.documentos.texto
-    );
+        abrirInspecao(
+            OBJETOS.documentos.titulo,
+            OBJETOS.documentos.texto
+        );
 
-}
+    }
 );
 
 inspectClose.addEventListener(
-"click",
-fecharInspecao
+    "click",
+    fecharInspecao
 );
 
 /* ====================================== */
@@ -521,51 +561,51 @@ fecharInspecao
 /* ====================================== */
 
 anne.addEventListener(
-"click",
-mostrarFalaAnne
+    "click",
+    mostrarFalaAnne
 );
 
 console.log(
-"Interações do diário e Anne carregadas."
+    "Interações do diário e Anne carregadas."
 );
 
 /* ====================================== */
 /* FADE */
 /* ====================================== */
 
-function fadeIn(){
+function fadeIn() {
 
     return new Promise(
-    resolve => {
+        resolve => {
 
-        fadeScreen.classList.add(
-        "active"
-        );
+            fadeScreen.classList.add(
+                "active"
+            );
 
-        setTimeout(
-        resolve,
-        CONFIG.fadeDuration
-        );
+            setTimeout(
+                resolve,
+                CONFIG.fadeDuration
+            );
 
-    });
+        });
 
 }
 
-function fadeOut(){
+function fadeOut() {
 
     return new Promise(
-    resolve => {
+        resolve => {
 
-        fadeScreen.classList.remove(
-        "active"
-        );
+            fadeScreen.classList.remove(
+                "active"
+            );
 
-        setTimeout(
-        resolve,
-        CONFIG.fadeDuration
-        );
+            setTimeout(
+                resolve,
+                CONFIG.fadeDuration
+            );
 
-    });
+        });
 
 }
 
@@ -574,13 +614,13 @@ function fadeOut(){
 /* ====================================== */
 
 async function teleportar(
-destinoY
-){
+    destinoY
+) {
 
     await fadeIn();
 
     const pos =
-    getRigPosition();
+        getRigPosition();
 
     setRigPosition(
         pos.x,
@@ -596,36 +636,36 @@ destinoY
 /* ESTANTE SECRETA */
 /* ====================================== */
 
-function abrirEstante(){
+function abrirEstante() {
 
-    if(
+    if (
         STATE.estanteAberta
-    ){
+    ) {
         return;
     }
 
     STATE.estanteAberta =
-    true;
+        true;
 
     estante.setAttribute(
-    "animation",
-    {
-        property:"position",
-        to:"1.8 1.5 -1.9",
-        dur:1400,
-        easing:"easeInOutQuad"
-    }
+        "animation",
+        {
+            property: "position",
+            to: "1.8 1.5 -1.9",
+            dur: 1400,
+            easing: "easeInOutQuad"
+        }
     );
 
     atualizarHUD(
-    "Passagem secreta revelada"
+        "Passagem secreta revelada"
     );
 
 }
 
 estante.addEventListener(
-"click",
-abrirEstante
+    "click",
+    abrirEstante
 );
 
 /* ====================================== */
@@ -633,25 +673,47 @@ abrirEstante
 /* ====================================== */
 
 subirAndar1.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-    teleportar(
-    CONFIG.yAndar1
-    );
+        teleportar(
+            CONFIG.yAndar1
+        );
 
-}
+    }
 );
 
 subirSotao.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-    teleportar(
-    CONFIG.ySotao
-    );
+        teleportar(
+            CONFIG.ySotao
+        );
 
-}
+    }
+);
+
+descerAndar1.addEventListener(
+    "click",
+    () => {
+
+        teleportar(
+            CONFIG.yTerreo
+        );
+
+    }
+);
+
+descerSotao.addEventListener(
+    "click",
+    () => {
+
+        teleportar(
+            CONFIG.yAndar1
+        );
+
+    }
 );
 
 /* ====================================== */
@@ -659,147 +721,147 @@ subirSotao.addEventListener(
 /* ====================================== */
 
 document.addEventListener(
-"keydown",
-event => {
+    "keydown",
+    event => {
 
-    if(
-        event.key !== "e"
-    ){
-        return;
+        if (
+            event.key !== "e"
+        ) {
+            return;
+        }
+
+        const pos =
+            getRigPosition();
+
+        if (
+            pos.y > 8
+        ) {
+
+            teleportar(
+                CONFIG.yAndar1
+            );
+
+            return;
+
+        }
+
+        if (
+            pos.y > 4
+        ) {
+
+            teleportar(
+                CONFIG.yTerreo
+            );
+
+        }
+
     }
-
-    const pos =
-    getRigPosition();
-
-    if(
-        pos.y > 8
-    ){
-
-        teleportar(
-        CONFIG.yAndar1
-        );
-
-        return;
-
-    }
-
-    if(
-        pos.y > 4
-    ){
-
-        teleportar(
-        CONFIG.yTerreo
-        );
-
-    }
-
-}
 );
 
 /* ====================================== */
 /* QR CODE */
 /* ====================================== */
 
-function abrirQR(){
+function abrirQR() {
 
     const url =
-    encodeURIComponent(
-    window.location.href
-    );
+        encodeURIComponent(
+            window.location.href
+        );
 
     qrImage.src =
-    `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${url}`;
+        `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${url}`;
 
     qrModal.classList.add(
-    "active"
+        "active"
     );
 
 }
 
-function fecharQR(){
+function fecharQR() {
 
     qrModal.classList.remove(
-    "active"
+        "active"
     );
 
 }
 
 openQrBtn.addEventListener(
-"click",
-abrirQR
+    "click",
+    abrirQR
 );
 
 closeQrBtn.addEventListener(
-"click",
-fecharQR
+    "click",
+    fecharQR
 );
 
 /* ====================================== */
 /* MODO DIA / NOITE */
 /* ====================================== */
 
-function atualizarModoVisual(){
+function atualizarModoVisual() {
 
-    if(
+    if (
         STATE.modoNoturno
-    ){
+    ) {
 
         ambientLight.setAttribute(
-        "intensity",
-        0.15
+            "intensity",
+            0.15
         );
 
         ambientLight.setAttribute(
-        "color",
-        "#4f6380"
+            "color",
+            "#4f6380"
         );
 
         sunLight.setAttribute(
-        "intensity",
-        0.35
+            "intensity",
+            0.35
         );
 
         sunLight.setAttribute(
-        "color",
-        "#9bb6ff"
+            "color",
+            "#9bb6ff"
         );
 
         toggleLightBtn.textContent =
-        "Modo Dia";
+            "Modo Dia";
 
         atualizarHUD(
-        "Modo noturno ativado"
+            "Modo noturno ativado"
         );
 
     }
 
-    else{
+    else {
 
         ambientLight.setAttribute(
-        "intensity",
-        0.35
+            "intensity",
+            0.35
         );
 
         ambientLight.setAttribute(
-        "color",
-        "#bfc9d4"
+            "color",
+            "#bfc9d4"
         );
 
         sunLight.setAttribute(
-        "intensity",
-        1.2
+            "intensity",
+            1.2
         );
 
         sunLight.setAttribute(
-        "color",
-        "#fff1c2"
+            "color",
+            "#fff1c2"
         );
 
         toggleLightBtn.textContent =
-        "Modo Noite";
+            "Modo Noite";
 
         atualizarHUD(
-        "Modo diurno ativado"
+            "Modo diurno ativado"
         );
 
     }
@@ -807,19 +869,19 @@ function atualizarModoVisual(){
 }
 
 toggleLightBtn.addEventListener(
-"click",
-() => {
+    "click",
+    () => {
 
-    STATE.modoNoturno =
-    !STATE.modoNoturno;
+        STATE.modoNoturno =
+            !STATE.modoNoturno;
 
-    atualizarModoVisual();
+        atualizarModoVisual();
 
-}
+    }
 );
 
 console.log(
-"Teleporte, QR Code e iluminação carregados."
+    "Teleporte, QR Code e iluminação carregados."
 );
 
 /* ====================================== */
@@ -827,167 +889,167 @@ console.log(
 /* ====================================== */
 
 AFRAME.registerComponent(
-"motor-colisao",
-{
+    "motor-colisao",
+    {
 
-    init(){
+        init() {
 
-        this.lastX = 0;
-        this.lastZ = 0;
+            this.lastX = 0;
+            this.lastZ = 0;
 
-    },
+        },
 
-    tick(){
+        tick() {
 
-        if(
-            STATE.diarioAberto ||
-            STATE.objetoInspecionado
-        ){
-            return;
-        }
+            if (
+                STATE.diarioAberto ||
+                STATE.objetoInspecionado
+            ) {
+                return;
+            }
 
-        const pos =
-        this.el.object3D.position;
+            const pos =
+                this.el.object3D.position;
 
-        const currentX = pos.x;
-        const currentZ = pos.z;
-        const currentY = pos.y;
+            const currentX = pos.x;
+            const currentZ = pos.z;
+            const currentY = pos.y;
 
-        /* ========================= */
-        /* LIMITES GERAIS */
-        /* ========================= */
+            /* ========================= */
+            /* LIMITES GERAIS */
+            /* ========================= */
 
-        pos.x = clamp(
-            currentX,
-            CONFIG.limiteMinX,
-            CONFIG.limiteMaxX
-        );
+            pos.x = clamp(
+                currentX,
+                CONFIG.limiteMinX,
+                CONFIG.limiteMaxX
+            );
 
-        pos.z = clamp(
-            currentZ,
-            CONFIG.limiteMinZ,
-            CONFIG.limiteMaxZ
-        );
+            pos.z = clamp(
+                currentZ,
+                CONFIG.limiteMinZ,
+                CONFIG.limiteMaxZ
+            );
 
-        /* ========================= */
-        /* ESTANTE FECHADA */
-        /* ========================= */
+            /* ========================= */
+            /* ESTANTE FECHADA */
+            /* ========================= */
 
-        if(
-            !STATE.estanteAberta
-        ){
+            if (
+                !STATE.estanteAberta
+            ) {
 
-            const dentroPassagemX =
-            pos.x > -0.95 &&
-            pos.x < 0.95;
+                const dentroPassagemX =
+                    pos.x > -0.95 &&
+                    pos.x < 0.95;
 
-            const tentandoEntrar =
-            pos.z < -1.5;
+                const tentandoEntrar =
+                    pos.z < -1.5;
 
-            if(
-                dentroPassagemX &&
-                tentandoEntrar
-            ){
+                if (
+                    dentroPassagemX &&
+                    tentandoEntrar
+                ) {
 
-                pos.z = -1.5;
+                    pos.z = -1.5;
+
+                }
 
             }
 
-        }
+            /* ========================= */
+            /* ARMÁRIO */
+            /* ========================= */
 
-        /* ========================= */
-        /* ARMÁRIO */
-        /* ========================= */
+            if (
+                currentY < 3
+            ) {
 
-        if(
-            currentY < 3
-        ){
+                const colidiuArmario =
 
-            const colidiuArmario =
+                    pos.x < -1.8 &&
+                    pos.x > -3.0 &&
 
-                pos.x < -1.8 &&
-                pos.x > -3.0 &&
+                    pos.z < -7.4 &&
+                    pos.z > -9.5;
 
-                pos.z < -7.4 &&
-                pos.z > -9.5;
+                if (
+                    colidiuArmario
+                ) {
 
-            if(
-                colidiuArmario
-            ){
+                    pos.x = this.lastX;
+                    pos.z = this.lastZ;
 
-                pos.x = this.lastX;
-                pos.z = this.lastZ;
-
-            }
-
-        }
-
-        /* ========================= */
-        /* CAMA */
-        /* ========================= */
-
-        if(
-            currentY > 3 &&
-            currentY < 7
-        ){
-
-            const colidiuCama =
-
-                pos.x > -0.2 &&
-                pos.x < 1.7 &&
-
-                pos.z < -7.4 &&
-                pos.z > -9.6;
-
-            if(
-                colidiuCama
-            ){
-
-                pos.x = this.lastX;
-                pos.z = this.lastZ;
+                }
 
             }
 
+            /* ========================= */
+            /* CAMA */
+            /* ========================= */
+
+            if (
+                currentY > 3 &&
+                currentY < 7
+            ) {
+
+                const colidiuCama =
+
+                    pos.x > -0.2 &&
+                    pos.x < 1.7 &&
+
+                    pos.z < -7.4 &&
+                    pos.z > -9.6;
+
+                if (
+                    colidiuCama
+                ) {
+
+                    pos.x = this.lastX;
+                    pos.z = this.lastZ;
+
+                }
+
+            }
+
+            /* ========================= */
+            /* PROTEÇÃO PAREDE FUNDO */
+            /* ========================= */
+
+            if (
+                pos.z < -9.4
+            ) {
+
+                pos.z = -9.4;
+
+            }
+
+            /* ========================= */
+            /* PROTEÇÃO PAREDE FRENTE */
+            /* ========================= */
+
+            if (
+                pos.z > 1.6
+            ) {
+
+                pos.z = 1.6;
+
+            }
+
+            /* ========================= */
+            /* MEMÓRIA */
+            /* ========================= */
+
+            this.lastX = pos.x;
+            this.lastZ = pos.z;
+
         }
-
-        /* ========================= */
-        /* PROTEÇÃO PAREDE FUNDO */
-        /* ========================= */
-
-        if(
-            pos.z < -9.4
-        ){
-
-            pos.z = -9.4;
-
-        }
-
-        /* ========================= */
-        /* PROTEÇÃO PAREDE FRENTE */
-        /* ========================= */
-
-        if(
-            pos.z > 1.6
-        ){
-
-            pos.z = 1.6;
-
-        }
-
-        /* ========================= */
-        /* MEMÓRIA */
-        /* ========================= */
-
-        this.lastX = pos.x;
-        this.lastZ = pos.z;
 
     }
-
-}
 );
 
 console.log(
-"Motor de colisão carregado."
+    "Motor de colisão carregado."
 );
 
 /* ====================================== */
@@ -995,19 +1057,19 @@ console.log(
 /* ====================================== */
 
 const joystick =
-document.getElementById(
-"mobile-joystick"
-);
+    document.getElementById(
+        "mobile-joystick"
+    );
 
 const joystickBase =
-document.getElementById(
-"joystick-base"
-);
+    document.getElementById(
+        "joystick-base"
+    );
 
 const joystickKnob =
-document.getElementById(
-"joystick-knob"
-);
+    document.getElementById(
+        "joystick-knob"
+    );
 
 let joystickPointerId = null;
 
@@ -1025,20 +1087,20 @@ const JOYSTICK = {
 
 };
 
-function atualizarCentroJoystick(){
+function atualizarCentroJoystick() {
 
     const rect =
-    joystickBase.getBoundingClientRect();
+        joystickBase.getBoundingClientRect();
 
     JOYSTICK.centerX =
-    rect.left + rect.width / 2;
+        rect.left + rect.width / 2;
 
     JOYSTICK.centerY =
-    rect.top + rect.height / 2;
+        rect.top + rect.height / 2;
 
 }
 
-function resetJoystick(){
+function resetJoystick() {
 
     JOYSTICK.active = false;
 
@@ -1046,30 +1108,30 @@ function resetJoystick(){
     JOYSTICK.moveY = 0;
 
     joystickKnob.style.left =
-    "40px";
+        "40px";
 
     joystickKnob.style.top =
-    "40px";
+        "40px";
 
 }
 
-function moverJoystick(clientX, clientY){
+function moverJoystick(clientX, clientY) {
 
     let dx =
-    clientX - JOYSTICK.centerX;
+        clientX - JOYSTICK.centerX;
 
     let dy =
-    clientY - JOYSTICK.centerY;
+        clientY - JOYSTICK.centerY;
 
     const distance =
-    Math.hypot(dx, dy);
+        Math.hypot(dx, dy);
 
-    if(
+    if (
         distance > JOYSTICK.radius
-    ){
+    ) {
 
         const scale =
-        JOYSTICK.radius / distance;
+            JOYSTICK.radius / distance;
 
         dx *= scale;
         dy *= scale;
@@ -1077,16 +1139,16 @@ function moverJoystick(clientX, clientY){
     }
 
     JOYSTICK.moveX =
-    dx / JOYSTICK.radius;
+        dx / JOYSTICK.radius;
 
     JOYSTICK.moveY =
-    dy / JOYSTICK.radius;
+        dy / JOYSTICK.radius;
 
     joystickKnob.style.left =
-    `${40 + dx}px`;
+        `${40 + dx}px`;
 
     joystickKnob.style.top =
-    `${40 + dy}px`;
+        `${40 + dy}px`;
 
 }
 
@@ -1095,51 +1157,58 @@ function moverJoystick(clientX, clientY){
 /* ====================================== */
 
 joystick.addEventListener(
-"pointerdown",
-event => {
+    "pointerdown",
+    event => {
 
-    joystickPointerId =
-    event.pointerId;
+        joystickPointerId =
+            event.pointerId;
 
-    JOYSTICK.active = true;
+        JOYSTICK.active = true;
 
-    atualizarCentroJoystick();
+        atualizarCentroJoystick();
 
-    moverJoystick(
-        event.clientX,
-        event.clientY
-    );
+        moverJoystick(
+            event.clientX,
+            event.clientY
+        );
 
-}
+    }
 );
+
+/* ====================================== */
+/* Click botão de interação */
+/* ====================================== */
+
+mobileAction.addEventListener("click", executarInteracaoCursor);
+
 
 /* ====================================== */
 /* TOUCH MOVE */
 /* ====================================== */
 
 window.addEventListener(
-"pointermove",
-event => {
+    "pointermove",
+    event => {
 
-    if(
-        !JOYSTICK.active
-    ){
-        return;
+        if (
+            !JOYSTICK.active
+        ) {
+            return;
+        }
+
+        if (
+            event.pointerId !==
+            joystickPointerId
+        ) {
+            return;
+        }
+
+        moverJoystick(
+            event.clientX,
+            event.clientY
+        );
+
     }
-
-    if(
-        event.pointerId !==
-        joystickPointerId
-    ){
-        return;
-    }
-
-    moverJoystick(
-        event.clientX,
-        event.clientY
-    );
-
-}
 );
 
 /* ====================================== */
@@ -1147,66 +1216,66 @@ event => {
 /* ====================================== */
 
 window.addEventListener(
-"pointerup",
-event => {
+    "pointerup",
+    event => {
 
-    if(
-        event.pointerId !==
-        joystickPointerId
-    ){
-        return;
+        if (
+            event.pointerId !==
+            joystickPointerId
+        ) {
+            return;
+        }
+
+        joystickPointerId = null;
+
+        resetJoystick();
+
     }
-
-    joystickPointerId = null;
-
-    resetJoystick();
-
-}
 );
 
 window.addEventListener(
-"pointercancel",
-resetJoystick
+    "pointercancel",
+    resetJoystick
 );
 
 /* ====================================== */
 /* MOVIMENTO */
 /* ====================================== */
 
-function atualizarJoystick(){
+function atualizarJoystick() {
 
-    if(
+    if (
         !isMobile()
-    ){
+    ) {
         return;
     }
 
-    if(
+    if (
         !JOYSTICK.active
-    ){
+    ) {
         return;
     }
 
     const rig =
-    cameraRig.object3D;
+        cameraRig.object3D;
 
     const cameraObj =
-    camera.object3D;
+        camera.object3D;
 
     const rotY =
-    cameraObj.rotation.y;
+        cameraObj.rotation.y;
 
     const frenteX =
-    -Math.sin(rotY);
+        -Math.sin(rotY);
 
     const frenteZ =
-    -Math.cos(rotY);
+        -Math.cos(rotY);
 
     const lateralX =
-    Math.cos(rotY);
+        Math.cos(rotY);
 
     const lateralZ =
-    -Math.sin(rotY);
+        -Math.sin(rotY);
 
     rig.position.x +=
         (
@@ -1234,36 +1303,36 @@ function atualizarJoystick(){
 /* LOOP CENTRAL */
 /* ====================================== */
 
-function animationLoop(){
+function animationLoop() {
 
     atualizarJoystick();
 
     requestAnimationFrame(
-    animationLoop
+        animationLoop
     );
 
 }
 
 requestAnimationFrame(
-animationLoop
+    animationLoop
 );
 
 console.log(
-"Joystick mobile carregado."
+    "Joystick mobile carregado."
 );
 
 /* ====================================== */
 /* WEBXR */
 /* ====================================== */
 
-function verificarWebXR(){
+function verificarWebXR() {
 
-    if(
+    if (
         !navigator.xr
-    ){
+    ) {
 
         console.warn(
-        "WebXR não suportado."
+            "WebXR não suportado."
         );
 
         return;
@@ -1271,27 +1340,27 @@ function verificarWebXR(){
     }
 
     navigator.xr
-    .isSessionSupported(
-        "immersive-ar"
-    )
-    .then(
-        suportado => {
+        .isSessionSupported(
+            "immersive-ar"
+        )
+        .then(
+            suportado => {
 
-            if(
-                suportado
-            ){
+                if (
+                    suportado
+                ) {
 
-                atualizarHUD(
-                "AR disponível neste dispositivo"
-                );
+                    atualizarHUD(
+                        "AR disponível neste dispositivo"
+                    );
+
+                }
 
             }
-
-        }
-    )
-    .catch(
-        () => {}
-    );
+        )
+        .catch(
+            () => { }
+        );
 
 }
 
@@ -1299,21 +1368,21 @@ function verificarWebXR(){
 /* QR AUTOMÁTICO */
 /* ====================================== */
 
-function prepararQRCode(){
+function prepararQRCode() {
 
-    if(
+    if (
         !qrImage
-    ){
+    ) {
         return;
     }
 
     const url =
-    encodeURIComponent(
-        window.location.href
-    );
+        encodeURIComponent(
+            window.location.href
+        );
 
     qrImage.src =
-    `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${url}`;
+        `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${url}`;
 
 }
 
@@ -1321,14 +1390,14 @@ function prepararQRCode(){
 /* HUD */
 /* ====================================== */
 
-function atualizarMensagemInicial(){
+function atualizarMensagemInicial() {
 
-    if(
+    if (
         isMobile()
-    ){
+    ) {
 
         atualizarHUD(
-        "Use o joystick para explorar"
+            "Use o joystick para explorar"
         );
 
         return;
@@ -1336,7 +1405,7 @@ function atualizarMensagemInicial(){
     }
 
     atualizarHUD(
-    "Use WASD e clique nos objetos"
+        "Use WASD e clique nos objetos"
     );
 
 }
@@ -1345,25 +1414,25 @@ function atualizarMensagemInicial(){
 /* MOBILE */
 /* ====================================== */
 
-function configurarMobile(){
+function configurarMobile() {
 
-    if(
+    if (
         !isMobile()
-    ){
+    ) {
         return;
     }
 
     const joystick =
-    document.getElementById(
-    "mobile-joystick"
-    );
+        document.getElementById(
+            "mobile-joystick"
+        );
 
-    if(
+    if (
         joystick
-    ){
+    ) {
 
         joystick.style.display =
-        "block";
+            "block";
 
     }
 
@@ -1373,37 +1442,37 @@ function configurarMobile(){
 /* EVENTOS GLOBAIS */
 /* ====================================== */
 
-function registrarEventosGlobais(){
+function registrarEventosGlobais() {
 
     window.addEventListener(
-    "resize",
-    () => {
+        "resize",
+        () => {
 
-        if(
-            typeof atualizarCentroJoystick ===
-            "function"
-        ){
+            if (
+                typeof atualizarCentroJoystick ===
+                "function"
+            ) {
 
-            atualizarCentroJoystick();
+                atualizarCentroJoystick();
+
+            }
 
         }
-
-    }
     );
 
     document.addEventListener(
-    "visibilitychange",
-    () => {
+        "visibilitychange",
+        () => {
 
-        if(
-            document.hidden
-        ){
+            if (
+                document.hidden
+            ) {
 
-            resetJoystick?.();
+                resetJoystick?.();
+
+            }
 
         }
-
-    }
     );
 
 }
@@ -1412,24 +1481,24 @@ function registrarEventosGlobais(){
 /* OTIMIZAÇÕES */
 /* ====================================== */
 
-function aplicarOtimizacoes(){
+function aplicarOtimizacoes() {
 
     const scene =
-    document.querySelector(
-    "a-scene"
-    );
+        document.querySelector(
+            "a-scene"
+        );
 
-    if(
+    if (
         !scene
-    ){
+    ) {
         return;
     }
 
     scene.renderer.sortObjects =
-    true;
+        true;
 
     scene.renderer.outputEncoding =
-    THREE.sRGBEncoding;
+        THREE.sRGBEncoding;
 
 }
 
@@ -1437,7 +1506,7 @@ function aplicarOtimizacoes(){
 /* INICIALIZAÇÃO */
 /* ====================================== */
 
-function initApp(){
+function initApp() {
 
     atualizarMensagemInicial();
 
@@ -1450,31 +1519,31 @@ function initApp(){
     registrarEventosGlobais();
 
     const scene =
-    document.querySelector(
-    "a-scene"
-    );
+        document.querySelector(
+            "a-scene"
+        );
 
-    if(
+    if (
         scene &&
         scene.hasLoaded
-    ){
+    ) {
 
         aplicarOtimizacoes();
 
     }
 
-    else if(scene){
+    else if (scene) {
 
         scene.addEventListener(
-        "loaded",
-        aplicarOtimizacoes,
-        { once:true }
+            "loaded",
+            aplicarOtimizacoes,
+            { once: true }
         );
 
     }
 
     console.log(
-    "Anexo Secreto iniciado."
+        "Anexo Secreto iniciado."
     );
 
 }
@@ -1483,19 +1552,19 @@ function initApp(){
 /* START */
 /* ====================================== */
 
-if(
+if (
     document.readyState ===
     "loading"
-){
+) {
 
     document.addEventListener(
-    "DOMContentLoaded",
-    initApp,
-    { once:true }
+        "DOMContentLoaded",
+        initApp,
+        { once: true }
     );
 
 }
-else{
+else {
 
     initApp();
 
