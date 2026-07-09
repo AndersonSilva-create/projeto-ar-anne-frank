@@ -16,6 +16,7 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none; /* Prevents double-tap zoom and generic scrolling */
         }
         .fonte-titulo {
             font-family: 'Georgia', serif;
@@ -59,6 +60,7 @@
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.05s ease-out;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -147,7 +149,7 @@
         </div>
         <!-- Touch action backup button -->
         <div class="pointer-events-auto">
-            <button id="mobile-action-btn" class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-[10px] select-none active:scale-90 transition transform">
+            <button id="mobile-action-btn" class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
                 INTERAGIR
             </button>
         </div>
@@ -161,7 +163,7 @@
     <!-- A-Frame 3D Scene setup -->
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;">
         <a-assets>
-            <!-- Room walls texturisation with robust fallbacks in case of physical failure -->
+            <!-- Room walls texturisation with robust fallbacks -->
             <img id="tex-biblioteca" src="assets/biblioteca_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/423122/ffeaa7?text=Madeira+Biblioteca'">
             <img id="tex-quarto" src="assets/quarto_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/2f1f10/ffffff?text=Parede+Quarto+Principal'">
             <img id="tex-andar1" src="assets/andar1_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/4b382a/ffffff?text=Segundo+Andar'">
@@ -191,11 +193,10 @@
         <a-sky id="sky" color="#87ceeb"></a-sky>
 
         <!-- ================= TÉRREO: CÔMODO 1 - BIBLIOTECA (X: -3 a 3 / Z: 2 a -2) ================= -->
-        <!-- Double-sided Floor and Ceiling layouts to prevent inverted-normal visibility bugs -->
         <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#423122" material="side: double; roughness: 0.8;"></a-plane> 
         <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#ebdcb9" material="side: double; roughness: 0.6;"></a-plane> 
         
-        <!-- Outer walls surrounding the library (SOLID COLLISION ASSURED IN JS) -->
+        <!-- Outer walls surrounding the library -->
         <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
         <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
         <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
@@ -248,8 +249,8 @@
         <!-- Armoire cabinet wardrobe in Ground room corner -->
         <a-entity id="armario-terreo" position="-2.6 0 -8.5">
             <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95;">
-                <a-box scale="0.02 1.0 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
-                <a-box scale="0.02 1.0 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 2.6 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 2.6 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
                 <a-sphere position="0.33 0 0.05" radius="0.02" color="#d4af37"></a-sphere>
             </a-box>
         </a-entity>
@@ -288,9 +289,9 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <!-- Escalation trigger boxes (Bottom to climb, Top to descend) -->
-            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" visible="false"></a-box>
-            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" visible="false"></a-box>
+            <!-- Escalation trigger boxes (Transparent/Opacity 0 but physically clickable on touch/click) -->
+            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
         <!-- ================= SEGUNDO ANDAR (X: -3 a 3 / Z: -2 a -10) ================= -->
@@ -300,8 +301,8 @@
         <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412" material="side: double;"></a-plane> <!-- Front Left -->
         <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412" material="side: double;"></a-plane> <!-- Extreme left bridge border -->
 
-        <!-- Intermediate Ceiling (Floor of the Attic) with double-sided pasting -->
-        <a-plane position="0 8.01 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8" material="side: double; roughness: 0.7;"></a-plane> 
+        <!-- Intermediate Ceiling (Ceiling of the 2nd Floor) -->
+        <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8" material="side: double; roughness: 0.7;"></a-plane> 
 
         <!-- Outer walls surrounding second floor -->
         <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
@@ -371,16 +372,16 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
             <!-- Escalation triggers -->
-            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" visible="false"></a-box>
-            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" visible="false"></a-box>
+            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
         <!-- ================= SÓTÃO (X: -3 a 3 / Z: -2 a -10) ================= -->
         <!-- Segmented Floor Laje with an exact 0.8 x 0.8 meter square hollow centered at X=2.3, Z=-4.5 using tex-piso-sotao -->
-        <a-plane position="-0.55 8.01 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane> <!-- Left block -->
-        <a-plane position="2.45 8.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Back Right -->
-        <a-plane position="2.45 8.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Front Right -->
-        <a-plane position="2.85 8.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Extreme right bridge border -->
+        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane> <!-- Left block -->
+        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Back Right -->
+        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Front Right -->
+        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Extreme right bridge border -->
 
         <!-- Solid Attic ceiling -->
         <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b" material="side: double; roughness: 0.9;"></a-plane> 
@@ -392,8 +393,8 @@
         <!-- Solid South Wall at Z = -2 preventing transparent views inside Attic -->
         <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane> 
 
-        <!-- Storage Boxes and Crates in the Attic (For environmental storytelling) -->
-        <a-entity id="caixas-sotao" position="0 8.01 -6">
+        <!-- Storage Boxes and Crates in the Attic (Raised 0.1m above floor, 0.2m from baseline 8.01) -->
+        <a-entity id="caixas-sotao" position="0 8.21 -6">
             <!-- Large box 1 -->
             <a-box position="-1.8 0.4 -2.5" scale="0.8 0.8 0.8" color="#6e5033" material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#5a4028"></a-box> <!-- Lid -->
@@ -488,7 +489,7 @@
 
                 // 2. Secret Partition Wall logic at Z = -2 (Paredes de divisa da estante)
                 if (pos.z < -1.8 && pos.z > -2.2) {
-                    // Check horizontal gaps (seções fixas sólidas da parede sul)
+                    // Check horizontal gaps
                     if (pos.x <= -0.9 || pos.x >= 0.9) {
                         pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
                     } else {
@@ -579,7 +580,7 @@
             transicionarAndar(0, 1.6);
         });
         document.querySelector('#trigger-subir-2').addEventListener('click', () => {
-            transicionarAndar(2, 9.6);
+            transicionarAndar(2, 9.71);
         });
         document.querySelector('#trigger-descer-2').addEventListener('click', () => {
             transicionarAndar(1, 5.6);
@@ -622,6 +623,11 @@
                 audioCtx.resume();
             }
         }
+
+        // Unlocks Audio Context globally in iOS/Android at the first user touch
+        document.addEventListener('touchstart', function() {
+            initializeAudioContext();
+        }, { once: true });
 
         // Vintage AM Radio Procedural Synthesizer
         function ativarRadioProcedural() {
@@ -936,7 +942,13 @@
         let joyCenter = { x: 0, y: 0 };
         let joyVector = { x: 0, y: 0 };
 
+        const preventInterference = (e) => {
+            e.stopPropagation();
+            if (e.cancelable) e.preventDefault();
+        };
+
         joyZone.addEventListener('touchstart', (e) => {
+            preventInterference(e);
             joyActive = true;
             const touch = e.touches[0];
             const bounds = joyZone.getBoundingClientRect();
@@ -947,6 +959,7 @@
         });
 
         joyZone.addEventListener('touchmove', (e) => {
+            preventInterference(e);
             if (!joyActive) return;
             const touch = e.touches[0];
             const dx = touch.clientX - joyCenter.x;
@@ -961,7 +974,8 @@
             joyVector = { x: pinX / 40, y: pinY / 40 };
         });
 
-        joyZone.addEventListener('touchend', () => {
+        joyZone.addEventListener('touchend', (e) => {
+            preventInterference(e);
             joyActive = false;
             joyStick.style.transform = 'translate(0px, 0px)';
             joyVector = { x: 0, y: 0 };
@@ -969,16 +983,16 @@
 
         // Render loop connection mapping vector translation along looking angle
         setInterval(() => {
-            if (joyVector.x !== 0 || joyVector.y !== 0) {
-                const rotation = cameraUser.getAttribute('rotation');
-                const angleRad = rotation.y * Math.PI / 180;
+            if (joyActive && (joyVector.x !== 0 || joyVector.y !== 0)) {
+                // Correct reading using the Three.js Euler angle updated dynamically by Gyroscope and touch drags
+                const rotationY = cameraUser.object3D.rotation.y; 
 
-                const lookDirX = -Math.sin(angleRad);
-                const lookDirZ = -Math.cos(angleRad);
-                const rightDirX = Math.cos(angleRad);
-                const rightDirZ = -Math.sin(angleRad);
+                const lookDirX = -Math.sin(rotationY);
+                const lookDirZ = -Math.cos(rotationY);
+                const rightDirX = Math.cos(rotationY);
+                const rightDirZ = -Math.sin(rotationY);
 
-                const speed = 0.04;
+                const speed = 0.05;
                 const pos = cameraRig.getAttribute('position');
 
                 pos.x += (lookDirX * -joyVector.y + rightDirX * joyVector.x) * speed;
@@ -988,7 +1002,7 @@
             }
         }, 16);
 
-        // Mobile click action backup button
+        // Mobile click action backup button trigger
         let currentTargetNode = null;
         const cursorEl = document.querySelector('a-cursor');
 
@@ -1005,11 +1019,19 @@
             document.querySelector('#mobile-action-btn').classList.remove('scale-105', 'bg-amber-500');
         });
 
-        document.querySelector('#mobile-action-btn').addEventListener('click', () => {
+        const actionBtn = document.querySelector('#mobile-action-btn');
+        const executeMobileClick = (e) => {
+            preventInterference(e);
             if (currentTargetNode) {
                 currentTargetNode.emit('click');
+                // Subtle visual click feedback on the mobile action button
+                actionBtn.classList.add('scale-95');
+                setTimeout(() => actionBtn.classList.remove('scale-95'), 100);
             }
-        });
+        };
+
+        actionBtn.addEventListener('touchstart', executeMobileClick);
+        actionBtn.addEventListener('mousedown', executeMobileClick);
     </script>
 </body>
 </html>
