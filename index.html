@@ -38,7 +38,7 @@
             border-radius: 3px;
         }
         #efeito-fade {
-            transition: opacity 0.25s ease-in-out;
+            transition: opacity 0.3s ease-in-out;
             pointer-events: none;
         }
         @media (pointer: coarse) {
@@ -70,6 +70,8 @@
 </head>
 <body class="bg-black text-white">
 
+    <div id="efeito-fade" class="fixed inset-0 bg-black opacity-0 z-[99999] pointer-events-none"></div>
+
     <div id="tela-inicial" class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
         <div class="max-w-md bg-neutral-900 border border-neutral-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center">
             <h1 class="fonte-titulo text-2xl sm:text-3xl font-bold text-amber-400 mb-3">O Anexo Secreto</h1>
@@ -81,6 +83,7 @@
             </button>
         </div>
     </div>
+
     <div class="fixed top-4 left-4 right-4 flex justify-between items-start sm:items-center z-[999] pointer-events-none">
         <div class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold pointer-events-auto shadow-xl my-1">
             <span id="txt-status" class="text-amber-300">Explorando: Biblioteca (Térreo)</span>
@@ -226,7 +229,6 @@
             <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg">
             <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg">
             <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg">
-            <!-- Áudio pré-carregado de fala da Anne. Altere 'fala_anne.mp3' para o nome do seu arquivo de áudio se necessário. -->
             <audio id="audio-anne" src="assets/fala_anne.mp3" preload="auto"></audio>
         </a-assets>
 
@@ -284,7 +286,6 @@
             </a-box>
         </a-entity>
 
-        <!-- Armoire cabinet wardrobe in Ground room corner -->
         <a-entity id="armario-terreo" position="-2.6 0 -8.5">
             <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95;">
                 <a-box scale="0.02 1.0 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
@@ -320,8 +321,10 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
-            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.2" scale="1.6 3.0 1.0" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.2" scale="1.6 1.2 1.0" material="opacity: 0; transparent: true"></a-box>
+            <a-plane class="interactable" position="0 1.6 0.25" width="1.2" height="0.4" color="#d97706" text="value: ⬆ SUBIR (2º Andar); align: center; width: 3.5; color: #ffffff;" material="shader: flat; side: double;"></a-plane>
+            <a-plane class="interactable" position="0 4.3 0.25" width="1.2" height="0.4" color="#b91c1c" text="value: ⬇ DESCER (Térreo); align: center; width: 3.5; color: #ffffff;" material="shader: flat; side: double;"></a-plane>
         </a-entity>
 
         <!-- SEGUNDO ANDAR -->
@@ -382,8 +385,10 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
-            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.2" scale="1.6 3.0 1.0" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.2" scale="1.6 1.2 1.0" material="opacity: 0; transparent: true"></a-box>
+            <a-plane class="interactable" position="0 1.6 0.25" width="1.2" height="0.4" color="#d97706" text="value: ⬆ SUBIR (Sótão); align: center; width: 3.5; color: #ffffff;" material="shader: flat; side: double;"></a-plane>
+            <a-plane class="interactable" position="0 4.3 0.25" width="1.2" height="0.4" color="#b91c1c" text="value: ⬇ DESCER (2º Andar); align: center; width: 3.5; color: #ffffff;" material="shader: flat; side: double;"></a-plane>
         </a-entity>
 
         <!-- SÓTÃO -->
@@ -656,12 +661,10 @@
             const fala = falasAnne[index];
             abrirFalaAnne(fala);
 
-            // Tenta reproduzir o arquivo de áudio localizado na pasta assets/
             const audioAnne = document.querySelector('#audio-anne');
             if (audioAnne) {
                 audioAnne.currentTime = 0;
                 audioAnne.play().catch(err => {
-                    console.warn("Não foi possível tocar o áudio em arquivo. Usando voz sintética como fallback:", err);
                     falarTextoAnne(fala);
                 });
             } else {
@@ -673,11 +676,11 @@
             document.querySelector('#texto-fala-anne').innerText = texto;
             document.querySelector('#modal-fala-anne').classList.remove('hidden');
         }
+
         document.querySelector('#btn-fala-fechar').addEventListener('click', () => {
             document.querySelector('#modal-fala-anne').classList.add('hidden');
             pararFalaAnne();
 
-            // Para a execução do arquivo de áudio caso o modal seja fechado
             const audioAnne = document.querySelector('#audio-anne');
             if (audioAnne) {
                 audioAnne.pause();
@@ -736,14 +739,12 @@
                 const cameraUser = document.querySelector('#visao-usuario');
                 if (!cameraUser || !cameraUser.object3D) return;
 
-                // Inverte o vetor de orientação para obter a direção real de visão (frente)
                 const forward = new THREE.Vector3();
                 cameraUser.object3D.getWorldDirection(forward);
                 forward.negate();
                 forward.y = 0;
                 forward.normalize();
 
-                // Vetor para a direita baseado na direção frontal
                 const right = new THREE.Vector3();
                 right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
 
@@ -840,15 +841,23 @@
                 setTimeout(() => {
                     fade.style.opacity = '0';
                     processandoTransicao = false;
-                }, 100);
+                }, 150);
 
-            }, 250);
+            }, 300);
         }
 
-        document.querySelector('#trigger-subir-1').addEventListener('click', () => transicionarAndar(1, 5.6));
-        document.querySelector('#trigger-descer-1').addEventListener('click', () => transicionarAndar(0, 1.6));
-        document.querySelector('#trigger-subir-2').addEventListener('click', () => transicionarAndar(2, 9.71));
-        document.querySelector('#trigger-descer-2').addEventListener('click', () => transicionarAndar(1, 5.6));
+        document.querySelectorAll('#escada-1 .interactable').forEach(el => {
+            el.addEventListener('click', () => {
+                if (currentFloor === 0) transicionarAndar(1, 5.6);
+                else if (currentFloor === 1) transicionarAndar(0, 1.6);
+            });
+        });
+        document.querySelectorAll('#escada-2 .interactable').forEach(el => {
+            el.addEventListener('click', () => {
+                if (currentFloor === 1) transicionarAndar(2, 9.71);
+                else if (currentFloor === 2) transicionarAndar(1, 5.6);
+            });
+        });
 
         document.querySelector('#estante-secreta').addEventListener('click', () => {
             const shelf = document.querySelector('#estante-secreta');
@@ -942,8 +951,10 @@
             if (morseOsc) { try { morseOsc.stop(); } catch(e){} morseOsc = null; }
             if (morseSequenceInterval) { clearTimeout(morseSequenceInterval); morseSequenceInterval = null; }
             const led = document.querySelector('#led-indicador-radio');
-            led.setAttribute('color', '#333333');
-            led.setAttribute('material', 'emissiveIntensity', '0');
+            if (led) {
+                led.setAttribute('color', '#333333');
+                led.setAttribute('material', 'emissiveIntensity', '0');
+            }
         }
 
         function ativarJanelaProcedural() {
