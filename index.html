@@ -155,35 +155,6 @@
                 <input type="range" id="vol-anne" min="0" max="100" value="80" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
 
-            <!-- Custom Textures File Selectors -->
-            <div class="border-t border-neutral-700 pt-4 mb-6">
-                <h4 class="text-sm font-bold text-amber-300 mb-3 flex items-center gap-1.5">
-                    🖼️ Carregar Suas Texturas Personalizadas
-                </h4>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="block text-neutral-300 mb-1 font-medium">Parede Biblioteca (Térreo)</label>
-                        <input type="file" id="input-tex-biblioteca" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-neutral-300 mb-1 font-medium">Parede Quarto de Anne</label>
-                        <input type="file" id="input-tex-quarto" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-neutral-300 mb-1 font-medium">Parede 1º Andar</label>
-                        <input type="file" id="input-tex-andar1" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-neutral-300 mb-1 font-medium">Parede Sótão</label>
-                        <input type="file" id="input-tex-sotao" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-neutral-300 mb-1 font-medium">Piso do Sótão</label>
-                        <input type="file" id="input-tex-piso-sotao" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
-                    </div>
-                </div>
-            </div>
-
             <button id="btn-config-fechar" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-2.5 rounded-xl text-sm font-bold transition shadow-lg">
                 Salvar e Fechar
             </button>
@@ -249,11 +220,11 @@
     <!-- A-Frame 3D Scene setup -->
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;">
         <a-assets>
-            <img id="tex-biblioteca" crossorigin="anonymous" src="biblioteca_parede.jpg">
-            <img id="tex-quarto" crossorigin="anonymous" src="quarto_parede.jpg">
-            <img id="tex-andar1" crossorigin="anonymous" src="andar1_parede.jpg">
-            <img id="tex-sotao" crossorigin="anonymous" src="sotao_parede.jpg">
-            <img id="tex-piso-sotao" crossorigin="anonymous" src="piso_sotao.jpg">
+            <img id="tex-biblioteca" crossorigin="anonymous">
+            <img id="tex-quarto" crossorigin="anonymous">
+            <img id="tex-andar1" crossorigin="anonymous">
+            <img id="tex-sotao" crossorigin="anonymous">
+            <img id="tex-piso-sotao" crossorigin="anonymous">
             <img id="tex-vista" crossorigin="anonymous">
             
             <img id="tex-anne-vestido" crossorigin="anonymous">
@@ -461,7 +432,7 @@
         </a-entity>
 
         <!-- CAMERA RIG FRAMEWORK -->
-        <a-entity id="camera-rig" position="0 1.6 0" wasd-controls="acceleration: 25" motor-colisao>
+        <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
             <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true" id="visao-usuario" position="0 0 0">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
@@ -473,7 +444,7 @@
     </a-scene>
 
     <script>
-        // Procedural Texture Generator to prevent cross-origin WebGL errors
+        // Procedural Texture Generator
         function criarTexturaProcedural(largura, altura, funcaoDesenho) {
             const canvas = document.createElement('canvas');
             canvas.width = largura;
@@ -483,90 +454,86 @@
             return canvas.toDataURL('image/png');
         }
 
-        // Initialize inline textures before WebGL compilation with local file and procedural fallback
+        // Initialize high-quality procedural textures directly
         (function gerarTexturasIniciais() {
-            function aplicarTexturaComFallback(idImg, funcaoGeradora) {
-                const imgEl = document.querySelector('#' + idImg);
-                const proceduralUrl = funcaoGeradora();
-
-                if (imgEl.hasAttribute('src') && imgEl.getAttribute('src') !== '') {
-                    imgEl.addEventListener('error', () => {
-                        console.warn(`Imagem ${idImg} não encontrada no caminho local. Aplicando textura de fallback.`);
-                        imgEl.src = proceduralUrl;
-                    }, { once: true });
-                } else {
-                    imgEl.src = proceduralUrl;
-                }
-            }
-
-            // Wood paneling for Library
-            aplicarTexturaComFallback('tex-biblioteca', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#3a2414';
+            // Biblioteca: Painéis de Madeira Elegantes
+            document.querySelector('#tex-biblioteca').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#4a2f1b';
                 ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                ctx.fillStyle = '#3b2312';
                 for (let i = 0; i < h; i += 64) {
                     ctx.fillRect(0, i, w, 4);
                 }
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-                for (let i = 0; i < 100; i++) {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 60; i++) {
                     ctx.beginPath();
-                    ctx.moveTo(Math.random() * w, 0);
-                    ctx.lineTo(Math.random() * w, h);
+                    let y = Math.random() * h;
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y + (Math.random() * 8 - 4));
                     ctx.stroke();
                 }
-            }));
+            });
 
-            // Vintage wallpaper for Anne's room
-            aplicarTexturaComFallback('tex-quarto', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#d4c2a5';
+            // Quarto de Anne: Papel de Parede Vintage Estilizado
+            document.querySelector('#tex-quarto').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#d8c4a0';
                 ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#bfae93';
+                ctx.fillStyle = '#c7b18a';
                 for (let x = 0; x < w; x += 32) {
                     ctx.fillRect(x, 0, 16, h);
                 }
-                ctx.fillStyle = 'rgba(92, 64, 40, 0.15)';
+                ctx.fillStyle = '#8a5a36';
                 for (let x = 16; x < w; x += 32) {
                     for (let y = 16; y < h; y += 32) {
                         ctx.beginPath();
-                        ctx.arc(x, y, 6, 0, Math.PI * 2);
+                        ctx.arc(x, y, 5, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 }
-            }));
+            });
 
-            // Aged plaster for first floor
-            aplicarTexturaComFallback('tex-andar1', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#c5b79e';
+            // 1º Andar: Reboco Antigo / Tijolos Históricos
+            document.querySelector('#tex-andar1').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#bfae94';
                 ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = 'rgba(0,0,0,0.03)';
-                for (let i = 0; i < 500; i++) {
-                    ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
-                }
-            }));
-
-            // Weathered attic rafters
-            aplicarTexturaComFallback('tex-sotao', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#2e2015';
-                ctx.fillRect(0, 0, w, h);
-                ctx.strokeStyle = '#1a110a';
-                ctx.lineWidth = 3;
-                for (let y = 0; y < h; y += 40) {
+                ctx.strokeStyle = 'rgba(74, 51, 25, 0.2)';
+                ctx.lineWidth = 2;
+                const rh = 32, rw = 64;
+                for (let y = 0; y < h; y += rh) {
                     ctx.beginPath();
                     ctx.moveTo(0, y);
                     ctx.lineTo(w, y);
                     ctx.stroke();
+                    const offset = (y / rh) % 2 === 0 ? 0 : rw / 2;
+                    for (let x = offset; x < w; x += rw) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x, y + rh);
+                        ctx.stroke();
+                    }
                 }
-            }));
+            });
 
-            // Attic floorboards
-            aplicarTexturaComFallback('tex-piso-sotao', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#4a3525';
+            // Sótão: Parede de Madeira Rústica
+            document.querySelector('#tex-sotao').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#3a271a';
                 ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#22150c';
-                for (let y = 0; y < h; y += 64) {
-                    ctx.fillRect(0, y, w, 6);
+                ctx.fillStyle = '#26180f';
+                for (let y = 0; y < h; y += 32) {
+                    ctx.fillRect(0, y, w, 4);
                 }
-            }));
+            });
+
+            // Piso do Sótão: Tábuas Antigas
+            document.querySelector('#tex-piso-sotao').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#523a26';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#2d1d11';
+                for (let y = 0; y < h; y += 48) {
+                    ctx.fillRect(0, y, w, 5);
+                }
+            });
 
             // Window view (Sky and Tree landscape)
             document.querySelector('#tex-vista').src = criarTexturaProcedural(512, 256, (ctx, w, h) => {
@@ -608,30 +575,6 @@
                 ctx.fillRect(0, 0, w, h);
             });
         })();
-
-        // File upload dynamically applies textures at runtime
-        function vincularUploaderTextura(inputId, assetId) {
-            const inputEl = document.querySelector('#' + inputId);
-            const imgEl = document.querySelector('#' + assetId);
-            if (!inputEl || !imgEl) return;
-
-            inputEl.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (evt) {
-                        imgEl.src = evt.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        vincularUploaderTextura('input-tex-biblioteca', 'tex-biblioteca');
-        vincularUploaderTextura('input-tex-quarto', 'tex-quarto');
-        vincularUploaderTextura('input-tex-andar1', 'tex-andar1');
-        vincularUploaderTextura('input-tex-sotao', 'tex-sotao');
-        vincularUploaderTextura('input-tex-piso-sotao', 'tex-piso-sotao');
 
         // Global variables for environment states
         let currentFloor = 0; 
@@ -796,7 +739,16 @@
             audioAnne.volume = val / 100;
         });
 
-        // Physics collision engine component
+        // Global keyboard state listener for directional WASD movement
+        const teclasPressionadas = {};
+        window.addEventListener('keydown', (e) => {
+            teclasPressionadas[e.code] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            teclasPressionadas[e.code] = false;
+        });
+
+        // Physics collision and movement engine component
         AFRAME.registerComponent('motor-colisao', {
             init: function () {
                 this.lastPosition = new THREE.Vector3();
@@ -805,13 +757,49 @@
             tick: function () {
                 if (processandoTransicao) return;
                 
-                // Mantiene a câmera alinhada ao centro do rig
+                // Mantem a câmera alinhada ao centro do rig
                 const cameraChild = document.querySelector('#visao-usuario');
                 if (cameraChild) {
                     cameraChild.object3D.position.set(0, 0, 0);
                 }
 
                 const pos = this.el.object3D.position;
+
+                // Process WASD Keyboard movement relative to current camera heading
+                if (cameraChild && cameraChild.object3D) {
+                    let dir = new THREE.Vector3();
+                    cameraChild.object3D.getWorldDirection(dir);
+                    
+                    // Direction vector forward on XZ plane (-dir.x, -dir.z)
+                    let fwdX = -dir.x;
+                    let fwdZ = -dir.z;
+                    let len = Math.hypot(fwdX, fwdZ);
+                    if (len > 0.0001) {
+                        fwdX /= len;
+                        fwdZ /= len;
+                    } else {
+                        fwdX = 0; fwdZ = -1;
+                    }
+
+                    // Perpendicular right vector
+                    let rightX = -fwdZ;
+                    let rightZ = fwdX;
+
+                    let moveX = 0;
+                    let moveZ = 0;
+
+                    if (teclasPressionadas['KeyW'] || teclasPressionadas['ArrowUp']) { moveX += fwdX; moveZ += fwdZ; }
+                    if (teclasPressionadas['KeyS'] || teclasPressionadas['ArrowDown']) { moveX -= fwdX; moveZ -= fwdZ; }
+                    if (teclasPressionadas['KeyA'] || teclasPressionadas['ArrowLeft']) { moveX -= rightX; moveZ -= rightZ; }
+                    if (teclasPressionadas['KeyD'] || teclasPressionadas['ArrowRight']) { moveX += rightX; moveZ += rightZ; }
+
+                    let moveLen = Math.hypot(moveX, moveZ);
+                    if (moveLen > 0) {
+                        const speed = 0.075;
+                        pos.x += (moveX / moveLen) * speed;
+                        pos.z += (moveZ / moveLen) * speed;
+                    }
+                }
 
                 // Limites das paredes externas do Anexo
                 if (pos.x < -2.6) pos.x = -2.6;
