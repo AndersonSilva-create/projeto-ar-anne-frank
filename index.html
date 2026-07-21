@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Anexo Secreto - Reconstrução Virtual Tridimensional</title>
-    <!-- A-Frame 1.4.0 Library for robust WebVR/WebXR rendering -->
+    <!-- A-Frame 1.4.0 Library for WebVR/WebXR rendering -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Tailwind CSS for elegant HUD and responsive 2D historical interfaces -->
+    <!-- Tailwind CSS for HUD and interfaces -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -16,12 +16,12 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none; /* Prevents double-tap zoom and generic scrolling */
+            touch-action: none;
         }
         .fonte-titulo {
             font-family: 'Georgia', serif;
         }
-        /* Parchment/Scroll style for historical diary and quotes */
+        /* Parchment style for historical diary and quotes */
         .modal-historico {
             background-color: #f2e6cb;
             background-image: radial-gradient(#fbf7ed 30%, #ebdcb9 100%);
@@ -31,7 +31,6 @@
             font-family: 'Georgia', serif;
             border-radius: 8px;
         }
-        /* Custom scrollbar to match the rustic feel */
         .sem-scroll::-webkit-scrollbar {
             width: 6px;
         }
@@ -39,12 +38,10 @@
             background-color: #4a3319;
             border-radius: 3px;
         }
-        /* Transition fade overlay for smooth floor teleports */
         #efeito-fade {
             transition: opacity 0.25s ease-in-out;
             pointer-events: none;
         }
-        /* Mobile Joystick Styles */
         #zona-joystick {
             width: 100px;
             height: 100px;
@@ -66,6 +63,11 @@
 </head>
 <body class="bg-black text-white">
 
+    <!-- Tag de áudio para o Som Ambiente em Loop -->
+    <audio id="audio-ambiente" src="assets/som_ambiente.mp3" loop preload="auto"></audio>
+    <!-- Tag de áudio para a Voz de Anne Frank -->
+    <audio id="audio-anne" src="assets/anne_fala.mp3" preload="auto"></audio>
+
     <!-- Screen Fade Overlay for teleportation -->
     <div id="efeito-fade" class="fixed inset-0 bg-black opacity-0 z-[9999]"></div>
 
@@ -76,29 +78,86 @@
         </div>
         <div class="flex gap-2 pointer-events-auto">
             <!-- Day/Night Climate Toggle -->
-            <button id="btn-dia-noite" class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-2 shadow-lg border border-indigo-400">
-                <span id="icone-clima">🌙</span> <span id="txt-clima">Modo Noite</span>
+            <button id="btn-dia-noite" class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
+                <span id="icone-clima">🌙</span> <span id="txt-clima" class="hidden sm:inline">Modo Noite</span>
             </button>
             <!-- Mobile AR QR Link Code button -->
-            <button id="btn-qr" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-2 shadow-lg border border-slate-600">
-                📱 Jogar no Celular (AR)
+            <button id="btn-qr" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-slate-600">
+                📱 <span class="hidden sm:inline">Celular (AR)</span>
+            </button>
+            <!-- Settings Modal Button (Upper Right) -->
+            <button id="btn-configuracoes" class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
+                ⚙️ <span class="hidden sm:inline">Ajustes</span>
             </button>
         </div>
     </div>
 
     <!-- Parchment Diary Modal -->
     <div id="modal-diario" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/70 backdrop-blur-sm">
-        <div class="modal-historico w-full max-w-lg flex flex-col h-[70vh] relative p-6 sm:p-8">
-            <h2 class="fonte-titulo text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-4 text-[#4a3319] text-center">Diário de Anne Frank</h2>
+        <div class="modal-historico w-full max-w-lg flex flex-col h-[75vh] relative p-5 sm:p-7">
+            <h2 class="fonte-titulo text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-3 text-[#4a3319] text-center">Diário de Anne Frank</h2>
+            
             <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic" id="corpo-diario">
                 <!-- Page content loaded dynamically via JavaScript -->
             </div>
-            <div class="mt-6 flex justify-between items-center border-t border-[#4a3319]/30 pt-4">
-                <button id="btn-dia-anterior" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40">Anterior</button>
-                <span id="cont-paginas" class="text-xs sm:text-sm font-bold text-[#4a3319]">Pág. 1 / 4</span>
-                <button id="btn-dia-proximo" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40">Próxima</button>
-                <button id="btn-dia-fechar" class="bg-red-800 text-white active:scale-95 px-4 py-2 rounded font-bold hover:bg-red-900 transition">Fechar</button>
+
+            <!-- Audio Controls Bar (Appears when diary is opened and vanishes if stopped) -->
+            <div id="painel-audio-diario" class="my-2 p-2.5 bg-[#4a3319]/10 rounded-lg border border-[#4a3319]/20 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#4a3319]">
+                    <span class="animate-pulse">🎙️</span>
+                    <span id="txt-status-audio">Tocando voz de Anne...</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-pausar-audio" class="bg-[#4a3319] hover:bg-[#342412] active:scale-95 text-[#f2e6cb] px-3 py-1 rounded text-xs font-bold transition">
+                        ⏸️ Pausar
+                    </button>
+                    <button id="btn-parar-audio" class="bg-red-900 hover:bg-red-800 active:scale-95 text-white px-3 py-1 rounded text-xs font-bold transition">
+                        ⏹️ Parar
+                    </button>
+                </div>
             </div>
+
+            <div class="mt-2 flex justify-between items-center border-t border-[#4a3319]/30 pt-3">
+                <button id="btn-dia-anterior" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Anterior</button>
+                <span id="cont-paginas" class="text-xs sm:text-sm font-bold text-[#4a3319]">Pág. 1 / 15</span>
+                <button id="btn-dia-proximo" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Próxima</button>
+                <button id="btn-dia-fechar" class="bg-red-800 text-white active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-red-900 transition text-xs sm:text-sm">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Settings Modal -->
+    <div id="modal-configuracoes" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/80 backdrop-blur-md">
+        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-sm rounded-2xl p-6 shadow-2xl relative">
+            <h3 class="fonte-titulo text-xl font-bold text-amber-400 mb-6 text-center flex items-center justify-center gap-2">
+                ⚙️ Configurações de Áudio
+            </h3>
+            
+            <!-- Background Music Volume Slider -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="vol-ambiente" class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
+                        🎵 Som Ambiente (Fundo)
+                    </label>
+                    <span id="val-vol-ambiente" class="text-xs font-bold text-amber-400">50%</span>
+                </div>
+                <input type="range" id="vol-ambiente" min="0" max="100" value="50" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+
+            <!-- Anne Voice Volume Slider -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="vol-anne" class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
+                        🎙️ Voz de Anne Frank
+                    </label>
+                    <span id="val-vol-anne" class="text-xs font-bold text-amber-400">80%</span>
+                </div>
+                <input type="range" id="vol-anne" min="0" max="100" value="80" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+
+            <button id="btn-config-fechar" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-2.5 rounded-xl text-sm font-bold transition shadow-lg">
+                Salvar e Fechar
+            </button>
         </div>
     </div>
 
@@ -141,13 +200,11 @@
 
     <!-- Mobile HUD Controls -->
     <div id="controles-mobile" class="fixed bottom-6 left-6 right-6 flex justify-between items-end z-[999] pointer-events-none md:hidden">
-        <!-- Joystick Zone -->
         <div class="pointer-events-auto flex items-center justify-center">
             <div id="zona-joystick" class="flex items-center justify-center">
                 <div id="pino-joystick"></div>
             </div>
         </div>
-        <!-- Touch action backup button -->
         <div class="pointer-events-auto">
             <button id="mobile-action-btn" class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
                 INTERAGIR
@@ -163,28 +220,23 @@
     <!-- A-Frame 3D Scene setup -->
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;">
         <a-assets>
-            <!-- Room walls texturisation with robust fallbacks -->
-            <img id="tex-biblioteca" src="assets/biblioteca_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/423122/ffeaa7?text=Madeira+Biblioteca'">
-            <img id="tex-quarto" src="assets/quarto_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/2f1f10/ffffff?text=Parede+Quarto+Principal'">
-            <img id="tex-andar1" src="assets/andar1_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/4b382a/ffffff?text=Segundo+Andar'">
-            <img id="tex-sotao" src="assets/sotao_parede.jpg" onerror="this.src='https://placehold.co/1024x1024/382b1c/ffffff?text=Parede+Sotao'">
-            <img id="tex-piso-sotao" src="assets/piso_sotao.png" onerror="this.src='https://placehold.co/1024x1024/4b2f1d/ffeaa7?text=Piso+Sotao'">
-            <img id="tex-vista" src="assets/vista_rua.jpg" onerror="this.src='https://placehold.co/1024x512/34495e/ffffff?text=Paisagem+Externa'">
+            <img id="tex-biblioteca" crossorigin="anonymous">
+            <img id="tex-quarto" crossorigin="anonymous">
+            <img id="tex-andar1" crossorigin="anonymous">
+            <img id="tex-sotao" crossorigin="anonymous">
+            <img id="tex-piso-sotao" crossorigin="anonymous">
+            <img id="tex-vista" crossorigin="anonymous">
             
-            <!-- Dress, Face and hair textures for 3D Anne Frank mannequin model -->
-            <img id="tex-anne-vestido" src="assets/anne_vestido.jpg" onerror="this.src='https://placehold.co/512x512/34495e/ffffff?text=Vestido+Anne'">
-            <img id="tex-anne-rosto" src="assets/anne_rosto.jpg" onerror="this.src='https://placehold.co/512x512/ffe0bd/000000?text=Rosto+Anne+Frank'">
-            <img id="tex-anne-cabelo" src="assets/anne_cabelo.jpg" onerror="this.src='https://placehold.co/512x512/111111/ffffff?text=Cabelo+Anne'">
+            <img id="tex-anne-vestido" crossorigin="anonymous">
+            <img id="tex-anne-rosto" crossorigin="anonymous">
+            <img id="tex-anne-cabelo" crossorigin="anonymous">
         </a-assets>
 
-        <!-- Scene Atmospheric Lighting (Alternated during Day/Night toggle) -->
+        <!-- Scene Atmospheric Lighting -->
         <a-entity id="luz-ambiente" light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity id="luz-sol" light="type: directional; color: #ffeebb; intensity: 1.2" position="1 4 1"></a-entity>
-        
-        <!-- High-fidelity yellow lamp point light inside the Library to preserve texturisation legibility -->
         <a-entity id="luz-biblioteca-teto" light="type: point; color: #ffbb66; intensity: 1.0; distance: 6; decay: 1.5" position="0 3.2 0"></a-entity>
 
-        <!-- Dynamic Candle Warm Point Lights in bedrooms and attic -->
         <a-entity id="luz-velas-1" light="type: point; color: #ff9933; intensity: 0.2; distance: 5" position="0 1.1 -6.5"></a-entity>
         <a-entity id="luz-velas-2" light="type: point; color: #ff9933; intensity: 0.2; distance: 5" position="0.8 5.1 -8.5"></a-entity>
         <a-entity id="luz-sotao-luar" light="type: point; color: #4466aa; intensity: 0.1; distance: 5" position="0 11 -9"></a-entity>
@@ -192,45 +244,37 @@
         <!-- Scene Sky dome -->
         <a-sky id="sky" color="#87ceeb"></a-sky>
 
-        <!-- ================= TÉRREO: CÔMODO 1 - BIBLIOTECA (X: -3 a 3 / Z: 2 a -2) ================= -->
+        <!-- TÉRREO: BIBLIOTECA -->
         <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#423122" material="side: double; roughness: 0.8;"></a-plane> 
         <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#ebdcb9" material="side: double; roughness: 0.6;"></a-plane> 
-        
-        <!-- Outer walls surrounding the library -->
         <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
         <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
         <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
 
-        <!-- Transition internal partition wall (Z = -2) leading to the sliding bookshelf -->
         <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
         <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
-        <!-- Wall slice above the bookshelf closing the gap from Y=3 to Y=4 -->
         <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
-        <!-- Solid closed ceiling slice bridging above the bookshelf for robust encapsulation -->
         <a-plane position="0 4 -2" rotation="90 0 0" width="2" height="1" color="#ebdcb9" material="side: double; roughness: 0.7;"></a-plane>
 
-        <!-- INTERACTIVE SECRET BOOKSHELF (Gives entry when clicked) -->
+        <!-- INTERACTIVE SECRET BOOKSHELF -->
         <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.95" height="3" depth="0.38" color="#5a3d28" material="roughness: 0.8">
-            <!-- Book decor simulations on the shelves -->
             <a-box scale="0.1 0.4 0.3" position="-0.7 0.8 0.1" color="#8b0000"></a-box>
             <a-box scale="0.12 0.45 0.3" position="-0.5 0.82 0.1" color="#00008b"></a-box>
             <a-box scale="0.08 0.38 0.3" position="-0.3 0.78 0.1" color="#556b2f"></a-box>
             <a-box scale="0.1 0.4 0.3" position="0.3 0.8 0.1" color="#d2b48c"></a-box>
             <a-box scale="0.11 0.42 0.3" position="0.5 0.81 0.1" color="#4a3b32"></a-box>
-            <!-- Row 2 -->
             <a-box scale="0.1 0.4 0.3" position="-0.4 -0.2 0.1" color="#2f4f4f"></a-box>
             <a-box scale="0.13 0.43 0.3" position="-0.2 -0.21 0.1" color="#800080"></a-box>
             <a-box scale="0.09 0.41 0.3" position="0.1 -0.2 0.1" color="#a0522d"></a-box>
             <a-box scale="0.12 0.44 0.3" position="0.3 -0.22 0.1" color="#2b1a09"></a-box>
         </a-box>
 
-        <!-- ================= TÉRREO: CÔMODO 2 - QUARTO PRINCIPAL (X: -3 a 3 / Z: -2 a -10) ================= -->
+        <!-- TÉRREO: QUARTO PRINCIPAL -->
         <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#352412" material="side: double; roughness: 0.9;"></a-plane> 
         <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
         <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
         <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
 
-        <!-- Ground floor table desk of the red diary -->
         <a-entity id="mesa-estudos" position="0 0 -6.5">
             <a-box position="0 0.72 0" scale="0.8 0.05 0.8" color="#5c3a21" material="roughness: 0.9"></a-box>
             <a-cylinder position="-0.35 0.36 -0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
@@ -240,42 +284,35 @@
             
             <!-- INTERACTIVE HISTORICAL DIARY -->
             <a-box id="objeto-diario" position="0 0.76 0" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable" material="roughness: 0.7">
-                <!-- Golden diary emblem and paper lines -->
                 <a-box scale="0.04 0.005 0.1" position="-0.09 0.02 0" color="#d4af37"></a-box>
                 <a-box scale="0.2 0.03 0.28" position="0.01 0 0" color="#fefefe"></a-box>
             </a-box>
         </a-entity>
 
-        <!-- Armoire cabinet wardrobe in Ground room corner -->
         <a-entity id="armario-terreo" position="-2.6 0 -8.5">
             <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95;">
-                <a-box scale="0.02 1.0 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
-                <a-box scale="0.02 1.0 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 2.6 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 2.6 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
                 <a-sphere position="0.33 0 0.05" radius="0.02" color="#d4af37"></a-sphere>
             </a-box>
         </a-entity>
 
-        <!-- INTERACTIVE VINTAGE AM RADIO (Fitted with status led) -->
+        <!-- INTERACTIVE VINTAGE AM RADIO -->
         <a-entity id="radio-vintage" position="-2.6 0 -5">
             <a-box scale="0.4 0.95 0.5" color="#5c3818" position="0 0.475 0" material="roughness: 0.8;">
-                <!-- Radio panel mesh -->
                 <a-box id="objeto-radio" scale="0.02 0.3 0.35" position="0.21 0.2 0" color="#2b1a09" class="interactable">
-                    <a-box scale="0.005 0.1 0.15" position="0.01 0.06 -0.07" color="#eeddbb"></a-box> <!-- Frequency -->
-                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08" color="#8b5a2b"></a-cylinder> <!-- Dial -->
-                    <!-- Glowing LED indicator of audio context -->
+                    <a-box scale="0.005 0.1 0.15" position="0.01 0.06 -0.07" color="#eeddbb"></a-box>
+                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08" color="#8b5a2b"></a-cylinder>
                     <a-sphere id="led-indicador-radio" position="0.01 0.08 0.11" radius="0.012" color="#333333" material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
                 </a-box>
             </a-box>
         </a-entity>
 
-        <!-- ================= ESCADA DE MÃO 1 (Térreo para Segundo Andar) ================= -->
-        <!-- Real circular structure positioned at corner X: -2.3, Z: -4.5. Protrudes above Y=4 -->
+        <!-- ESCADA DE MÃO 1 -->
         <a-entity id="escada-1" position="-2.3 0 -4.5">
-            <!-- Parallel Vertical rail cylinders (height 4.7m) -->
             <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
             <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
             
-            <!-- Spaced tubular circular rungs -->
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -285,79 +322,57 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 2.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 3.2 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 3.6 0" color="#7a5d48"></a-cylinder>
-            <!-- Tubular rungs protruding cleanly inside the 2nd floor hole -->
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <!-- Escalation trigger boxes (Transparent/Opacity 0 but physically clickable on touch/click) -->
             <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
             <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
-        <!-- ================= SEGUNDO ANDAR (X: -3 a 3 / Z: -2 a -10) ================= -->
-        <!-- Segmented Floor Laje with an exact 0.8 x 0.8 meter square hollow centered at X=-2.3, Z=-4.5 -->
-        <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412" material="side: double; roughness: 0.95;"></a-plane> <!-- Right block -->
-        <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412" material="side: double;"></a-plane> <!-- Back Left -->
-        <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412" material="side: double;"></a-plane> <!-- Front Left -->
-        <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412" material="side: double;"></a-plane> <!-- Extreme left bridge border -->
+        <!-- SEGUNDO ANDAR -->
+        <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412" material="side: double; roughness: 0.95;"></a-plane>
+        <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412" material="side: double;"></a-plane>
+        <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412" material="side: double;"></a-plane>
+        <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412" material="side: double;"></a-plane>
 
-        <!-- Intermediate Ceiling (Ceiling of the 2nd Floor) -->
         <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8" material="side: double; roughness: 0.7;"></a-plane> 
 
-        <!-- Outer walls surrounding second floor -->
         <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
         <a-plane position="3 6 -6" rotation="0 -90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
         <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
-        <!-- Solid South Wall at Z = -2 preventing transparent ceiling views -->
         <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane> 
 
-        <!-- Glass Window on the East wall mapping background street views -->
         <a-plane position="2.98 6 -6" rotation="0 -90 0" width="1.4" height="1.6" src="#tex-vista" material="side: double;"></a-plane>
 
         <!-- Anne Frank Bedroom Furniture and Mannequin -->
         <a-entity id="cama-anne" position="0.8 4.01 -8.5">
             <a-box scale="1.1 0.3 1.8" color="#4a3319" position="0 0.15 0" material="roughness: 0.95;"></a-box>
-            <a-box scale="1.05 0.1 1.7" color="#f5ecd5" position="0 0.3 0"></a-box> <!-- Mattress -->
-            <a-box scale="1.1 0.6 0.08" color="#332211" position="0 0.35 -0.9" material="roughness: 0.9;"></a-box> <!-- Headboard -->
+            <a-box scale="1.05 0.1 1.7" color="#f5ecd5" position="0 0.3 0"></a-box>
+            <a-box scale="1.1 0.6 0.08" color="#332211" position="0 0.35 -0.9" material="roughness: 0.9;"></a-box>
 
-            <!-- STYLIZED LOW-POLY ANNE FRANK (Posed reading a textbook) -->
             <a-entity id="manequim-anne" position="0 0.35 0" rotation="0 -115 0" class="interactable">
-                <!-- Body dress container -->
                 <a-box scale="0.28 0.4 0.2" position="0 0.2 0" src="#tex-anne-vestido"></a-box>
-                
-                <!-- Rosto (Sphere with Y-rotation to look at the room center and correct mapping distortions) -->
                 <a-sphere radius="0.1" position="0 0.48 0" src="#tex-anne-rosto" rotation="0 90 0"></a-sphere>
-                
-                <!-- Hair blocks framing face -->
                 <a-box scale="0.22 0.12 0.2" position="0 0.52 -0.03" src="#tex-anne-cabelo"></a-box>
                 <a-box scale="0.03 0.18 0.16" position="-0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
                 <a-box scale="0.03 0.18 0.16" position="0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
-
-                <!-- Softly bent lap limbs and studies books -->
                 <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
                 <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
-                <a-box scale="0.06 0.22 0.06" position="-0.06 -0.12 0.22" color="#ffe0bd"></a-box> <!-- Legs skin -->
+                <a-box scale="0.06 0.22 0.06" position="-0.06 -0.12 0.22" color="#ffe0bd"></a-box>
                 <a-box scale="0.06 0.22 0.06" position="0.06 -0.12 0.22" color="#ffe0bd"></a-box>
-
-                <!-- Reading arms -->
                 <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 5"></a-box>
                 <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 -5"></a-box>
-
-                <!-- Study textbook open in lap -->
                 <a-box scale="0.18 0.02 0.14" position="0 0.18 0.18" color="#cfb997" rotation="10 0 0">
                     <a-box scale="0.16 0.01 0.12" position="0 0.01 0" color="#fcfcfc"></a-box>
                 </a-box>
             </a-entity>
         </a-entity>
 
-        <!-- ================= ESCADA DE MÃO 2 (Segundo Andar para Sótão) ================= -->
-        <!-- Real circular structure positioned at corner X: 2.3, Z: -4.5. Protrudes above Y=8 -->
+        <!-- ESCADA DE MÃO 2 -->
         <a-entity id="escada-2" position="2.3 4 -4.5">
-            <!-- Parallel Vertical rail cylinders (height 4.7m) -->
             <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
             <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
             
-            <!-- Spaced tubular circular rungs -->
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -367,52 +382,39 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 2.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 3.2 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 3.6 0" color="#7a5d48"></a-cylinder>
-            <!-- Tubular rungs protruding cleanly inside the Attic floor hole -->
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <!-- Escalation triggers -->
             <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
             <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
-        <!-- ================= SÓTÃO (X: -3 a 3 / Z: -2 a -10) ================= -->
-        <!-- Segmented Floor Laje with an exact 0.8 x 0.8 meter square hollow centered at X=2.3, Z=-4.5 using tex-piso-sotao -->
-        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane> <!-- Left block -->
-        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Back Right -->
-        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Front Right -->
-        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane> <!-- Extreme right bridge border -->
+        <!-- SÓTÃO -->
+        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane>
+        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
+        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
+        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane>
 
-        <!-- Solid Attic ceiling -->
         <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b" material="side: double; roughness: 0.9;"></a-plane> 
 
-        <!-- Outer walls surrounding the Attic (Strictly bounds at Z = -2 and Z = -10) -->
         <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
         <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
         <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
-        <!-- Solid South Wall at Z = -2 preventing transparent views inside Attic -->
         <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane> 
 
-        <!-- Storage Boxes and Crates in the Attic (Raised 0.1m above floor, 0.2m from baseline 8.01) -->
         <a-entity id="caixas-sotao" position="0 8.21 -6">
-            <!-- Large box 1 -->
             <a-box position="-1.8 0.4 -2.5" scale="0.8 0.8 0.8" color="#6e5033" material="roughness: 0.95">
-                <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#5a4028"></a-box> <!-- Lid -->
+                <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#5a4028"></a-box>
             </a-box>
-            <!-- Medium box stacked -->
             <a-box position="-1.8 1.1 -2.5" scale="0.6 0.6 0.6" color="#805d3b" rotation="0 15 0" material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#664a2f"></a-box>
             </a-box>
-            <!-- Long flat box -->
             <a-box position="1.6 0.25 -2.2" scale="1.1 0.5 0.8" color="#5a4028" rotation="0 -10 0" material="roughness: 0.95"></a-box>
-            <!-- Stack of books on flat box -->
             <a-box position="1.4 0.55 -2.3" scale="0.4 0.08 0.3" color="#a31d1d" rotation="0 5 0"></a-box>
             <a-box position="1.4 0.63 -2.3" scale="0.38 0.07 0.28" color="#1d4fa3" rotation="0 -12 0"></a-box>
-            <!-- Single small dusty crate -->
             <a-box position="-1.5 0.25 1.5" scale="0.5 0.5 0.5" color="#5c4431" material="roughness: 0.98"></a-box>
         </a-entity>
 
-        <!-- INTERACTIVE WINDOW OF HOPE (Looking towards the Chestnut Tree) -->
         <a-plane id="janela-esperanca" class="interactable" position="0 10.2 -9.9" rotation="0 0 0" width="1.4" height="1.4" color="#a0c0d0" opacity="0.65" material="side: double; roughness: 0.1; metalness: 0.5;">
             <a-box scale="1.4 0.05 0.05" position="0 0.7 0" color="#382b1c"></a-box>
             <a-box scale="1.4 0.05 0.05" position="0 -0.7 0" color="#382b1c"></a-box>
@@ -422,7 +424,6 @@
             <a-box scale="1.4 0.02 0.02" position="0 0 0" color="#382b1c"></a-box>
         </a-plane>
 
-        <!-- Chestnut Tree model (Castanheira) sitting in the background distance -->
         <a-entity id="arvore-castanheira" position="0 4.5 -24">
             <a-cylinder radius="0.45" height="10" color="#412f21" material="roughness: 0.95;"></a-cylinder>
             <a-sphere radius="3.8" position="0 6.5 0" color="#274d1a" opacity="0.85" material="roughness: 0.9;"></a-sphere>
@@ -430,10 +431,9 @@
             <a-sphere radius="2.6" position="1.5 7.5 -0.5" color="#1f3d14" opacity="0.85"></a-sphere>
         </a-entity>
 
-        <!-- CAMERA RIG FRAMEWORK WITH INTEGRATED MOVEMENT COMPONENT -->
+        <!-- CAMERA RIG FRAMEWORK -->
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
             <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true" wasd-controls="acceleration: 25" id="visao-usuario">
-                <!-- Reticule pointer with fusing visual triggers -->
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
                           animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
@@ -444,24 +444,166 @@
     </a-scene>
 
     <script>
+        // Procedural Texture Generator to prevent cross-origin WebGL errors
+        function criarTexturaProcedural(largura, altura, funcaoDesenho) {
+            const canvas = document.createElement('canvas');
+            canvas.width = largura;
+            canvas.height = altura;
+            const ctx = canvas.getContext('2d');
+            funcaoDesenho(ctx, largura, altura);
+            return canvas.toDataURL('image/png');
+        }
+
+        // Initialize inline textures before WebGL compilation
+        (function gerarTexturasIniciais() {
+            // Wood paneling for Library
+            const texBiblio = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#3a2414';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                for (let i = 0; i < h; i += 64) {
+                    ctx.fillRect(0, i, w, 4);
+                }
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                for (let i = 0; i < 100; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(Math.random() * w, 0);
+                    ctx.lineTo(Math.random() * w, h);
+                    ctx.stroke();
+                }
+            });
+            document.querySelector('#tex-biblioteca').src = texBiblio;
+
+            // Vintage wallpaper for Anne's room
+            const texQuarto = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#d4c2a5';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#bfae93';
+                for (let x = 0; x < w; x += 32) {
+                    ctx.fillRect(x, 0, 16, h);
+                }
+                ctx.fillStyle = 'rgba(92, 64, 40, 0.15)';
+                for (let x = 16; x < w; x += 32) {
+                    for (let y = 16; y < h; y += 32) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 6, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            });
+            document.querySelector('#tex-quarto').src = texQuarto;
+
+            // Aged plaster for first floor
+            const texAndar1 = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#c5b79e';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = 'rgba(0,0,0,0.03)';
+                for (let i = 0; i < 500; i++) {
+                    ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
+                }
+            });
+            document.querySelector('#tex-andar1').src = texAndar1;
+
+            // Weathered attic rafters
+            const texSotao = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#2e2015';
+                ctx.fillRect(0, 0, w, h);
+                ctx.strokeStyle = '#1a110a';
+                ctx.lineWidth = 3;
+                for (let y = 0; y < h; y += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke();
+                }
+            });
+            document.querySelector('#tex-sotao').src = texSotao;
+
+            // Attic floorboards
+            const texPisoSotao = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#4a3525';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#22150c';
+                for (let y = 0; y < h; y += 64) {
+                    ctx.fillRect(0, y, w, 6);
+                }
+            });
+            document.querySelector('#tex-piso-sotao').src = texPisoSotao;
+
+            // Window view (Sky and Tree landscape)
+            const texVista = criarTexturaProcedural(512, 256, (ctx, w, h) => {
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#5882a8');
+                grad.addColorStop(0.7, '#d6e4ed');
+                grad.addColorStop(1, '#8ca085');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+                
+                // Silhouette of chestnut tree
+                ctx.fillStyle = '#213318';
+                ctx.beginPath();
+                ctx.arc(400, 100, 70, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            document.querySelector('#tex-vista').src = texVista;
+
+            // Character textures
+            const texAnneVestido = criarTexturaProcedural(256, 256, (ctx, w, h) => {
+                ctx.fillStyle = '#2d4a43';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#ffffff';
+                for (let i = 0; i < 80; i++) {
+                    ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
+                }
+            });
+            document.querySelector('#tex-anne-vestido').src = texAnneVestido;
+
+            const texAnneRosto = criarTexturaProcedural(256, 256, (ctx, w, h) => {
+                ctx.fillStyle = '#fce4ce';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#3a2218';
+                ctx.fillRect(70, 100, 20, 10); // Left eye
+                ctx.fillRect(166, 100, 20, 10); // Right eye
+                ctx.fillStyle = '#c46859';
+                ctx.fillRect(100, 170, 56, 8); // Smile
+            });
+            document.querySelector('#tex-anne-rosto').src = texAnneRosto;
+
+            const texAnneCabelo = criarTexturaProcedural(256, 256, (ctx, w, h) => {
+                ctx.fillStyle = '#1e140e';
+                ctx.fillRect(0, 0, w, h);
+            });
+            document.querySelector('#tex-anne-cabelo').src = texAnneCabelo;
+        })();
+
         // Global variables for environment states
-        let currentFloor = 0; // 0: Térreo, 1: 2º Andar, 2: Sótão
+        let currentFloor = 0; 
         let estanteAberta = false;
-        let climaDia = true; // STARTS IN DAY MODE AS REQUESTED
+        let climaDia = true; 
         let radioAtivo = false;
         let janelaAtiva = false;
         let processandoTransicao = false;
 
-        // Custom Diary Pages content
+        // Custom Diary Pages content - Expanded to 15 Historical Pages
         const paginasDiario = [
-            "12 de junho de 1942:<br><br>Espero poder contar tudo a você, como nunca pude contar a ninguém, e espero que você seja uma grande fonte de conforto e apoio. Até agora você tem sido de grande ajuda...",
-            "9 de julho de 1942:<br><br>A vida aqui é muito diferente de tudo o que conhecíamos. Temos de andar na ponta dos pés e falar aos sussurros para que não nos ouçam na parte de baixo do armazém. O silêncio é o nosso maior protetor.",
-            "23 de julho de 1943:<br><br>O rádio nos traz notícias maravilhosas sobre o avanço dos aliados. Ouvir a transmissão da BBC nos dá uma dose imensa de esperança, embora a estática pesada e o Código Morse tornem as mensagens difíceis de compreender.",
-            "24 de fevereiro de 1944:<br><br>A castanheira do sótão está florescendo! De lá, olhando para o céu livre e os pássaros, sinto que a natureza tem o poder de curar qualquer dor. Enquanto eu puder ver isso, não sentirei tristeza."
+            "12 de junho de 1942:<br><br>Espero poder contar tudo a você, como nunca pude contar a ninguém, e espero que você seja uma grande fonte de conforto e apoio. Ganhei este diário hoje no meu aniversário de 13 anos...",
+            "20 de junho de 1942:<br><br>Escrever num diário é uma experiência realmente estranha para alguém como eu. Não apenas porque nunca escrevi nada antes, mas porque me parece que mais tarde ninguém estará interessado nos pensamentos de uma garota de treze anos. Vou chamar meu diário de 'Kitty'.",
+            "9 de julho de 1942:<br><br>Chegamos ao Anexo Secreto na Prinsengracht 263. Papai, Mamãe e Margot já estavam arrumando as coisas. Subimos as escadas de madeira e nos trancamos. A vida aqui é muito diferente de tudo o que conhecíamos.",
+            "10 de julho de 1942:<br><br>Temos de andar na ponta dos pés e falar aos sussurros para que não nos ouçam na parte de baixo do armazém. O silêncio absoluto durante o dia é o nosso maior protetor.",
+            "28 de novembro de 1942:<br><br>Agora somos oito pessoas no Anexo com a chegada do Sr. Dussel. O espaço é pequeno e o racionamento é rígido. Mas temos a sorte de ter protetores incríveis como Miep e Bep, que arriscam suas vidas por nós todos os dias.",
+            "10 de dezembro de 1942:<br><br>À noite, quando as luzes se apagam e o vento sopra lá fora, o medo tenta tomar conta. Mas nos confortamos sabendo que estamos juntos. As regras de segurança são extremamente severas.",
+            "2 de maio de 1943:<br><br>A comida está ficando cada vez mais escassa e sem graça. Couve-flor enlatada, batatas velhas e pão duro são nossa rotina. Mas tentamos manter o bom humor nas refeições.",
+            "23 de julho de 1943:<br><br>O rádio nos traz notícias maravilhosas sobre o avanço dos aliados. Ouvir a transmissão da BBC nos dá uma dose imensa de esperança, embora a estática pesada torne as mensagens difíceis de compreender.",
+            "11 de novembro de 1943:<br><br>Minha caneta-tinteiro favorita, que me acompanhou por anos, foi acidentalmente destruída no fogão. Fiquei muito triste, mas percebo que há coisas muito mais preciosas que estamos lutando para preservar.",
+            "24 de fevereiro de 1944:<br><br>A castanheira vista da janela do sótão está florescendo! De lá, olhando para o céu livre e os pássaros, sinto que a natureza tem o poder de curar qualquer dor. Enquanto eu puder ver isso, não sentirei tristeza.",
+            "29 de março de 1944:<br><br>O ministro da Educação no rádio disse que após a guerra haverá uma coleção de diários e cartas sobre este período. Todos se voltaram para o meu diário! Pensei como seria interessante se eu publicasse um romance sobre o Anexo Secreto.",
+            "16 de abril de 1944:<br><br>Minhas conversas com Peter no sótão se tornaram meu momento favorito do dia. Encontrei nele um amigo com quem posso compartilhar meus sentimentos mais profundos e sonhos para o futuro.",
+            "6 de junho de 1944:<br><br>'O Dia D chegou!' - anunciou a BBC. A invasão aliada começou na Normandia! O entusiasmo no Anexo é indescritível. A libertação parece finalmente estar ao nosso alcance!",
+            "15 de julho de 1944:<br><br>É um grande milagre que eu não tenha abandonado todos os meus esperançosos ideais, porque eles parecem tão absurdos e impossíveis de realizar. No entanto, eu os mantenho, porque apesar de tudo, eu ainda acredito que as pessoas são realmente boas de coração.",
+            "1 de agosto de 1944:<br><br>Uma voz dentro de mim sussurra que preciso continuar forte. Sou meu próprio crítico mais severo. Busco constantemente maneiras de me tornar quem eu realmente gostaria de ser..."
         ];
         let paginaAtual = 0;
 
-        // Historic quotes for the mannequin Anne
         const falasAnne = [
             "Como é maravilhoso que ninguém precise esperar um único momento antes de começar a melhorar o mundo.",
             "Apesar de tudo, eu ainda acredito que as pessoas são realmente boas de coração.",
@@ -469,45 +611,164 @@
             "Onde há esperança, há vida. Ela nos enche de coragem e nos faz fortes novamente."
         ];
 
-        // Physics collision engine custom component to run during scene rendering ticks
+        // Audio HTML Elements Pointers
+        const audioAmbiente = document.querySelector('#audio-ambiente');
+        const audioAnne = document.querySelector('#audio-anne');
+        const painelAudioDiario = document.querySelector('#painel-audio-diario');
+        const txtStatusAudio = document.querySelector('#txt-status-audio');
+        const btnPausarAudio = document.querySelector('#btn-pausar-audio');
+        const btnPararAudio = document.querySelector('#btn-parar-audio');
+
+        // Set default initial volumes
+        audioAmbiente.volume = 0.5;
+        audioAnne.volume = 0.8;
+
+        // Start Ambient Sound on First User Interaction (bypassing browser autoplay policies)
+        let somAmbienteIniciado = false;
+        function iniciarSomAmbiente() {
+            if (!somAmbienteIniciado) {
+                audioAmbiente.play().then(() => {
+                    somAmbienteIniciado = true;
+                }).catch(err => {
+                    console.log("Aguardando interação para iniciar áudio ambiente.");
+                });
+            }
+        }
+        document.addEventListener('click', iniciarSomAmbiente, { once: true });
+        document.addEventListener('touchstart', iniciarSomAmbiente, { once: true });
+
+        // Diary Audio Control Mechanics
+        function tocarAudioAnne() {
+            if (audioAnne.src) {
+                audioAnne.currentTime = 0;
+                audioAnne.play().then(() => {
+                    painelAudioDiario.classList.remove('hidden');
+                    txtStatusAudio.innerText = "Tocando voz de Anne...";
+                    btnPausarAudio.innerText = "⏸️ Pausar";
+                }).catch(err => {
+                    console.log("Arquivo de áudio da Anne não encontrado ou reprodução bloqueada.");
+                    // O painel continua visível permitindo controle mesmo se houver atraso no carregamento
+                    painelAudioDiario.classList.remove('hidden');
+                });
+            }
+        }
+
+        function pausarAudioAnne() {
+            if (audioAnne.paused) {
+                audioAnne.play();
+                txtStatusAudio.innerText = "Tocando voz de Anne...";
+                btnPausarAudio.innerText = "⏸️ Pausar";
+            } else {
+                audioAnne.pause();
+                txtStatusAudio.innerText = "Áudio Pausado";
+                btnPausarAudio.innerText = "▶️ Continuar";
+            }
+        }
+
+        function pararAudioAnne() {
+            audioAnne.pause();
+            audioAnne.currentTime = 0;
+            painelAudioDiario.classList.add('hidden'); // Botões somem junto com a parada do áudio
+        }
+
+        btnPausarAudio.addEventListener('click', pausarAudioAnne);
+        btnPararAudio.addEventListener('click', pararAudioAnne);
+
+        audioAnne.addEventListener('ended', () => {
+            pararAudioAnne();
+        });
+
+        // Diary Click Interaction
+        document.querySelector('#objeto-diario').addEventListener('click', () => {
+            paginaAtual = 0;
+            document.querySelector('#modal-diario').classList.remove('hidden');
+            carregarPaginaDiario();
+            tocarAudioAnne(); // Toca o áudio da Anne ao abrir o diário
+        });
+
+        function carregarPaginaDiario() {
+            document.querySelector('#corpo-diario').innerHTML = paginasDiario[paginaAtual];
+            document.querySelector('#cont-paginas').innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
+            document.querySelector('#btn-dia-anterior').disabled = paginaAtual === 0;
+            document.querySelector('#btn-dia-proximo').disabled = paginaAtual === paginasDiario.length - 1;
+        }
+
+        document.querySelector('#btn-dia-anterior').addEventListener('click', () => {
+            if (paginaAtual > 0) {
+                paginaAtual--;
+                carregarPaginaDiario();
+            }
+        });
+        document.querySelector('#btn-dia-proximo').addEventListener('click', () => {
+            if (paginaAtual < paginasDiario.length - 1) {
+                paginaAtual++;
+                carregarPaginaDiario();
+            }
+        });
+        document.querySelector('#btn-dia-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-diario').classList.add('hidden');
+            pararAudioAnne(); // Parar o áudio caso o diário seja fechado
+        });
+
+        // Audio Settings UI logic
+        const modalConfig = document.querySelector('#modal-configuracoes');
+        const btnConfig = document.querySelector('#btn-configuracoes');
+        const btnConfigFechar = document.querySelector('#btn-config-fechar');
+        const sliderAmbiente = document.querySelector('#vol-ambiente');
+        const sliderAnne = document.querySelector('#vol-anne');
+        const valAmbiente = document.querySelector('#val-vol-ambiente');
+        const valAnne = document.querySelector('#val-vol-anne');
+
+        btnConfig.addEventListener('click', () => {
+            modalConfig.classList.remove('hidden');
+        });
+
+        btnConfigFechar.addEventListener('click', () => {
+            modalConfig.classList.add('hidden');
+        });
+
+        sliderAmbiente.addEventListener('input', (e) => {
+            const val = e.target.value;
+            valAmbiente.innerText = `${val}%`;
+            audioAmbiente.volume = val / 100;
+        });
+
+        sliderAnne.addEventListener('input', (e) => {
+            const val = e.target.value;
+            valAnne.innerText = `${val}%`;
+            audioAnne.volume = val / 100;
+        });
+
+        // Physics collision engine component
         AFRAME.registerComponent('motor-colisao', {
             init: function () {
                 this.lastPosition = new THREE.Vector3();
                 this.lastPosition.copy(this.el.object3D.position);
             },
             tick: function () {
-                // Safeguard during teleport animations
                 if (processandoTransicao) return;
-
                 const pos = this.el.object3D.position;
 
-                // 1. Scene bounding walls (X: [-2.6, 2.6], Z: [1.6, -9.4]) - ADDING STRICT COLLISION FOR WALLS
                 if (pos.x < -2.6) pos.x = -2.6;
                 if (pos.x > 2.6) pos.x = 2.6;
                 if (pos.z > 1.6) pos.z = 1.6;
                 if (pos.z < -9.4) pos.z = -9.4;
 
-                // 2. Secret Partition Wall logic at Z = -2 (Paredes de divisa da estante)
                 if (pos.z < -1.8 && pos.z > -2.2) {
-                    // Check horizontal gaps
                     if (pos.x <= -0.9 || pos.x >= 0.9) {
                         pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
                     } else {
-                        // Central sliding gap
                         if (!estanteAberta) {
                             pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
                         }
                     }
                 }
 
-                // 3. Furniture Bounding Box Exclusions (only active on designated floors)
                 if (currentFloor === 0) {
-                    // Armoire cabinet corner block (X < -1.8, Z < -7.4)
                     if (pos.x < -1.8 && pos.z < -7.4) {
                         if (this.lastPosition.x >= -1.8) pos.x = -1.8;
                         if (this.lastPosition.z >= -7.4) pos.z = -7.4;
                     }
-                    // Table desk block (X in [-0.5, 0.5], Z in [-6.9, -6.1])
                     if (pos.x > -0.5 && pos.x < 0.5 && pos.z > -6.9 && pos.z < -6.1) {
                         if (this.lastPosition.x <= -0.5) pos.x = -0.5;
                         else if (this.lastPosition.x >= 0.5) pos.x = 0.5;
@@ -515,22 +776,18 @@
                         else if (this.lastPosition.z >= -6.1) pos.z = -6.1;
                     }
                 } else if (currentFloor === 1) {
-                    // Single Bed block (X in [-0.2, 1.7], Z < -7.4)
                     if (pos.x > -0.2 && pos.x < 1.7 && pos.z < -7.4) {
                         if (this.lastPosition.x <= -0.2) pos.x = -0.2;
                         if (this.lastPosition.z >= -7.4) pos.z = -7.4;
                     }
                 } else if (currentFloor === 2) {
-                    // Attic boundaries (South side wall strictly closed at Z = -2)
                     if (pos.z > -2.0) pos.z = -2.0;
                 }
 
-                // Save coordinate state
                 this.lastPosition.copy(pos);
             }
         });
 
-        // Transition fade overlay controller with momentum reset
         function transicionarAndar(alvoFloor, novoY) {
             if (processandoTransicao) return;
             processandoTransicao = true;
@@ -539,21 +796,17 @@
             const camera = document.querySelector('#visao-usuario');
             const fade = document.querySelector('#efeito-fade');
 
-            // Set fade black overlay
             fade.style.opacity = '1';
 
             setTimeout(() => {
-                // Zero WASD momentum velocity on the camera target
                 if (camera.components['wasd-controls']) {
                     camera.components['wasd-controls'].velocity.set(0, 0, 0);
                 }
 
-                // Teleport position coordinates
                 const rigPos = rig.getAttribute('position');
                 rigPos.y = novoY;
                 rig.setAttribute('position', rigPos);
 
-                // Update floor pointers
                 currentFloor = alvoFloor;
                 
                 const statusTexts = [
@@ -563,7 +816,6 @@
                 ];
                 document.querySelector('#txt-status').innerText = statusTexts[currentFloor];
 
-                // Remove fade black overlay after coordinates setup
                 setTimeout(() => {
                     fade.style.opacity = '0';
                     processandoTransicao = false;
@@ -572,45 +824,31 @@
             }, 250);
         }
 
-        // Setup interaction triggers for ladders (Now highly visible and functional)
-        document.querySelector('#trigger-subir-1').addEventListener('click', () => {
-            transicionarAndar(1, 5.6);
-        });
-        document.querySelector('#trigger-descer-1').addEventListener('click', () => {
-            transicionarAndar(0, 1.6);
-        });
-        document.querySelector('#trigger-subir-2').addEventListener('click', () => {
-            transicionarAndar(2, 9.71);
-        });
-        document.querySelector('#trigger-descer-2').addEventListener('click', () => {
-            transicionarAndar(1, 5.6);
-        });
+        document.querySelector('#trigger-subir-1').addEventListener('click', () => { transicionarAndar(1, 5.6); });
+        document.querySelector('#trigger-descer-1').addEventListener('click', () => { transicionarAndar(0, 1.6); });
+        document.querySelector('#trigger-subir-2').addEventListener('click', () => { transicionarAndar(2, 9.71); });
+        document.querySelector('#trigger-descer-2').addEventListener('click', () => { transicionarAndar(1, 5.6); });
 
-        // Sliding door bookshelf animation trigger (Now opening flawlessly using native slide)
         document.querySelector('#estante-secreta').addEventListener('click', () => {
             const shelf = document.querySelector('#estante-secreta');
-            
             estanteAberta = !estanteAberta;
-            
             shelf.setAttribute('animation', {
                 property: 'position',
                 to: `${estanteAberta ? 1.8 : 0} 1.5 -1.9`,
                 dur: 1500,
                 easing: 'easeInOutQuad'
             });
-
             document.querySelector('#hud-instrucoes').innerText = estanteAberta 
                 ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal." 
                 : "Estante Secreta trancada.";
         });
 
-        // Procedural Audio Engine (White noise and sine oscillators via Web Audio API)
+        // Procedural Audio Engine for Radio and Window
         let audioCtx = null;
         let staticSource = null;
         let morseOsc = null;
         let morseGainNode = null;
         let morseSequenceInterval = null;
-        
         let windSource = null;
         let windFilter = null;
         let birdTimer = null;
@@ -624,16 +862,8 @@
             }
         }
 
-        // Unlocks Audio Context globally in iOS/Android at the first user touch
-        document.addEventListener('touchstart', function() {
-            initializeAudioContext();
-        }, { once: true });
-
-        // Vintage AM Radio Procedural Synthesizer
         function ativarRadioProcedural() {
             initializeAudioContext();
-
-            // 1. Procedural AM Static (Bandpass filtered white noise)
             const bufferSize = audioCtx.sampleRate * 2;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
@@ -651,17 +881,16 @@
             bandpass.Q.value = 1.6;
 
             const staticGain = audioCtx.createGain();
-            staticGain.gain.value = 0.05; // Faint white noise
+            staticGain.gain.value = 0.05;
 
             staticSource.connect(bandpass);
             bandpass.connect(staticGain);
             staticGain.connect(audioCtx.destination);
             staticSource.start();
 
-            // 2. Morse Code Signal (Sine oscillator blinking Morse sequence "H-O-P-E")
             morseOsc = audioCtx.createOscillator();
             morseOsc.type = 'sine';
-            morseOsc.frequency.value = 880; // Classic CW beep frequency
+            morseOsc.frequency.value = 880;
 
             morseGainNode = audioCtx.createGain();
             morseGainNode.gain.value = 0;
@@ -670,12 +899,11 @@
             morseGainNode.connect(audioCtx.destination);
             morseOsc.start();
 
-            // Beep pattern mapping for "H-O-P-E" (. . . .  - - -  . - - .  .)
             const pattern = [
-                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 240 }, // H
-                { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 240 },                             // O
-                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 240 }, // P
-                { f: 1, d: 80 }, { f: 0, d: 800 }                                                                                                     // E
+                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 240 },
+                { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 240 },
+                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 240 },
+                { f: 1, d: 80 }, { f: 0, d: 800 }
             ];
 
             let index = 0;
@@ -700,33 +928,20 @@
                     tocarProximaNota();
                 }, note.d);
             }
-
             tocarProximaNota();
         }
 
         function desativarRadioProcedural() {
-            if (staticSource) {
-                try { staticSource.stop(); } catch(e){}
-                staticSource = null;
-            }
-            if (morseOsc) {
-                try { morseOsc.stop(); } catch(e){}
-                morseOsc = null;
-            }
-            if (morseSequenceInterval) {
-                clearTimeout(morseSequenceInterval);
-                morseSequenceInterval = null;
-            }
+            if (staticSource) { try { staticSource.stop(); } catch(e){} staticSource = null; }
+            if (morseOsc) { try { morseOsc.stop(); } catch(e){} morseOsc = null; }
+            if (morseSequenceInterval) { clearTimeout(morseSequenceInterval); morseSequenceInterval = null; }
             const led = document.querySelector('#led-indicador-radio');
             led.setAttribute('color', '#333333');
             led.setAttribute('material', 'emissiveIntensity', '0');
         }
 
-        // Sótão Window of Hope Procedural Wind and Birds Synthesizer
         function ativarJanelaProcedural() {
             initializeAudioContext();
-
-            // 1. Procedural Wind (Low-frequency swept bandpass white noise)
             const bufferSize = audioCtx.sampleRate * 2;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
@@ -751,7 +966,6 @@
             windGain.connect(audioCtx.destination);
             windSource.start();
 
-            // Sweep filter frequency dynamically to simulate wind gusting
             function sweepWind() {
                 if (!janelaAtiva) return;
                 const freq = 200 + Math.random() * 300;
@@ -762,49 +976,35 @@
             }
             sweepWind();
 
-            // 2. Procedural Bird Chirps (Oscillator sweep chirping)
             function chirpBird() {
                 if (!janelaAtiva) return;
-                
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(2500 + Math.random() * 500, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(3500 + Math.random() * 500, audioCtx.currentTime + 0.15);
-                
                 gain.gain.setValueAtTime(0, audioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.02);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-                
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.2);
-
                 birdTimer = setTimeout(chirpBird, 2000 + Math.random() * 3000);
             }
             chirpBird();
         }
 
         function desativarJanelaProcedural() {
-            if (windSource) {
-                try { windSource.stop(); } catch(e){}
-                windSource = null;
-            }
-            if (birdTimer) {
-                clearTimeout(birdTimer);
-                birdTimer = null;
-            }
+            if (windSource) { try { windSource.stop(); } catch(e){} windSource = null; }
+            if (birdTimer) { clearTimeout(birdTimer); birdTimer = null; }
         }
 
-        // Hooking up trigger events to active components
         document.querySelector('#objeto-radio').addEventListener('click', () => {
             radioAtivo = !radioAtivo;
             if (radioAtivo) {
                 ativarRadioProcedural();
-                abrirInspecao("Rádio Antigo", "📻", "Este pequeno aparelho receptor de rádio era a única ponte de conexão das famílias com o progresso das frentes aliadas. Otto Frank e os outros ouviam a BBC às escondidas para alimentar sua coragem.");
+                abrirInspecao("Rádio Antigo", "📻", "Este pequeno aparelho receptor de rádio era a única ponte de conexão das famílias com o progresso das frentes aliadas. Otto Frank e os outros ouviam a BBC às escondidas.");
             } else {
                 desativarRadioProcedural();
             }
@@ -814,43 +1014,12 @@
             janelaAtiva = !janelaAtiva;
             if (janelaAtiva) {
                 ativarJanelaProcedural();
-                abrirFalaAnne("Olhar para o céu aberto e para a grande castanheira florescendo me devolve a certeza de que a paz voltará. Enquanto a natureza existir, haverá consolo para qualquer dor.");
+                abrirFalaAnne("Olhar para o céu aberto e para a grande castanheira florescendo me devolve a certeza de que a paz voltará.");
             } else {
                 desativarJanelaProcedural();
             }
         });
 
-        // Diary Click Interaction
-        document.querySelector('#objeto-diario').addEventListener('click', () => {
-            paginaAtual = 0;
-            document.querySelector('#modal-diario').classList.remove('hidden');
-            carregarPaginaDiario();
-        });
-
-        function carregarPaginaDiario() {
-            document.querySelector('#corpo-diario').innerHTML = paginasDiario[paginaAtual];
-            document.querySelector('#cont-paginas').innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
-            document.querySelector('#btn-dia-anterior').disabled = paginaAtual === 0;
-            document.querySelector('#btn-dia-proximo').disabled = paginaAtual === paginasDiario.length - 1;
-        }
-
-        document.querySelector('#btn-dia-anterior').addEventListener('click', () => {
-            if (paginaAtual > 0) {
-                paginaAtual--;
-                carregarPaginaDiario();
-            }
-        });
-        document.querySelector('#btn-dia-proximo').addEventListener('click', () => {
-            if (paginaAtual < paginasDiario.length - 1) {
-                paginaAtual++;
-                carregarPaginaDiario();
-            }
-        });
-        document.querySelector('#btn-dia-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-diario').classList.add('hidden');
-        });
-
-        // Anne Frank mannequin click interaction
         document.querySelector('#manequim-anne').addEventListener('click', () => {
             const index = Math.floor(Math.random() * falasAnne.length);
             abrirFalaAnne(falasAnne[index]);
@@ -860,6 +1029,7 @@
             document.querySelector('#texto-fala-anne').innerText = texto;
             document.querySelector('#modal-fala-anne').classList.remove('hidden');
         }
+
         document.querySelector('#btn-fala-fechar').addEventListener('click', () => {
             document.querySelector('#modal-fala-anne').classList.add('hidden');
             if (janelaAtiva) {
@@ -868,13 +1038,13 @@
             }
         });
 
-        // Generic object inspector UI loader
         function abrirInspecao(titulo, render, descricao) {
             document.querySelector('#inspecao-titulo').innerText = titulo;
             document.querySelector('#inspecao-render').innerText = render;
             document.querySelector('#inspecao-descricao').innerText = descricao;
             document.querySelector('#modal-inspecao').classList.remove('hidden');
         }
+
         document.querySelector('#btn-inspecao-fechar').addEventListener('click', () => {
             document.querySelector('#modal-inspecao').classList.add('hidden');
             if (radioAtivo) {
@@ -883,7 +1053,7 @@
             }
         });
 
-        // Climate toggle switcher (Day vs Night)
+        // Climate toggle switcher
         const btnClima = document.querySelector('#btn-dia-noite');
         const lAmbient = document.querySelector('#luz-ambiente');
         const lSol = document.querySelector('#luz-sol');
@@ -896,7 +1066,6 @@
         btnClima.addEventListener('click', () => {
             climaDia = !climaDia;
             if (climaDia) {
-                // Day mode setups
                 lAmbient.setAttribute('light', 'intensity', '0.6; color: #ffffff;');
                 lSol.setAttribute('light', 'intensity', '1.2');
                 lBiblio.setAttribute('light', 'intensity', '1.0; color: #ffffff;');
@@ -906,9 +1075,8 @@
                 skyEl.setAttribute('color', '#87ceeb');
                 document.querySelector('#icone-clima').innerText = "🌙";
                 document.querySelector('#txt-clima').innerText = "Modo Noite";
-                btnClima.className = "bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-2 shadow-lg border border-indigo-400";
+                btnClima.className = "bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400";
             } else {
-                // Night mode setups
                 lAmbient.setAttribute('light', 'intensity', '0.25; color: #0c0f1d;');
                 lSol.setAttribute('light', 'intensity', '0.0');
                 lBiblio.setAttribute('light', 'intensity', '1.8; color: #ffbb66;');
@@ -918,7 +1086,7 @@
                 skyEl.setAttribute('color', '#03030c');
                 document.querySelector('#icone-clima').innerText = "☀️";
                 document.querySelector('#txt-clima').innerText = "Modo Dia";
-                btnClima.className = "bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-2 shadow-lg border border-amber-500";
+                btnClima.className = "bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500";
             }
         });
 
@@ -932,7 +1100,7 @@
             document.querySelector('#modal-qrcode').classList.add('hidden');
         });
 
-        // Joystick mobile controller mapping to rig transformation
+        // Joystick mobile controller mapping
         const joyZone = document.querySelector('#zona-joystick');
         const joyStick = document.querySelector('#pino-joystick');
         const cameraRig = document.querySelector('#camera-rig');
@@ -981,10 +1149,8 @@
             joyVector = { x: 0, y: 0 };
         });
 
-        // Render loop connection mapping vector translation along looking angle
         setInterval(() => {
             if (joyActive && (joyVector.x !== 0 || joyVector.y !== 0)) {
-                // Correct reading using the Three.js Euler angle updated dynamically by Gyroscope and touch drags
                 const rotationY = cameraUser.object3D.rotation.y; 
 
                 const lookDirX = -Math.sin(rotationY);
@@ -1002,7 +1168,7 @@
             }
         }, 16);
 
-        // Mobile click action backup button trigger
+        // Mobile click action button
         let currentTargetNode = null;
         const cursorEl = document.querySelector('a-cursor');
 
@@ -1024,7 +1190,6 @@
             preventInterference(e);
             if (currentTargetNode) {
                 currentTargetNode.emit('click');
-                // Subtle visual click feedback on the mobile action button
                 actionBtn.classList.add('scale-95');
                 setTimeout(() => actionBtn.classList.remove('scale-95'), 100);
             }
