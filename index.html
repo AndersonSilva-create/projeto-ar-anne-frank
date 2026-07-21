@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -8,7 +9,8 @@
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <!-- Tailwind CSS for HUD and interfaces -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
 
     <style>
         body {
@@ -22,6 +24,7 @@
             width: 100vw;
             height: 100vh;
         }
+
         a-scene {
             position: absolute !important;
             top: 0;
@@ -30,9 +33,11 @@
             height: 100% !important;
             z-index: 1;
         }
+
         .fonte-titulo {
             font-family: 'Georgia', serif;
         }
+
         /* Parchment style for historical diary and quotes */
         .modal-historico {
             background-color: #f2e6cb;
@@ -43,17 +48,21 @@
             font-family: 'Georgia', serif;
             border-radius: 8px;
         }
+
         .sem-scroll::-webkit-scrollbar {
             width: 6px;
         }
+
         .sem-scroll::-webkit-scrollbar-thumb {
             background-color: #4a3319;
             border-radius: 3px;
         }
+
         #efeito-fade {
             transition: opacity 0.25s ease-in-out;
             pointer-events: none;
         }
+
         #zona-joystick {
             width: 100px;
             height: 100px;
@@ -62,21 +71,48 @@
             border-radius: 50%;
             touch-action: none;
         }
+
         #pino-joystick {
             width: 40px;
             height: 40px;
             background: rgba(255, 255, 255, 0.7);
             border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             transition: transform 0.05s ease-out;
             pointer-events: none;
         }
+
         /* Ocultar elementos nativos do A-Frame que ficavam por cima dos botões no celular */
-        .a-enter-vr, .a-enter-ar, .a-orientation-modal {
+        .a-enter-vr,
+        .a-enter-ar,
+        .a-orientation-modal {
             display: none !important;
+        }
+
+        /* Regra para garantir que os controles mobile fiquem visíveis no celular em MODO PAISAGEM (horizontal) */
+        @media (pointer: coarse),
+        (hover: none) {
+            .controle-mobile-only {
+                display: flex !important;
+            }
+
+            .desktop-hud-only {
+                display: none !important;
+            }
+        }
+
+        @media (pointer: fine) and (min-width: 768px) {
+            .desktop-hud-only {
+                display: block !important;
+            }
+
+            .controle-mobile-only {
+                display: none !important;
+            }
         }
     </style>
 </head>
+
 <body class="bg-black text-white">
 
     <!-- Tag de áudio para o Som Ambiente em Loop -->
@@ -85,14 +121,18 @@
     <audio id="audio-anne" src="assets/anne_fala.mp3" preload="auto"></audio>
 
     <!-- SCREEN OVERLAY DE INÍCIO PARA AUTORIZAR SENSORES E ÁUDIO NO CELULAR -->
-    <div id="modal-inicio" class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
-        <div class="max-w-md bg-neutral-900 border border-neutral-700 p-6 sm:p-8 rounded-2xl shadow-2xl flex flex-col items-center">
+    <div id="modal-inicio"
+        class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
+        <div
+            class="max-w-md bg-neutral-900 border border-neutral-700 p-6 sm:p-8 rounded-2xl shadow-2xl flex flex-col items-center">
             <span class="text-5xl mb-4">🏛️</span>
             <h1 class="fonte-titulo text-2xl sm:text-3xl font-bold text-amber-400 mb-2">Anexo Secreto</h1>
             <p class="text-xs sm:text-sm text-neutral-300 mb-6 leading-relaxed">
-                Reconstrução virtual tridimensional do refúgio de Anne Frank. Explore o museu interativo no seu navegador ou celular.
+                Reconstrução virtual tridimensional do refúgio de Anne Frank. Explore o museu interativo no seu
+                navegador ou celular.
             </p>
-            <button id="btn-iniciar-experiencia" class="w-full py-3.5 px-6 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold text-base rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+            <button id="btn-iniciar-experiencia"
+                class="w-full py-3.5 px-6 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold text-base rounded-xl shadow-lg transition flex items-center justify-center gap-2">
                 <span>▶️</span> Entrar na Experiência 3D
             </button>
             <span class="text-[10px] text-neutral-500 mt-3">Toque para ativar áudio e navegação 3D no celular</span>
@@ -104,200 +144,258 @@
 
     <!-- HUD Bar (Controls and Status indicators) -->
     <div class="fixed top-4 left-4 right-4 flex justify-between items-center z-[999] pointer-events-none">
-        <div class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold pointer-events-auto shadow-xl">
+        <div
+            class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold pointer-events-auto shadow-xl">
             <span id="txt-status" class="text-amber-300">Explorando: Biblioteca (Térreo)</span>
         </div>
         <div class="flex gap-2 pointer-events-auto">
             <!-- Botão Tela Cheia -->
-            <button id="btn-fullscreen" class="bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500">
-                <span id="icone-fullscreen">⛶</span> <span id="txt-fullscreen" class="hidden sm:inline">Tela Cheia</span>
+            <button id="btn-fullscreen"
+                class="bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500">
+                <span id="icone-fullscreen">⛶</span> <span id="txt-fullscreen" class="hidden sm:inline">Tela
+                    Cheia</span>
             </button>
             <!-- Day/Night Climate Toggle -->
-            <button id="btn-dia-noite" class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
+            <button id="btn-dia-noite"
+                class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
                 <span id="icone-clima">🌙</span> <span id="txt-clima" class="hidden sm:inline">Modo Noite</span>
             </button>
             <!-- Mobile AR QR Link Code button -->
-            <button id="btn-qr" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-slate-600">
+            <button id="btn-qr"
+                class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-slate-600">
                 📱 <span class="hidden sm:inline">Celular (AR)</span>
             </button>
             <!-- Settings Modal Button (Upper Right) -->
-            <button id="btn-configuracoes" class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
+            <button id="btn-configuracoes"
+                class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
                 ⚙️ <span class="hidden sm:inline">Ajustes</span>
             </button>
         </div>
     </div>
 
     <!-- Parchment Diary Modal -->
-    <div id="modal-diario" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/70 backdrop-blur-sm">
+    <div id="modal-diario"
+        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/70 backdrop-blur-sm">
         <div class="modal-historico w-full max-w-lg flex flex-col h-[75vh] relative p-5 sm:p-7">
-            <h2 class="fonte-titulo text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-3 text-[#4a3319] text-center">Diário de Anne Frank</h2>
-            
-            <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic" id="corpo-diario">
+            <h2
+                class="fonte-titulo text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-3 text-[#4a3319] text-center">
+                Diário de Anne Frank</h2>
+
+            <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic"
+                id="corpo-diario">
                 <!-- Page content loaded dynamically via JavaScript -->
             </div>
 
             <!-- Audio Controls Bar (Appears when diary is opened and vanishes if stopped) -->
-            <div id="painel-audio-diario" class="my-2 p-2.5 bg-[#4a3319]/10 rounded-lg border border-[#4a3319]/20 flex items-center justify-between gap-2">
+            <div id="painel-audio-diario"
+                class="my-2 p-2.5 bg-[#4a3319]/10 rounded-lg border border-[#4a3319]/20 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#4a3319]">
                     <span class="animate-pulse">🎙️</span>
                     <span id="txt-status-audio">Tocando voz de Anne...</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="btn-pausar-audio" class="bg-[#4a3319] hover:bg-[#342412] active:scale-95 text-[#f2e6cb] px-3 py-1 rounded text-xs font-bold transition">
+                    <button id="btn-pausar-audio"
+                        class="bg-[#4a3319] hover:bg-[#342412] active:scale-95 text-[#f2e6cb] px-3 py-1 rounded text-xs font-bold transition">
                         ⏸️ Pausar
                     </button>
-                    <button id="btn-parar-audio" class="bg-red-900 hover:bg-red-800 active:scale-95 text-white px-3 py-1 rounded text-xs font-bold transition">
+                    <button id="btn-parar-audio"
+                        class="bg-red-900 hover:bg-red-800 active:scale-95 text-white px-3 py-1 rounded text-xs font-bold transition">
                         ⏹️ Parar
                     </button>
                 </div>
             </div>
 
             <div class="mt-2 flex justify-between items-center border-t border-[#4a3319]/30 pt-3">
-                <button id="btn-dia-anterior" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Anterior</button>
+                <button id="btn-dia-anterior"
+                    class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Anterior</button>
                 <span id="cont-paginas" class="text-xs sm:text-sm font-bold text-[#4a3319]">Pág. 1 / 15</span>
-                <button id="btn-dia-proximo" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Próxima</button>
-                <button id="btn-dia-fechar" class="bg-red-800 text-white active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-red-900 transition text-xs sm:text-sm">Fechar</button>
+                <button id="btn-dia-proximo"
+                    class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Próxima</button>
+                <button id="btn-dia-fechar"
+                    class="bg-red-800 text-white active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-red-900 transition text-xs sm:text-sm">Fechar</button>
             </div>
         </div>
     </div>
 
     <!-- Audio Settings Modal -->
-    <div id="modal-configuracoes" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/80 backdrop-blur-md">
-        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto sem-scroll">
-            <h3 class="fonte-titulo text-xl font-bold text-amber-400 mb-4 text-center flex items-center justify-center gap-2">
+    <div id="modal-configuracoes"
+        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/80 backdrop-blur-md">
+        <div
+            class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto sem-scroll">
+            <h3
+                class="fonte-titulo text-xl font-bold text-amber-400 mb-4 text-center flex items-center justify-center gap-2">
                 ⚙️ Configurações & Texturas
             </h3>
-            
+
             <!-- Background Music Volume Slider -->
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-1">
-                    <label for="vol-ambiente" class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
+                    <label for="vol-ambiente"
+                        class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
                         🎵 Som Ambiente (Fundo)
                     </label>
                     <span id="val-vol-ambiente" class="text-xs font-bold text-amber-400">50%</span>
                 </div>
-                <input type="range" id="vol-ambiente" min="0" max="100" value="50" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                <input type="range" id="vol-ambiente" min="0" max="100" value="50"
+                    class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
 
             <!-- Anne Voice Volume Slider -->
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-1">
-                    <label for="vol-anne" class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
+                    <label for="vol-anne"
+                        class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
                         🎙️ Voz de Anne Frank
                     </label>
                     <span id="val-vol-anne" class="text-xs font-bold text-amber-400">80%</span>
                 </div>
-                <input type="range" id="vol-anne" min="0" max="100" value="80" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                <input type="range" id="vol-anne" min="0" max="100" value="80"
+                    class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
             </div>
 
-            <button id="btn-config-fechar" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-2.5 rounded-xl text-sm font-bold transition shadow-lg">
+            <button id="btn-config-fechar"
+                class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-2.5 rounded-xl text-sm font-bold transition shadow-lg">
                 Salvar e Fechar
             </button>
         </div>
     </div>
 
     <!-- Anne Frank Dialogue / Thought Bubble Modal -->
-    <div id="modal-fala-anne" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/60 backdrop-blur-sm">
+    <div id="modal-fala-anne"
+        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/60 backdrop-blur-sm">
         <div class="modal-historico w-full max-w-md p-6 relative border-double border-8 border-[#4a3319]">
-            <h3 class="fonte-titulo text-xl font-bold border-b border-[#4a3319]/30 pb-2 mb-4 text-[#4a3319] flex items-center gap-2">
+            <h3
+                class="fonte-titulo text-xl font-bold border-b border-[#4a3319]/30 pb-2 mb-4 text-[#4a3319] flex items-center gap-2">
                 ✍️ Pensamento de Anne
             </h3>
             <p id="texto-fala-anne" class="italic text-base sm:text-lg leading-relaxed text-[#2b1a09] pr-1"></p>
             <div class="mt-6 flex justify-end">
-                <button id="btn-fala-fechar" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-5 py-2 rounded font-bold hover:bg-[#342412] transition">Refletir</button>
+                <button id="btn-fala-fechar"
+                    class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-5 py-2 rounded font-bold hover:bg-[#342412] transition">Refletir</button>
             </div>
         </div>
     </div>
 
     <!-- Advanced Object Inspection UI -->
-    <div id="modal-inspecao" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
-        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 flex flex-col items-center shadow-2xl relative">
+    <div id="modal-inspecao"
+        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
+        <div
+            class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 flex flex-col items-center shadow-2xl relative">
             <h3 id="inspecao-titulo" class="fonte-titulo text-2xl font-bold text-amber-400 mb-2">Objeto Antigo</h3>
-            <div class="w-48 h-48 my-4 flex items-center justify-center bg-black/40 rounded-xl relative border border-white/5 overflow-hidden">
+            <div
+                class="w-48 h-48 my-4 flex items-center justify-center bg-black/40 rounded-xl relative border border-white/5 overflow-hidden">
                 <div id="inspecao-render" class="text-6xl select-none animate-pulse">📻</div>
             </div>
             <p id="inspecao-descricao" class="text-sm text-neutral-300 text-center leading-relaxed mb-6"></p>
-            <button id="btn-inspecao-fechar" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-3 rounded-xl font-bold transition">Colocar de Volta</button>
+            <button id="btn-inspecao-fechar"
+                class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-3 rounded-xl font-bold transition">Colocar
+                de Volta</button>
         </div>
     </div>
 
     <!-- Mobile AR QR Code modal -->
-    <div id="modal-qrcode" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/90 backdrop-blur-sm">
-        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-xs rounded-2xl p-6 flex flex-col items-center">
+    <div id="modal-qrcode"
+        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/90 backdrop-blur-sm">
+        <div
+            class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-xs rounded-2xl p-6 flex flex-col items-center">
             <h3 class="text-lg font-bold text-center mb-2">Modo Realidade Aumentada</h3>
-            <p class="text-xs text-neutral-400 text-center mb-4">Aponte a câmera do seu celular para o QR Code para abrir este museu virtual no smartphone.</p>
+            <p class="text-xs text-neutral-400 text-center mb-4">Aponte a câmera do seu celular para o QR Code para
+                abrir este museu virtual no smartphone.</p>
             <div class="bg-white p-3 rounded-xl mb-4 shadow-xl">
                 <img id="img-qrcode" src="" alt="QR Code" class="w-44 h-44">
             </div>
-            <button id="btn-qr-fechar" class="bg-neutral-800 hover:bg-neutral-700 text-white w-full py-2 rounded-xl text-xs font-bold transition">Fechar</button>
+            <button id="btn-qr-fechar"
+                class="bg-neutral-800 hover:bg-neutral-700 text-white w-full py-2 rounded-xl text-xs font-bold transition">Fechar</button>
         </div>
     </div>
 
-    <!-- Mobile HUD Controls -->
-    <div id="controles-mobile" class="fixed bottom-6 left-4 right-4 flex justify-between items-end z-[9999] pointer-events-none md:hidden">
+    <!-- Mobile HUD Controls (Utiliza classe customizada que mantém visível na horizontal) -->
+    <div id="controles-mobile"
+        class="fixed bottom-6 left-4 right-4 flex justify-between items-end z-[9999] pointer-events-none controle-mobile-only">
         <div class="pointer-events-auto flex items-center gap-2">
             <div id="zona-joystick" class="flex items-center justify-center">
                 <div id="pino-joystick"></div>
             </div>
             <!-- Botões auxiliares de virar câmera no Celular -->
             <div class="flex flex-col gap-1">
-                <button id="btn-virar-esq" class="w-10 h-10 bg-black/60 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-sm shadow-md flex items-center justify-center">↺</button>
-                <button id="btn-virar-dir" class="w-10 h-10 bg-black/60 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-sm shadow-md flex items-center justify-center">↻</button>
+                <button id="btn-virar-esq"
+                    class="w-11 h-11 bg-black/70 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-base shadow-md flex items-center justify-center">↺</button>
+                <button id="btn-virar-dir"
+                    class="w-11 h-11 bg-black/70 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-base shadow-md flex items-center justify-center">↻</button>
             </div>
         </div>
         <div class="pointer-events-auto pb-1 pr-1">
-            <button id="mobile-action-btn" class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
+            <button id="mobile-action-btn"
+                class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
                 INTERAGIR
             </button>
         </div>
     </div>
 
     <!-- Desktop movement instructions hud -->
-    <div id="hud-instrucoes" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-white/10 text-white px-6 py-3 rounded-full text-xs sm:text-sm text-center z-[999] pointer-events-none hidden md:block">
-        Mova-se com <kbd class="px-1.5 py-0.5 bg-white/20 rounded">W, A, S, D</kbd> • Olhe com o <kbd class="px-1.5 py-0.5 bg-white/20 rounded">Mouse</kbd> • Clique para interagir nos itens brilhantes.
+    <div id="hud-instrucoes"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-white/10 text-white px-6 py-3 rounded-full text-xs sm:text-sm text-center z-[999] pointer-events-none desktop-hud-only hidden">
+        Mova-se com <kbd class="px-1.5 py-0.5 bg-white/20 rounded">W, A, S, D</kbd> • Olhe com o <kbd
+            class="px-1.5 py-0.5 bg-white/20 rounded">Mouse</kbd> • Clique para interagir nos itens brilhantes.
     </div>
 
     <!-- A-Frame 3D Scene setup - vr-mode-ui desativado para evitar tela preta no celular -->
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;" vr-mode-ui="enabled: false">
-        <a-assets>
-            <img id="tex-biblioteca" crossorigin="anonymous" src="assets/biblioteca_parede.jpg">
-            <img id="tex-quarto" crossorigin="anonymous" src="assets/quarto_parede.jpg">
-            <img id="tex-andar1" crossorigin="anonymous" src="assets/andar1_parede.jpg">
-            <img id="tex-sotao" crossorigin="anonymous" src="assets/sotao_parede.jpg">
-            <img id="tex-piso-sotao" crossorigin="anonymous" src="assets/piso_sotao.png">
+        
+        <a-assets> 
+
+            <img id="tex-biblioteca" crossorigin="anonymous" src="assets/biblioteca_parede.jpg"> 
+            <img id="tex-quarto" crossorigin="anonymous" src="assets/quarto_parede.jpg"> 
+            <img id="tex-andar1" crossorigin="anonymous" src="assets/andar1_parede.jpg"> 
+            <img id="tex-sotao" crossorigin="anonymous" src="assets/sotao_parede.jpg"> 
+            <img id="tex-piso-sotao" crossorigin="anonymous" src="assets/piso_sotao.png"> 
             <img id="tex-vista" crossorigin="anonymous" src="assets/vista_rua.jpg">
-            
-            <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg">
-            <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg">
-            <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg">
+            <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg"> 
+            <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg"> 
+            <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg"> 
+
         </a-assets>
 
         <!-- Scene Atmospheric Lighting -->
         <a-entity id="luz-ambiente" light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity id="luz-sol" light="type: directional; color: #ffeebb; intensity: 1.2" position="1 4 1"></a-entity>
-        <a-entity id="luz-biblioteca-teto" light="type: point; color: #ffbb66; intensity: 1.0; distance: 6; decay: 1.5" position="0 3.2 0"></a-entity>
+        <a-entity id="luz-biblioteca-teto" light="type: point; color: #ffbb66; intensity: 1.0; distance: 6; decay: 1.5"
+            position="0 3.2 0"></a-entity>
 
-        <a-entity id="luz-velas-1" light="type: point; color: #ff9933; intensity: 0.2; distance: 5" position="0 1.1 -6.5"></a-entity>
-        <a-entity id="luz-velas-2" light="type: point; color: #ff9933; intensity: 0.2; distance: 5" position="0.8 5.1 -8.5"></a-entity>
-        <a-entity id="luz-sotao-luar" light="type: point; color: #4466aa; intensity: 0.1; distance: 5" position="0 11 -9"></a-entity>
+        <a-entity id="luz-velas-1" light="type: point; color: #ff9933; intensity: 0.2; distance: 5"
+            position="0 1.1 -6.5"></a-entity>
+        <a-entity id="luz-velas-2" light="type: point; color: #ff9933; intensity: 0.2; distance: 5"
+            position="0.8 5.1 -8.5"></a-entity>
+        <a-entity id="luz-sotao-luar" light="type: point; color: #4466aa; intensity: 0.1; distance: 5"
+            position="0 11 -9"></a-entity>
 
         <!-- Scene Sky dome -->
         <a-sky id="sky" color="#87ceeb"></a-sky>
 
         <!-- TÉRREO: BIBLIOTECA -->
-        <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#423122" material="side: double; roughness: 0.8;"></a-plane> 
-        <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#ebdcb9" material="side: double; roughness: 0.6;"></a-plane> 
-        <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
-        <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
-        <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
+        <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#423122"
+            material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#ebdcb9"
+            material="side: double; roughness: 0.6;"></a-plane>
+        <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca"
+            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca"
+            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca"
+            material="side: double; roughness: 0.7;"></a-plane>
 
-        <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="0 4 -2" rotation="90 0 0" width="2" height="1" color="#ebdcb9" material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca"
+            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca"
+            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca"
+            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="0 4 -2" rotation="90 0 0" width="2" height="1" color="#ebdcb9"
+            material="side: double; roughness: 0.7;"></a-plane>
 
         <!-- INTERACTIVE SECRET BOOKSHELF -->
-        <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.95" height="3" depth="0.38" color="#5a3d28" material="roughness: 0.8">
+        <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.95" height="3" depth="0.38"
+            color="#5a3d28" material="roughness: 0.8">
             <a-box scale="0.1 0.4 0.3" position="-0.7 0.8 0.1" color="#8b0000"></a-box>
             <a-box scale="0.12 0.45 0.3" position="-0.5 0.82 0.1" color="#00008b"></a-box>
             <a-box scale="0.08 0.38 0.3" position="-0.3 0.78 0.1" color="#556b2f"></a-box>
@@ -310,10 +408,14 @@
         </a-box>
 
         <!-- TÉRREO: QUARTO PRINCIPAL -->
-        <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#352412" material="side: double; roughness: 0.9;"></a-plane> 
-        <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
-        <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
-        <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
+        <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#352412"
+            material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto"
+            material="side: double;"></a-plane>
+        <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"
+            material="side: double;"></a-plane>
+        <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"
+            material="side: double;"></a-plane>
 
         <a-entity id="mesa-estudos" position="0 0 -6.5">
             <a-box position="0 0.72 0" scale="0.8 0.05 0.8" color="#5c3a21" material="roughness: 0.9"></a-box>
@@ -321,9 +423,10 @@
             <a-cylinder position="0.35 0.36 -0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
             <a-cylinder position="-0.35 0.36 0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
             <a-cylinder position="0.35 0.36 0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
-            
+
             <!-- INTERACTIVE HISTORICAL DIARY -->
-            <a-box id="objeto-diario" position="0 0.76 0" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable" material="roughness: 0.7">
+            <a-box id="objeto-diario" position="0 0.76 0" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable"
+                material="roughness: 0.7">
                 <a-box scale="0.04 0.005 0.1" position="-0.09 0.02 0" color="#d4af37"></a-box>
                 <a-box scale="0.2 0.03 0.28" position="0.01 0 0" color="#fefefe"></a-box>
             </a-box>
@@ -331,8 +434,8 @@
 
         <a-entity id="armario-terreo" position="-2.6 0 -8.5">
             <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95;">
-                <a-box scale="0.02 1.0 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
-                <a-box scale="0.02 1.0 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 2.6 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 2.6 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
                 <a-sphere position="0.33 0 0.05" radius="0.02" color="#d4af37"></a-sphere>
             </a-box>
         </a-entity>
@@ -340,19 +443,24 @@
         <!-- INTERACTIVE VINTAGE AM RADIO -->
         <a-entity id="radio-vintage" position="-2.6 0 -5">
             <a-box scale="0.4 0.95 0.5" color="#5c3818" position="0 0.475 0" material="roughness: 0.8;">
-                <a-box id="objeto-radio" scale="0.02 0.3 0.35" position="0.21 0.2 0" color="#2b1a09" class="interactable">
+                <a-box id="objeto-radio" scale="0.02 0.3 0.35" position="0.21 0.2 0" color="#2b1a09"
+                    class="interactable">
                     <a-box scale="0.005 0.1 0.15" position="0.01 0.06 -0.07" color="#eeddbb"></a-box>
-                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08" color="#8b5a2b"></a-cylinder>
-                    <a-sphere id="led-indicador-radio" position="0.01 0.08 0.11" radius="0.012" color="#333333" material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
+                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08"
+                        color="#8b5a2b"></a-cylinder>
+                    <a-sphere id="led-indicador-radio" position="0.01 0.08 0.11" radius="0.012" color="#333333"
+                        material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
                 </a-box>
             </a-box>
         </a-entity>
 
         <!-- ESCADA DE MÃO 1 -->
         <a-entity id="escada-1" position="-2.3 0 -4.5">
-            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
-            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
-            
+            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331"
+                material="roughness: 0.9"></a-cylinder>
+            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331"
+                material="roughness: 0.9"></a-cylinder>
+
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -365,24 +473,36 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
-            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3"
+                material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3"
+                material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
         <!-- SEGUNDO ANDAR -->
-        <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412" material="side: double; roughness: 0.95;"></a-plane>
-        <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412" material="side: double;"></a-plane>
-        <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412" material="side: double;"></a-plane>
-        <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412" material="side: double;"></a-plane>
+        <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412"
+            material="side: double; roughness: 0.95;"></a-plane>
+        <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412"
+            material="side: double;"></a-plane>
+        <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412"
+            material="side: double;"></a-plane>
+        <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412"
+            material="side: double;"></a-plane>
 
-        <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8" material="side: double; roughness: 0.7;"></a-plane> 
+        <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8"
+            material="side: double; roughness: 0.7;"></a-plane>
 
-        <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="3 6 -6" rotation="0 -90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane> 
+        <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1"
+            material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="3 6 -6" rotation="0 -90 0" width="8" height="4" src="#tex-andar1"
+            material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1"
+            material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1"
+            material="side: double; roughness: 0.8;"></a-plane>
 
-        <a-plane position="2.98 6 -6" rotation="0 -90 0" width="1.4" height="1.6" src="#tex-vista" material="side: double;"></a-plane>
+        <a-plane position="2.98 6 -6" rotation="0 -90 0" width="1.4" height="1.6" src="#tex-vista"
+            material="side: double;"></a-plane>
 
         <!-- Anne Frank Bedroom Furniture and Mannequin -->
         <a-entity id="cama-anne" position="0.8 4.01 -8.5">
@@ -396,12 +516,16 @@
                 <a-box scale="0.22 0.12 0.2" position="0 0.52 -0.03" src="#tex-anne-cabelo"></a-box>
                 <a-box scale="0.03 0.18 0.16" position="-0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
                 <a-box scale="0.03 0.18 0.16" position="0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
-                <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
-                <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
+                <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido"
+                    rotation="15 0 0"></a-box>
+                <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido"
+                    rotation="15 0 0"></a-box>
                 <a-box scale="0.06 0.22 0.06" position="-0.06 -0.12 0.22" color="#ffe0bd"></a-box>
                 <a-box scale="0.06 0.22 0.06" position="0.06 -0.12 0.22" color="#ffe0bd"></a-box>
-                <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 5"></a-box>
-                <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 -5"></a-box>
+                <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido"
+                    rotation="-25 0 5"></a-box>
+                <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido"
+                    rotation="-25 0 -5"></a-box>
                 <a-box scale="0.18 0.02 0.14" position="0 0.18 0.18" color="#cfb997" rotation="10 0 0">
                     <a-box scale="0.16 0.01 0.12" position="0 0.01 0" color="#fcfcfc"></a-box>
                 </a-box>
@@ -410,9 +534,11 @@
 
         <!-- ESCADA DE MÃO 2 -->
         <a-entity id="escada-2" position="2.3 4 -4.5">
-            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
-            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
-            
+            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331"
+                material="roughness: 0.9"></a-cylinder>
+            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331"
+                material="roughness: 0.9"></a-cylinder>
+
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -425,37 +551,51 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
-            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3"
+                material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3"
+                material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
         <!-- SÓTÃO -->
-        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane>
-        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
-        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
-        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane>
+        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao"
+            material="side: double; roughness: 0.95;"></a-plane>
+        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao"
+            material="side: double;"></a-plane>
+        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao"
+            material="side: double;"></a-plane>
+        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao"
+            material="side: double;"></a-plane>
 
-        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b" material="side: double; roughness: 0.9;"></a-plane> 
+        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b"
+            material="side: double; roughness: 0.9;"></a-plane>
 
-        <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane> 
+        <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao"
+            material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"
+            material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao"
+            material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao"
+            material="side: double; roughness: 0.9;"></a-plane>
 
         <a-entity id="caixas-sotao" position="0 8.21 -6">
             <a-box position="-1.8 0.4 -2.5" scale="0.8 0.8 0.8" color="#6e5033" material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#5a4028"></a-box>
             </a-box>
-            <a-box position="-1.8 1.1 -2.5" scale="0.6 0.6 0.6" color="#805d3b" rotation="0 15 0" material="roughness: 0.95">
+            <a-box position="-1.8 1.1 -2.5" scale="0.6 0.6 0.6" color="#805d3b" rotation="0 15 0"
+                material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#664a2f"></a-box>
             </a-box>
-            <a-box position="1.6 0.25 -2.2" scale="1.1 0.5 0.8" color="#5a4028" rotation="0 -10 0" material="roughness: 0.95"></a-box>
+            <a-box position="1.6 0.25 -2.2" scale="1.1 0.5 0.8" color="#5a4028" rotation="0 -10 0"
+                material="roughness: 0.95"></a-box>
             <a-box position="1.4 0.55 -2.3" scale="0.4 0.08 0.3" color="#a31d1d" rotation="0 5 0"></a-box>
             <a-box position="1.4 0.63 -2.3" scale="0.38 0.07 0.28" color="#1d4fa3" rotation="0 -12 0"></a-box>
             <a-box position="-1.5 0.25 1.5" scale="0.5 0.5 0.5" color="#5c4431" material="roughness: 0.98"></a-box>
         </a-entity>
 
-        <a-plane id="janela-esperanca" class="interactable" position="0 10.2 -9.9" rotation="0 0 0" width="1.4" height="1.4" color="#a0c0d0" opacity="0.65" material="side: double; roughness: 0.1; metalness: 0.5;">
+        <a-plane id="janela-esperanca" class="interactable" position="0 10.2 -9.9" rotation="0 0 0" width="1.4"
+            height="1.4" color="#a0c0d0" opacity="0.65" material="side: double; roughness: 0.1; metalness: 0.5;">
             <a-box scale="1.4 0.05 0.05" position="0 0.7 0" color="#382b1c"></a-box>
             <a-box scale="1.4 0.05 0.05" position="0 -0.7 0" color="#382b1c"></a-box>
             <a-box scale="0.05 1.4 0.05" position="0.7 0 0" color="#382b1c"></a-box>
@@ -466,17 +606,19 @@
 
         <a-entity id="arvore-castanheira" position="0 4.5 -24">
             <a-cylinder radius="0.45" height="10" color="#412f21" material="roughness: 0.95;"></a-cylinder>
-            <a-sphere radius="3.8" position="0 6.5 0" color="#274d1a" opacity="0.85" material="roughness: 0.9;"></a-sphere>
+            <a-sphere radius="3.8" position="0 6.5 0" color="#274d1a" opacity="0.85"
+                material="roughness: 0.9;"></a-sphere>
             <a-sphere radius="2.8" position="-1.5 8 0.5" color="#1f3d14" opacity="0.85"></a-sphere>
             <a-sphere radius="2.6" position="1.5 7.5 -0.5" color="#1f3d14" opacity="0.85"></a-sphere>
         </a-entity>
 
         <!-- CAMERA RIG FRAMEWORK -->
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
-            <a-entity camera look-controls="magicWindowTrackingEnabled: false; touchEnabled: true" id="visao-usuario" position="0 0 0">
+            <a-entity camera look-controls="magicWindowTrackingEnabled: false; touchEnabled: true" id="visao-usuario"
+                position="0 0 0">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
-                          animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
-                          animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
+                    animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
+                    animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
                 </a-cursor>
             </a-entity>
         </a-entity>
@@ -572,9 +714,9 @@
         })();
 
         // Global variables for environment states
-        let currentFloor = 0; 
+        let currentFloor = 0;
         let estanteAberta = false;
-        let climaDia = true; 
+        let climaDia = true;
         let radioAtivo = false;
         let janelaAtiva = false;
         let processandoTransicao = false;
@@ -751,7 +893,7 @@
             },
             tick: function () {
                 if (processandoTransicao) return;
-                
+
                 // Mantem a câmera alinhada ao centro do rig
                 const cameraChild = document.querySelector('#visao-usuario');
                 if (cameraChild) {
@@ -764,7 +906,7 @@
                 if (cameraChild && cameraChild.object3D) {
                     let dir = new THREE.Vector3();
                     cameraChild.object3D.getWorldDirection(dir);
-                    
+
                     // Direction vector forward on XZ plane (-dir.x, -dir.z)
                     let fwdX = -dir.x;
                     let fwdZ = -dir.z;
@@ -860,7 +1002,7 @@
                 rig.setAttribute('position', rigPos);
 
                 currentFloor = alvoFloor;
-                
+
                 const statusTexts = [
                     "Explorando: Biblioteca (Térreo)",
                     "Explorando: Quarto de Anne (2º Andar)",
@@ -890,8 +1032,8 @@
                 dur: 1500,
                 easing: 'easeInOutQuad'
             });
-            document.querySelector('#hud-instrucoes').innerText = estanteAberta 
-                ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal." 
+            document.querySelector('#hud-instrucoes').innerText = estanteAberta
+                ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal."
                 : "Estante Secreta trancada.";
         });
 
@@ -984,8 +1126,8 @@
         }
 
         function desativarRadioProcedural() {
-            if (staticSource) { try { staticSource.stop(); } catch(e){} staticSource = null; }
-            if (morseOsc) { try { morseOsc.stop(); } catch(e){} morseOsc = null; }
+            if (staticSource) { try { staticSource.stop(); } catch (e) { } staticSource = null; }
+            if (morseOsc) { try { morseOsc.stop(); } catch (e) { } morseOsc = null; }
             if (morseSequenceInterval) { clearTimeout(morseSequenceInterval); morseSequenceInterval = null; }
             const led = document.querySelector('#led-indicador-radio');
             led.setAttribute('color', '#333333');
@@ -1048,7 +1190,7 @@
         }
 
         function desativarJanelaProcedural() {
-            if (windSource) { try { windSource.stop(); } catch(e){} windSource = null; }
+            if (windSource) { try { windSource.stop(); } catch (e) { } windSource = null; }
             if (birdTimer) { clearTimeout(birdTimer); birdTimer = null; }
         }
 
@@ -1193,7 +1335,7 @@
         const joyStick = document.querySelector('#pino-joystick');
         const cameraRig = document.querySelector('#camera-rig');
         const cameraUser = document.querySelector('#visao-usuario');
-        
+
         let joyActive = false;
         let joyCenter = { x: 0, y: 0 };
         let joyVector = { x: 0, y: 0 };
@@ -1220,7 +1362,7 @@
             const touch = e.touches[0];
             const dx = touch.clientX - joyCenter.x;
             const dy = touch.clientY - joyCenter.y;
-            const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 40);
             const angle = Math.atan2(dy, dx);
 
             const pinX = Math.cos(angle) * distance;
@@ -1237,36 +1379,57 @@
             joyVector = { x: 0, y: 0 };
         });
 
+        // Atualização contínua do movimento pelo analógico
         setInterval(() => {
             if (joyActive && (joyVector.x !== 0 || joyVector.y !== 0)) {
-                const rotationY = cameraUser.object3D.rotation.y; 
+                let dir = new THREE.Vector3();
+                cameraUser.object3D.getWorldDirection(dir);
 
-                const lookDirX = -Math.sin(rotationY);
-                const lookDirZ = -Math.cos(rotationY);
-                const rightDirX = Math.cos(rotationY);
-                const rightDirZ = -Math.sin(rotationY);
+                let fwdX = -dir.x;
+                let fwdZ = -dir.z;
+                let len = Math.hypot(fwdX, fwdZ);
+                if (len > 0.001) {
+                    fwdX /= len;
+                    fwdZ /= len;
+                } else {
+                    fwdX = 0; fwdZ = -1;
+                }
 
-                const speed = 0.05;
+                let rightX = -fwdZ;
+                let rightZ = fwdX;
+
+                const speed = 0.065;
                 const pos = cameraRig.getAttribute('position');
 
-                pos.x += (lookDirX * -joyVector.y + rightDirX * joyVector.x) * speed;
-                pos.z += (lookDirZ * -joyVector.y + rightDirZ * joyVector.x) * speed;
+                pos.x += (fwdX * (-joyVector.y) + rightX * joyVector.x) * speed;
+                pos.z += (fwdZ * (-joyVector.y) + rightZ * joyVector.x) * speed;
 
                 cameraRig.setAttribute('position', pos);
             }
         }, 16);
 
-        document.querySelector('#btn-virar-esq').addEventListener('click', () => {
-            const rot = cameraUser.getAttribute('rotation');
-            rot.y += 25;
-            cameraUser.setAttribute('rotation', rot);
-        });
+        // Função para virar a câmera no mobile integrando ao look-controls do A-Frame
+        function virarCameraMobile(anguloGraus) {
+            const lookControls = cameraUser.components['look-controls'];
+            if (lookControls && lookControls.yawObject) {
+                lookControls.yawObject.rotation.y += THREE.MathUtils.degToRad(anguloGraus);
+            } else {
+                const rot = cameraRig.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+                rot.y += anguloGraus;
+                cameraRig.setAttribute('rotation', rot);
+            }
+        }
 
-        document.querySelector('#btn-virar-dir').addEventListener('click', () => {
-            const rot = cameraUser.getAttribute('rotation');
-            rot.y -= 25;
-            cameraUser.setAttribute('rotation', rot);
-        });
+        const btnEsq = document.querySelector('#btn-virar-esq');
+        const btnDir = document.querySelector('#btn-virar-dir');
+
+        const acaoVirarEsq = (e) => { preventInterference(e); virarCameraMobile(25); };
+        const acaoVirarDir = (e) => { preventInterference(e); virarCameraMobile(-25); };
+
+        btnEsq.addEventListener('touchstart', acaoVirarEsq);
+        btnEsq.addEventListener('click', acaoVirarEsq);
+        btnDir.addEventListener('touchstart', acaoVirarDir);
+        btnDir.addEventListener('click', acaoVirarDir);
 
         // Mobile click action button
         let currentTargetNode = null;
@@ -1299,4 +1462,5 @@
         actionBtn.addEventListener('mousedown', executeMobileClick);
     </script>
 </body>
+
 </html>
