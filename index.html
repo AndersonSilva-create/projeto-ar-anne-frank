@@ -71,6 +71,10 @@
             transition: transform 0.05s ease-out;
             pointer-events: none;
         }
+        /* Ocultar elementos nativos do A-Frame que ficavam por cima dos botões no celular */
+        .a-enter-vr, .a-enter-ar, .a-orientation-modal {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-black text-white">
@@ -104,6 +108,10 @@
             <span id="txt-status" class="text-amber-300">Explorando: Biblioteca (Térreo)</span>
         </div>
         <div class="flex gap-2 pointer-events-auto">
+            <!-- Botão Tela Cheia -->
+            <button id="btn-fullscreen" class="bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500">
+                <span id="icone-fullscreen">⛶</span> <span id="txt-fullscreen" class="hidden sm:inline">Tela Cheia</span>
+            </button>
             <!-- Day/Night Climate Toggle -->
             <button id="btn-dia-noite" class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
                 <span id="icone-clima">🌙</span> <span id="txt-clima" class="hidden sm:inline">Modo Noite</span>
@@ -226,7 +234,7 @@
     </div>
 
     <!-- Mobile HUD Controls -->
-    <div id="controles-mobile" class="fixed bottom-6 left-4 right-4 flex justify-between items-end z-[999] pointer-events-none md:hidden">
+    <div id="controles-mobile" class="fixed bottom-6 left-4 right-4 flex justify-between items-end z-[9999] pointer-events-none md:hidden">
         <div class="pointer-events-auto flex items-center gap-2">
             <div id="zona-joystick" class="flex items-center justify-center">
                 <div id="pino-joystick"></div>
@@ -237,7 +245,7 @@
                 <button id="btn-virar-dir" class="w-10 h-10 bg-black/60 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-sm shadow-md flex items-center justify-center">↻</button>
             </div>
         </div>
-        <div class="pointer-events-auto">
+        <div class="pointer-events-auto pb-1 pr-1">
             <button id="mobile-action-btn" class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
                 INTERAGIR
             </button>
@@ -1133,6 +1141,42 @@
                 btnClima.className = "bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500";
             }
         });
+
+        // Alternar modo Tela Cheia (Fullscreen)
+        const btnFullscreen = document.querySelector('#btn-fullscreen');
+        const iconeFullscreen = document.querySelector('#icone-fullscreen');
+        const txtFullscreen = document.querySelector('#txt-fullscreen');
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen();
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        function atualizarIconeFullscreen() {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                iconeFullscreen.innerText = '◤ ◥';
+                if (txtFullscreen) txtFullscreen.innerText = 'Sair da Tela Cheia';
+            } else {
+                iconeFullscreen.innerText = '⛶';
+                if (txtFullscreen) txtFullscreen.innerText = 'Tela Cheia';
+            }
+        }
+
+        btnFullscreen.addEventListener('click', toggleFullscreen);
+        document.addEventListener('fullscreenchange', atualizarIconeFullscreen);
+        document.addEventListener('webkitfullscreenchange', atualizarIconeFullscreen);
 
         // QR Code generation setup
         document.querySelector('#btn-qr').addEventListener('click', () => {
