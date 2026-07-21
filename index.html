@@ -17,6 +17,18 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: none;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        a-scene {
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 1;
         }
         .fonte-titulo {
             font-family: 'Georgia', serif;
@@ -67,6 +79,21 @@
     <audio id="audio-ambiente" src="assets/som_ambiente.mp3" loop preload="auto"></audio>
     <!-- Tag de áudio para a Voz de Anne Frank -->
     <audio id="audio-anne" src="assets/anne_fala.mp3" preload="auto"></audio>
+
+    <!-- SCREEN OVERLAY DE INÍCIO PARA AUTORIZAR SENSORES E ÁUDIO NO CELULAR -->
+    <div id="modal-inicio" class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-md bg-neutral-900 border border-neutral-700 p-6 sm:p-8 rounded-2xl shadow-2xl flex flex-col items-center">
+            <span class="text-5xl mb-4">🏛️</span>
+            <h1 class="fonte-titulo text-2xl sm:text-3xl font-bold text-amber-400 mb-2">Anexo Secreto</h1>
+            <p class="text-xs sm:text-sm text-neutral-300 mb-6 leading-relaxed">
+                Reconstrução virtual tridimensional do refúgio de Anne Frank. Explore o museu interativo no seu navegador ou celular.
+            </p>
+            <button id="btn-iniciar-experiencia" class="w-full py-3.5 px-6 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold text-base rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                <span>▶️</span> Entrar na Experiência 3D
+            </button>
+            <span class="text-[10px] text-neutral-500 mt-3">Toque para ativar áudio e navegação 3D no celular</span>
+        </div>
+    </div>
 
     <!-- Screen Fade Overlay for teleportation -->
     <div id="efeito-fade" class="fixed inset-0 bg-black opacity-0 z-[9999]"></div>
@@ -199,10 +226,15 @@
     </div>
 
     <!-- Mobile HUD Controls -->
-    <div id="controles-mobile" class="fixed bottom-6 left-6 right-6 flex justify-between items-end z-[999] pointer-events-none md:hidden">
-        <div class="pointer-events-auto flex items-center justify-center">
+    <div id="controles-mobile" class="fixed bottom-6 left-4 right-4 flex justify-between items-end z-[999] pointer-events-none md:hidden">
+        <div class="pointer-events-auto flex items-center gap-2">
             <div id="zona-joystick" class="flex items-center justify-center">
                 <div id="pino-joystick"></div>
+            </div>
+            <!-- Botões auxiliares de virar câmera no Celular -->
+            <div class="flex flex-col gap-1">
+                <button id="btn-virar-esq" class="w-10 h-10 bg-black/60 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-sm shadow-md flex items-center justify-center">↺</button>
+                <button id="btn-virar-dir" class="w-10 h-10 bg-black/60 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-sm shadow-md flex items-center justify-center">↻</button>
             </div>
         </div>
         <div class="pointer-events-auto">
@@ -217,8 +249,8 @@
         Mova-se com <kbd class="px-1.5 py-0.5 bg-white/20 rounded">W, A, S, D</kbd> • Olhe com o <kbd class="px-1.5 py-0.5 bg-white/20 rounded">Mouse</kbd> • Clique para interagir nos itens brilhantes.
     </div>
 
-    <!-- A-Frame 3D Scene setup -->
-    <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;">
+    <!-- A-Frame 3D Scene setup - vr-mode-ui desativado para evitar tela preta no celular -->
+    <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;" vr-mode-ui="enabled: false">
         <a-assets>
             <img id="tex-biblioteca" crossorigin="anonymous" src="assets/biblioteca_parede.jpg">
             <img id="tex-quarto" crossorigin="anonymous" src="assets/quarto.jpg">
@@ -433,7 +465,7 @@
 
         <!-- CAMERA RIG FRAMEWORK -->
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
-            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true" id="visao-usuario" position="0 0 0">
+            <a-entity camera look-controls="magicWindowTrackingEnabled: false; touchEnabled: true" id="visao-usuario" position="0 0 0">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
                           animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
@@ -444,6 +476,27 @@
     </a-scene>
 
     <script>
+        const btnIniciarExp = document.querySelector('#btn-iniciar-experiencia');
+        const modalInicio = document.querySelector('#modal-inicio');
+
+        btnIniciarExp.addEventListener('click', async () => {
+            // Solicitar permissão de Giroscópio no iOS Safari se disponível
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    await DeviceOrientationEvent.requestPermission();
+                } catch (e) {
+                    console.log('Permissão de giroscópio ignorada ou negada.');
+                }
+            }
+
+            // Iniciar contexto de áudio
+            initializeAudioContext();
+            iniciarSomAmbiente();
+
+            // Ocultar tela de início
+            modalInicio.classList.add('hidden');
+        });
+
         // Procedural Texture Generator
         function criarTexturaProcedural(largura, altura, funcaoDesenho) {
             const canvas = document.createElement('canvas');
@@ -454,125 +507,59 @@
             return canvas.toDataURL('image/png');
         }
 
-        // Initialize high-quality procedural textures directly
-        (function gerarTexturasIniciais() {
-            // Biblioteca: Painéis de Madeira Elegantes
-            document.querySelector('#tex-biblioteca').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#4a2f1b';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#3b2312';
-                for (let i = 0; i < h; i += 64) {
-                    ctx.fillRect(0, i, w, 4);
+        // Configure fallbacks for image textures if files are missing or fail to load
+        (function configurarTexturasComFallback() {
+            const fallbacks = {
+                '#tex-biblioteca': (ctx, w, h) => {
+                    ctx.fillStyle = '#4a2f1b';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = '#3b2312';
+                    for (let i = 0; i < h; i += 64) ctx.fillRect(0, i, w, 4);
+                },
+                '#tex-quarto': (ctx, w, h) => {
+                    ctx.fillStyle = '#d8c4a0';
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-andar1': (ctx, w, h) => {
+                    ctx.fillStyle = '#bfae94';
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-sotao': (ctx, w, h) => {
+                    ctx.fillStyle = '#3a271a';
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-piso-sotao': (ctx, w, h) => {
+                    ctx.fillStyle = '#523a26';
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-vista': (ctx, w, h) => {
+                    const grad = ctx.createLinearGradient(0, 0, 0, h);
+                    grad.addColorStop(0, '#5882a8');
+                    grad.addColorStop(1, '#8ca085');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-anne-vestido': (ctx, w, h) => {
+                    ctx.fillStyle = '#2d4a43';
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-anne-rosto': (ctx, w, h) => {
+                    ctx.fillStyle = '#fce4ce';
+                    ctx.fillRect(0, 0, w, h);
+                },
+                '#tex-anne-cabelo': (ctx, w, h) => {
+                    ctx.fillStyle = '#1e140e';
+                    ctx.fillRect(0, 0, w, h);
                 }
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-                ctx.lineWidth = 2;
-                for (let i = 0; i < 60; i++) {
-                    ctx.beginPath();
-                    let y = Math.random() * h;
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(w, y + (Math.random() * 8 - 4));
-                    ctx.stroke();
+            };
+
+            Object.keys(fallbacks).forEach(id => {
+                const img = document.querySelector(id);
+                if (img) {
+                    img.onerror = () => {
+                        img.src = criarTexturaProcedural(512, 512, fallbacks[id]);
+                    };
                 }
-            });
-
-            // Quarto de Anne: Papel de Parede Vintage Estilizado
-            document.querySelector('#tex-quarto').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#d8c4a0';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#c7b18a';
-                for (let x = 0; x < w; x += 32) {
-                    ctx.fillRect(x, 0, 16, h);
-                }
-                ctx.fillStyle = '#8a5a36';
-                for (let x = 16; x < w; x += 32) {
-                    for (let y = 16; y < h; y += 32) {
-                        ctx.beginPath();
-                        ctx.arc(x, y, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-            });
-
-            // 1º Andar: Reboco Antigo / Tijolos Históricos
-            document.querySelector('#tex-andar1').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#bfae94';
-                ctx.fillRect(0, 0, w, h);
-                ctx.strokeStyle = 'rgba(74, 51, 25, 0.2)';
-                ctx.lineWidth = 2;
-                const rh = 32, rw = 64;
-                for (let y = 0; y < h; y += rh) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(w, y);
-                    ctx.stroke();
-                    const offset = (y / rh) % 2 === 0 ? 0 : rw / 2;
-                    for (let x = offset; x < w; x += rw) {
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(x, y + rh);
-                        ctx.stroke();
-                    }
-                }
-            });
-
-            // Sótão: Parede de Madeira Rústica
-            document.querySelector('#tex-sotao').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#3a271a';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#26180f';
-                for (let y = 0; y < h; y += 32) {
-                    ctx.fillRect(0, y, w, 4);
-                }
-            });
-
-            // Piso do Sótão: Tábuas Antigas
-            document.querySelector('#tex-piso-sotao').src = criarTexturaProcedural(512, 512, (ctx, w, h) => {
-                ctx.fillStyle = '#523a26';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#2d1d11';
-                for (let y = 0; y < h; y += 48) {
-                    ctx.fillRect(0, y, w, 5);
-                }
-            });
-
-            // Window view (Sky and Tree landscape)
-            document.querySelector('#tex-vista').src = criarTexturaProcedural(512, 256, (ctx, w, h) => {
-                const grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#5882a8');
-                grad.addColorStop(0.7, '#d6e4ed');
-                grad.addColorStop(1, '#8ca085');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-                
-                ctx.fillStyle = '#213318';
-                ctx.beginPath();
-                ctx.arc(400, 100, 70, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // Character textures
-            document.querySelector('#tex-anne-vestido').src = criarTexturaProcedural(256, 256, (ctx, w, h) => {
-                ctx.fillStyle = '#2d4a43';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#ffffff';
-                for (let i = 0; i < 80; i++) {
-                    ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
-                }
-            });
-
-            document.querySelector('#tex-anne-rosto').src = criarTexturaProcedural(256, 256, (ctx, w, h) => {
-                ctx.fillStyle = '#fce4ce';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#3a2218';
-                ctx.fillRect(70, 100, 20, 10);
-                ctx.fillRect(166, 100, 20, 10);
-                ctx.fillStyle = '#c46859';
-                ctx.fillRect(100, 170, 56, 8);
-            });
-
-            document.querySelector('#tex-anne-cabelo').src = criarTexturaProcedural(256, 256, (ctx, w, h) => {
-                ctx.fillStyle = '#1e140e';
-                ctx.fillRect(0, 0, w, h);
             });
         })();
 
@@ -1224,6 +1211,18 @@
                 cameraRig.setAttribute('position', pos);
             }
         }, 16);
+
+        document.querySelector('#btn-virar-esq').addEventListener('click', () => {
+            const rot = cameraUser.getAttribute('rotation');
+            rot.y += 25;
+            cameraUser.setAttribute('rotation', rot);
+        });
+
+        document.querySelector('#btn-virar-dir').addEventListener('click', () => {
+            const rot = cameraUser.getAttribute('rotation');
+            rot.y -= 25;
+            cameraUser.setAttribute('rotation', rot);
+        });
 
         // Mobile click action button
         let currentTargetNode = null;
