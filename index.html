@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Anexo Secreto - Reconstrução Virtual Tridimensional</title>
-    <!-- A-Frame 1.4.0 Library for WebVR/WebXR rendering -->
+    <!-- A-Frame 1.4.0 Library for WebVR/WebXR and 3D rendering -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Tailwind CSS for HUD and interfaces -->
+    <!-- Tailwind CSS for HUD and responsive interfaces -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -19,26 +17,10 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: none;
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
         }
-
-        a-scene {
-            position: absolute !important;
-            top: 0;
-            left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 1;
-        }
-
         .fonte-titulo {
             font-family: 'Georgia', serif;
         }
-
-        /* Parchment style for historical diary and quotes */
         .modal-historico {
             background-color: #f2e6cb;
             background-image: radial-gradient(#fbf7ed 30%, #ebdcb9 100%);
@@ -48,354 +30,226 @@
             font-family: 'Georgia', serif;
             border-radius: 8px;
         }
-
         .sem-scroll::-webkit-scrollbar {
             width: 6px;
         }
-
         .sem-scroll::-webkit-scrollbar-thumb {
             background-color: #4a3319;
             border-radius: 3px;
         }
-
         #efeito-fade {
             transition: opacity 0.25s ease-in-out;
             pointer-events: none;
         }
-
+        @media (pointer: coarse) {
+            #controles-mobile {
+                display: flex !important;
+            }
+        }
         #zona-joystick {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             background: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.25);
             border-radius: 50%;
             touch-action: none;
         }
-
         #pino-joystick {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.7);
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.05s ease-out;
             pointer-events: none;
         }
-
-        /* Ocultar elementos nativos do A-Frame que ficavam por cima dos botões no celular */
-        .a-enter-vr,
-        .a-enter-ar,
-        .a-orientation-modal {
+        .a-enter-vr, .a-enter-ar {
             display: none !important;
-        }
-
-        /* Regra para garantir que os controles mobile fiquem visíveis no celular em MODO PAISAGEM (horizontal) */
-        @media (pointer: coarse),
-        (hover: none) {
-            .controle-mobile-only {
-                display: flex !important;
-            }
-
-            .desktop-hud-only {
-                display: none !important;
-            }
-        }
-
-        @media (pointer: fine) and (min-width: 768px) {
-            .desktop-hud-only {
-                display: block !important;
-            }
-
-            .controle-mobile-only {
-                display: none !important;
-            }
         }
     </style>
 </head>
-
 <body class="bg-black text-white">
 
-    <!-- Tag de áudio para o Som Ambiente em Loop -->
-    <audio id="audio-ambiente" src="assets/som_ambiente.mp3" loop preload="auto"></audio>
-    <!-- Tag de áudio para a Voz de Anne Frank -->
-    <audio id="audio-anne" src="assets/anne_fala.mp3" preload="auto"></audio>
-
-    <!-- SCREEN OVERLAY DE INÍCIO PARA AUTORIZAR SENSORES E ÁUDIO NO CELULAR -->
-    <div id="modal-inicio"
-        class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
-        <div
-            class="max-w-md bg-neutral-900 border border-neutral-700 p-6 sm:p-8 rounded-2xl shadow-2xl flex flex-col items-center">
-            <span class="text-5xl mb-4">🏛️</span>
-            <h1 class="fonte-titulo text-2xl sm:text-3xl font-bold text-amber-400 mb-2">Anexo Secreto</h1>
-            <p class="text-xs sm:text-sm text-neutral-300 mb-6 leading-relaxed">
-                Reconstrução virtual tridimensional do refúgio de Anne Frank. Explore o museu interativo no seu
-                navegador ou celular.
+    <div id="tela-inicial" class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-md bg-neutral-900 border border-neutral-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center">
+            <h1 class="fonte-titulo text-2xl sm:text-3xl font-bold text-amber-400 mb-3">O Anexo Secreto</h1>
+            <p class="text-sm sm:text-base text-neutral-300 mb-6 leading-relaxed">
+                Reconstrução tridimensional virtual do esconderijo histórico de Anne Frank e sua família.
             </p>
-            <button id="btn-iniciar-experiencia"
-                class="w-full py-3.5 px-6 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold text-base rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                <span>▶️</span> Entrar na Experiência 3D
+            <button id="btn-iniciar-exp" class="w-full py-4 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold rounded-2xl transition shadow-xl text-base sm:text-lg flex items-center justify-center gap-2">
+                <span>🚪</span> Entrar na Experiência 3D
             </button>
-            <span class="text-[10px] text-neutral-500 mt-3">Toque para ativar áudio e navegação 3D no celular</span>
         </div>
     </div>
 
-    <!-- Screen Fade Overlay for teleportation -->
-    <div id="efeito-fade" class="fixed inset-0 bg-black opacity-0 z-[9999]"></div>
+    <div id="efeito-fade" class="fixed inset-0 bg-black opacity-0 z-[9998]"></div>
 
-    <!-- HUD Bar (Controls and Status indicators) -->
     <div class="fixed top-4 left-4 right-4 flex justify-between items-center z-[999] pointer-events-none">
-        <div
-            class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold pointer-events-auto shadow-xl">
+        <div class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold pointer-events-auto shadow-xl">
             <span id="txt-status" class="text-amber-300">Explorando: Biblioteca (Térreo)</span>
         </div>
         <div class="flex gap-2 pointer-events-auto">
-            <!-- Botão Tela Cheia -->
-            <button id="btn-fullscreen"
-                class="bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500">
-                <span id="icone-fullscreen">⛶</span> <span id="txt-fullscreen" class="hidden sm:inline">Tela
-                    Cheia</span>
-            </button>
-            <!-- Day/Night Climate Toggle -->
-            <button id="btn-dia-noite"
-                class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
+            <button id="btn-dia-noite" class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
                 <span id="icone-clima">🌙</span> <span id="txt-clima" class="hidden sm:inline">Modo Noite</span>
             </button>
-            <!-- Mobile AR QR Link Code button -->
-            <button id="btn-qr"
-                class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-slate-600">
-                📱 <span class="hidden sm:inline">Celular (AR)</span>
+            <button id="btn-fullscreen" class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
+                <span>⛶</span> <span class="hidden sm:inline">Tela Cheia</span>
             </button>
-            <!-- Settings Modal Button (Upper Right) -->
-            <button id="btn-configuracoes"
-                class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
-                ⚙️ <span class="hidden sm:inline">Ajustes</span>
+            <button id="btn-config" class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
+                <span>⚙️</span>
+            </button>
+            <button id="btn-qr" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-slate-600">
+                <span>📱</span>
             </button>
         </div>
     </div>
 
-    <!-- Parchment Diary Modal -->
-    <div id="modal-diario"
-        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/70 backdrop-blur-sm">
-        <div class="modal-historico w-full max-w-lg flex flex-col h-[75vh] relative p-5 sm:p-7">
-            <h2
-                class="fonte-titulo text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-3 text-[#4a3319] text-center">
-                Diário de Anne Frank</h2>
-
-            <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic"
-                id="corpo-diario">
-                <!-- Page content loaded dynamically via JavaScript -->
+    <div id="modal-diario" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/70 backdrop-blur-sm">
+        <div class="modal-historico w-full max-w-lg flex flex-col h-[75vh] relative p-6 sm:p-8">
+            <h2 class="fonte-titulo text-xl sm:text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-3 text-[#4a3319] text-center">Diário de Anne Frank</h2>
+            
+            <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic" id="corpo-diario">
             </div>
 
-            <!-- Audio Controls Bar (Appears when diary is opened and vanishes if stopped) -->
-            <div id="painel-audio-diario"
-                class="my-2 p-2.5 bg-[#4a3319]/10 rounded-lg border border-[#4a3319]/20 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#4a3319]">
-                    <span class="animate-pulse">🎙️</span>
-                    <span id="txt-status-audio">Tocando voz de Anne...</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="btn-pausar-audio"
-                        class="bg-[#4a3319] hover:bg-[#342412] active:scale-95 text-[#f2e6cb] px-3 py-1 rounded text-xs font-bold transition">
-                        ⏸️ Pausar
-                    </button>
-                    <button id="btn-parar-audio"
-                        class="bg-red-900 hover:bg-red-800 active:scale-95 text-white px-3 py-1 rounded text-xs font-bold transition">
-                        ⏹️ Parar
-                    </button>
+            <!-- Speech player subpanel inside diary -->
+            <div id="painel-audio-anne" class="my-2 p-3 bg-[#4a3319]/10 rounded-lg border border-[#4a3319]/20 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-[#4a3319] flex items-center gap-1.5">
+                    <span class="animate-pulse">🎙️</span> Narração de Anne:
+                </span>
+                <div class="flex items-center gap-1.5">
+                    <button id="btn-audio-pausa" class="bg-[#4a3319] text-[#f2e6cb] px-2.5 py-1 rounded text-xs font-bold hover:bg-[#342412] transition">⏸️ Pausar</button>
+                    <button id="btn-audio-parar" class="bg-red-800 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-900 transition">⏹️ Parar</button>
                 </div>
             </div>
 
             <div class="mt-2 flex justify-between items-center border-t border-[#4a3319]/30 pt-3">
-                <button id="btn-dia-anterior"
-                    class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Anterior</button>
+                <button id="btn-dia-anterior" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 py-1.5 rounded text-xs sm:text-sm font-bold hover:bg-[#342412] transition disabled:opacity-40">Anterior</button>
                 <span id="cont-paginas" class="text-xs sm:text-sm font-bold text-[#4a3319]">Pág. 1 / 15</span>
-                <button id="btn-dia-proximo"
-                    class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-[#342412] transition disabled:opacity-40 text-xs sm:text-sm">Próxima</button>
-                <button id="btn-dia-fechar"
-                    class="bg-red-800 text-white active:scale-95 px-3 sm:px-4 py-2 rounded font-bold hover:bg-red-900 transition text-xs sm:text-sm">Fechar</button>
+                <button id="btn-dia-proximo" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-3 py-1.5 rounded text-xs sm:text-sm font-bold hover:bg-[#342412] transition disabled:opacity-40">Próxima</button>
+                <button id="btn-dia-fechar" class="bg-red-800 text-white active:scale-95 px-3 py-1.5 rounded text-xs sm:text-sm font-bold hover:bg-red-900 transition">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- Audio Settings Modal -->
-    <div id="modal-configuracoes"
-        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/80 backdrop-blur-md">
-        <div
-            class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto sem-scroll">
-            <h3
-                class="fonte-titulo text-xl font-bold text-amber-400 mb-4 text-center flex items-center justify-center gap-2">
-                ⚙️ Configurações & Texturas
-            </h3>
-
-            <!-- Background Music Volume Slider -->
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-1">
-                    <label for="vol-ambiente"
-                        class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
-                        🎵 Som Ambiente (Fundo)
-                    </label>
-                    <span id="val-vol-ambiente" class="text-xs font-bold text-amber-400">50%</span>
-                </div>
-                <input type="range" id="vol-ambiente" min="0" max="100" value="50"
-                    class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
-            </div>
-
-            <!-- Anne Voice Volume Slider -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-1">
-                    <label for="vol-anne"
-                        class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
-                        🎙️ Voz de Anne Frank
-                    </label>
-                    <span id="val-vol-anne" class="text-xs font-bold text-amber-400">80%</span>
-                </div>
-                <input type="range" id="vol-anne" min="0" max="100" value="80"
-                    class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
-            </div>
-
-            <button id="btn-config-fechar"
-                class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-2.5 rounded-xl text-sm font-bold transition shadow-lg">
-                Salvar e Fechar
-            </button>
-        </div>
-    </div>
-
-    <!-- Anne Frank Dialogue / Thought Bubble Modal -->
-    <div id="modal-fala-anne"
-        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/60 backdrop-blur-sm">
+    <div id="modal-fala-anne" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/60 backdrop-blur-sm">
         <div class="modal-historico w-full max-w-md p-6 relative border-double border-8 border-[#4a3319]">
-            <h3
-                class="fonte-titulo text-xl font-bold border-b border-[#4a3319]/30 pb-2 mb-4 text-[#4a3319] flex items-center gap-2">
+            <h3 class="fonte-titulo text-xl font-bold border-b border-[#4a3319]/30 pb-2 mb-4 text-[#4a3319] flex items-center gap-2">
                 ✍️ Pensamento de Anne
             </h3>
             <p id="texto-fala-anne" class="italic text-base sm:text-lg leading-relaxed text-[#2b1a09] pr-1"></p>
             <div class="mt-6 flex justify-end">
-                <button id="btn-fala-fechar"
-                    class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-5 py-2 rounded font-bold hover:bg-[#342412] transition">Refletir</button>
+                <button id="btn-fala-fechar" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-5 py-2 rounded font-bold hover:bg-[#342412] transition">Refletir</button>
             </div>
         </div>
     </div>
 
-    <!-- Advanced Object Inspection UI -->
-    <div id="modal-inspecao"
-        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
-        <div
-            class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 flex flex-col items-center shadow-2xl relative">
+    <div id="modal-config" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-sm rounded-2xl p-6 flex flex-col gap-5 shadow-2xl">
+            <h3 class="fonte-titulo text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2">⚙️ Ajustes de Som</h3>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-semibold text-neutral-300 flex justify-between">
+                    <span>🔊 Som Ambiente:</span>
+                    <span id="vol-ambiente-txt">50%</span>
+                </label>
+                <input id="slider-vol-ambiente" type="range" min="0" max="1" step="0.05" value="0.5" class="accent-amber-500 w-full cursor-pointer">
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-semibold text-neutral-300 flex justify-between">
+                    <span>🗣️ Fala de Anne / Narração:</span>
+                    <span id="vol-anne-txt">80%</span>
+                </label>
+                <input id="slider-vol-anne" type="range" min="0" max="1" step="0.05" value="0.8" class="accent-amber-500 w-full cursor-pointer">
+            </div>
+
+            <button id="btn-config-fechar" class="mt-2 bg-neutral-800 hover:bg-neutral-700 text-white w-full py-2.5 rounded-xl font-bold text-xs transition">Concluído</button>
+        </div>
+    </div>
+
+    <div id="modal-inspecao" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 flex flex-col items-center shadow-2xl relative">
             <h3 id="inspecao-titulo" class="fonte-titulo text-2xl font-bold text-amber-400 mb-2">Objeto Antigo</h3>
-            <div
-                class="w-48 h-48 my-4 flex items-center justify-center bg-black/40 rounded-xl relative border border-white/5 overflow-hidden">
+            <div class="w-48 h-48 my-4 flex items-center justify-center bg-black/40 rounded-xl relative border border-white/5 overflow-hidden">
                 <div id="inspecao-render" class="text-6xl select-none animate-pulse">📻</div>
             </div>
             <p id="inspecao-descricao" class="text-sm text-neutral-300 text-center leading-relaxed mb-6"></p>
-            <button id="btn-inspecao-fechar"
-                class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-3 rounded-xl font-bold transition">Colocar
-                de Volta</button>
+            <button id="btn-inspecao-fechar" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-3 rounded-xl font-bold transition">Colocar de Volta</button>
         </div>
     </div>
 
-    <!-- Mobile AR QR Code modal -->
-    <div id="modal-qrcode"
-        class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/90 backdrop-blur-sm">
-        <div
-            class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-xs rounded-2xl p-6 flex flex-col items-center">
-            <h3 class="text-lg font-bold text-center mb-2">Modo Realidade Aumentada</h3>
-            <p class="text-xs text-neutral-400 text-center mb-4">Aponte a câmera do seu celular para o QR Code para
-                abrir este museu virtual no smartphone.</p>
+    <div id="modal-qrcode" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/90 backdrop-blur-sm">
+        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-xs rounded-2xl p-6 flex flex-col items-center">
+            <h3 class="text-lg font-bold text-center mb-2">Modo Celular (AR)</h3>
+            <p class="text-xs text-neutral-400 text-center mb-4">Aponte a câmera do celular para este código para abrir o museu virtual no smartphone.</p>
             <div class="bg-white p-3 rounded-xl mb-4 shadow-xl">
                 <img id="img-qrcode" src="" alt="QR Code" class="w-44 h-44">
             </div>
-            <button id="btn-qr-fechar"
-                class="bg-neutral-800 hover:bg-neutral-700 text-white w-full py-2 rounded-xl text-xs font-bold transition">Fechar</button>
+            <button id="btn-qr-fechar" class="bg-neutral-800 hover:bg-neutral-700 text-white w-full py-2 rounded-xl text-xs font-bold transition">Fechar</button>
         </div>
     </div>
 
-    <!-- Mobile HUD Controls (Utiliza classe customizada que mantém visível na horizontal) -->
-    <div id="controles-mobile"
-        class="fixed bottom-6 left-4 right-4 flex justify-between items-end z-[9999] pointer-events-none controle-mobile-only">
-        <div class="pointer-events-auto flex items-center gap-2">
+    <div id="controles-mobile" class="fixed bottom-6 left-6 right-6 flex justify-between items-end z-[9999] pointer-events-none hidden">
+        <div class="pointer-events-auto flex items-center gap-3">
             <div id="zona-joystick" class="flex items-center justify-center">
                 <div id="pino-joystick"></div>
             </div>
-            <!-- Botões auxiliares de virar câmera no Celular -->
-            <div class="flex flex-col gap-1">
-                <button id="btn-virar-esq"
-                    class="w-11 h-11 bg-black/70 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-base shadow-md flex items-center justify-center">↺</button>
-                <button id="btn-virar-dir"
-                    class="w-11 h-11 bg-black/70 active:bg-amber-600 border border-white/20 text-white rounded-full font-bold text-base shadow-md flex items-center justify-center">↻</button>
+            <div class="flex flex-col gap-2">
+                <button id="btn-girar-esq" class="w-10 h-10 bg-black/60 active:bg-black/80 rounded-full border border-white/20 text-white font-bold text-sm shadow-lg flex items-center justify-center">↺</button>
+                <button id="btn-girar-dir" class="w-10 h-10 bg-black/60 active:bg-black/80 rounded-full border border-white/20 text-white font-bold text-sm shadow-lg flex items-center justify-center">↻</button>
             </div>
         </div>
-        <div class="pointer-events-auto pb-1 pr-1">
-            <button id="mobile-action-btn"
-                class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
+        <div class="pointer-events-auto">
+            <button id="mobile-action-btn" class="w-16 h-16 bg-amber-600 active:bg-amber-500 rounded-full border-4 border-white/20 shadow-2xl flex items-center justify-center text-white font-bold text-xs select-none active:scale-90 transition transform">
                 INTERAGIR
             </button>
         </div>
     </div>
 
-    <!-- Desktop movement instructions hud -->
-    <div id="hud-instrucoes"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-white/10 text-white px-6 py-3 rounded-full text-xs sm:text-sm text-center z-[999] pointer-events-none desktop-hud-only hidden">
-        Mova-se com <kbd class="px-1.5 py-0.5 bg-white/20 rounded">W, A, S, D</kbd> • Olhe com o <kbd
-            class="px-1.5 py-0.5 bg-white/20 rounded">Mouse</kbd> • Clique para interagir nos itens brilhantes.
+    <div id="hud-instrucoes" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-white/10 text-white px-6 py-3 rounded-full text-xs sm:text-sm text-center z-[999] pointer-events-none hidden md:block">
+        Mova-se com <kbd class="px-1.5 py-0.5 bg-white/20 rounded">W, A, S, D</kbd> • Olhe com o <kbd class="px-1.5 py-0.5 bg-white/20 rounded">Mouse</kbd> • Clique nos itens destacados.
     </div>
 
-    <!-- A-Frame 3D Scene setup - vr-mode-ui desativado para evitar tela preta no celular -->
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;" vr-mode-ui="enabled: false">
-        
-        <a-assets> 
-
-            <img id="tex-biblioteca" crossorigin="anonymous" src="assets/biblioteca_parede.jpg"> 
-            <img id="tex-quarto" crossorigin="anonymous" src="assets/quarto_parede.jpg"> 
-            <img id="tex-andar1" crossorigin="anonymous" src="assets/andar1_parede.jpg"> 
-            <img id="tex-sotao" crossorigin="anonymous" src="assets/sotao_parede.jpg"> 
-            <img id="tex-piso-sotao" crossorigin="anonymous" src="assets/piso_sotao.png"> 
+        <a-assets>
+            <img id="tex-biblioteca" crossorigin="anonymous" src="assets/biblioteca_parede.jpg">
+            <img id="tex-quarto" crossorigin="anonymous" src="assets/quarto_parede.jpg">
+            <img id="tex-andar1" crossorigin="anonymous" src="assets/andar1_parede.jpg">
+            <img id="tex-sotao" crossorigin="anonymous" src="assets/sotao_parede.jpg">
+            <img id="tex-piso-sotao" crossorigin="anonymous" src="assets/piso_sotao.png">
             <img id="tex-vista" crossorigin="anonymous" src="assets/vista_rua.jpg">
-            <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg"> 
-            <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg"> 
-            <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg"> 
+            <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg">
+            <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg">
+            <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg">
 
+            <audio id="audio-fundo" src="assets/som_ambiente.mp3" preload="auto" loop></audio>
+            <audio id="audio-fala-anne" src="assets/anne_fala.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Scene Atmospheric Lighting -->
         <a-entity id="luz-ambiente" light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity id="luz-sol" light="type: directional; color: #ffeebb; intensity: 1.2" position="1 4 1"></a-entity>
-        <a-entity id="luz-biblioteca-teto" light="type: point; color: #ffbb66; intensity: 1.0; distance: 6; decay: 1.5"
-            position="0 3.2 0"></a-entity>
+        <a-entity id="luz-biblioteca-teto" light="type: point; color: #ffbb66; intensity: 1.0; distance: 6; decay: 1.5" position="0 3.2 0"></a-entity>
 
-        <a-entity id="luz-velas-1" light="type: point; color: #ff9933; intensity: 0.2; distance: 5"
-            position="0 1.1 -6.5"></a-entity>
-        <a-entity id="luz-velas-2" light="type: point; color: #ff9933; intensity: 0.2; distance: 5"
-            position="0.8 5.1 -8.5"></a-entity>
-        <a-entity id="luz-sotao-luar" light="type: point; color: #4466aa; intensity: 0.1; distance: 5"
-            position="0 11 -9"></a-entity>
+        <a-entity id="luz-velas-1" light="type: point; color: #ff9933; intensity: 0.2; distance: 5" position="0 1.1 -6.5"></a-entity>
+        <a-entity id="luz-velas-2" light="type: point; color: #ff9933; intensity: 0.2; distance: 5" position="0.8 5.1 -8.5"></a-entity>
+        <a-entity id="luz-sotao-luar" light="type: point; color: #4466aa; intensity: 0.1; distance: 5" position="0 11 -9"></a-entity>
 
-        <!-- Scene Sky dome -->
         <a-sky id="sky" color="#87ceeb"></a-sky>
 
-        <!-- TÉRREO: BIBLIOTECA -->
-        <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#423122"
-            material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#ebdcb9"
-            material="side: double; roughness: 0.6;"></a-plane>
-        <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca"
-            material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca"
-            material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca"
-            material="side: double; roughness: 0.7;"></a-plane>
+        <!-- TÉRREO: CÔMODO 1 - BIBLIOTECA -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="6" height="4" color="#423122" material="side: double; roughness: 0.8;"></a-plane> 
+        <a-plane position="0 4 0" rotation="90 0 0" width="6" height="4" color="#ebdcb9" material="side: double; roughness: 0.6;"></a-plane> 
+        
+        <a-plane position="-3 2 0" rotation="0 90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
+        <a-plane position="3 2 0" rotation="0 -90 0" width="4" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
+        <a-plane position="0 2 2" rotation="0 180 0" width="6" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane> 
 
-        <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca"
-            material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca"
-            material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca"
-            material="side: double; roughness: 0.7;"></a-plane>
-        <a-plane position="0 4 -2" rotation="90 0 0" width="2" height="1" color="#ebdcb9"
-            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="-2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="2 2 -2" rotation="0 0 0" width="2" height="4" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="0 4 -2" rotation="90 0 0" width="2" height="1" color="#ebdcb9" material="side: double; roughness: 0.7;"></a-plane>
 
-        <!-- INTERACTIVE SECRET BOOKSHELF -->
-        <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.95" height="3" depth="0.38"
-            color="#5a3d28" material="roughness: 0.8">
+        <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.95" height="3" depth="0.38" color="#5a3d28" material="roughness: 0.8">
             <a-box scale="0.1 0.4 0.3" position="-0.7 0.8 0.1" color="#8b0000"></a-box>
             <a-box scale="0.12 0.45 0.3" position="-0.5 0.82 0.1" color="#00008b"></a-box>
             <a-box scale="0.08 0.38 0.3" position="-0.3 0.78 0.1" color="#556b2f"></a-box>
@@ -407,15 +261,11 @@
             <a-box scale="0.12 0.44 0.3" position="0.3 -0.22 0.1" color="#2b1a09"></a-box>
         </a-box>
 
-        <!-- TÉRREO: QUARTO PRINCIPAL -->
-        <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#352412"
-            material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto"
-            material="side: double;"></a-plane>
-        <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto"
-            material="side: double;"></a-plane>
-        <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto"
-            material="side: double;"></a-plane>
+        <!-- TÉRREO: CÔMODO 2 - QUARTO PRINCIPAL -->
+        <a-plane position="0 0 -6" rotation="-90 0 0" width="6" height="8" color="#352412" material="side: double; roughness: 0.9;"></a-plane> 
+        <a-plane position="-3 2 -6" rotation="0 90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
+        <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
+        <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
 
         <a-entity id="mesa-estudos" position="0 0 -6.5">
             <a-box position="0 0.72 0" scale="0.8 0.05 0.8" color="#5c3a21" material="roughness: 0.9"></a-box>
@@ -423,44 +273,37 @@
             <a-cylinder position="0.35 0.36 -0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
             <a-cylinder position="-0.35 0.36 0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
             <a-cylinder position="0.35 0.36 0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
-
-            <!-- INTERACTIVE HISTORICAL DIARY -->
-            <a-box id="objeto-diario" position="0 0.76 0" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable"
-                material="roughness: 0.7">
+            
+            <a-box id="objeto-diario" position="0 0.76 0" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable" material="roughness: 0.7">
                 <a-box scale="0.04 0.005 0.1" position="-0.09 0.02 0" color="#d4af37"></a-box>
                 <a-box scale="0.2 0.03 0.28" position="0.01 0 0" color="#fefefe"></a-box>
             </a-box>
         </a-entity>
 
+        <!-- Armoire cabinet wardrobe in Ground room corner -->
         <a-entity id="armario-terreo" position="-2.6 0 -8.5">
             <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95;">
-                <a-box scale="0.02 2.6 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
-                <a-box scale="0.02 2.6 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 1.0 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
+                <a-box scale="0.02 1.0 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
                 <a-sphere position="0.33 0 0.05" radius="0.02" color="#d4af37"></a-sphere>
             </a-box>
         </a-entity>
 
-        <!-- INTERACTIVE VINTAGE AM RADIO -->
         <a-entity id="radio-vintage" position="-2.6 0 -5">
             <a-box scale="0.4 0.95 0.5" color="#5c3818" position="0 0.475 0" material="roughness: 0.8;">
-                <a-box id="objeto-radio" scale="0.02 0.3 0.35" position="0.21 0.2 0" color="#2b1a09"
-                    class="interactable">
+                <a-box id="objeto-radio" scale="0.02 0.3 0.35" position="0.21 0.2 0" color="#2b1a09" class="interactable">
                     <a-box scale="0.005 0.1 0.15" position="0.01 0.06 -0.07" color="#eeddbb"></a-box>
-                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08"
-                        color="#8b5a2b"></a-cylinder>
-                    <a-sphere id="led-indicador-radio" position="0.01 0.08 0.11" radius="0.012" color="#333333"
-                        material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
+                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08" color="#8b5a2b"></a-cylinder>
+                    <a-sphere id="led-indicador-radio" position="0.01 0.08 0.11" radius="0.012" color="#333333" material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
                 </a-box>
             </a-box>
         </a-entity>
 
-        <!-- ESCADA DE MÃO 1 -->
+        <!-- ESCADA 1 -->
         <a-entity id="escada-1" position="-2.3 0 -4.5">
-            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331"
-                material="roughness: 0.9"></a-cylinder>
-            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331"
-                material="roughness: 0.9"></a-cylinder>
-
+            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
+            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
+            
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -473,38 +316,25 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3"
-                material="opacity: 0; transparent: true"></a-box>
-            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3"
-                material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
         <!-- SEGUNDO ANDAR -->
-        <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412"
-            material="side: double; roughness: 0.95;"></a-plane>
-        <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412"
-            material="side: double;"></a-plane>
-        <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412"
-            material="side: double;"></a-plane>
-        <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412"
-            material="side: double;"></a-plane>
+        <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412" material="side: double; roughness: 0.95;"></a-plane>
+        <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412" material="side: double;"></a-plane>
+        <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412" material="side: double;"></a-plane>
+        <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412" material="side: double;"></a-plane>
 
-        <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8"
-            material="side: double; roughness: 0.7;"></a-plane>
+        <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8" material="side: double; roughness: 0.7;"></a-plane> 
 
-        <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1"
-            material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="3 6 -6" rotation="0 -90 0" width="8" height="4" src="#tex-andar1"
-            material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1"
-            material="side: double; roughness: 0.8;"></a-plane>
-        <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1"
-            material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="3 6 -6" rotation="0 -90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
+        <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane> 
 
-        <a-plane position="2.98 6 -6" rotation="0 -90 0" width="1.4" height="1.6" src="#tex-vista"
-            material="side: double;"></a-plane>
+        <a-plane position="2.98 6 -6" rotation="0 -90 0" width="1.4" height="1.6" src="#tex-vista" material="side: double;"></a-plane>
 
-        <!-- Anne Frank Bedroom Furniture and Mannequin -->
         <a-entity id="cama-anne" position="0.8 4.01 -8.5">
             <a-box scale="1.1 0.3 1.8" color="#4a3319" position="0 0.15 0" material="roughness: 0.95;"></a-box>
             <a-box scale="1.05 0.1 1.7" color="#f5ecd5" position="0 0.3 0"></a-box>
@@ -516,29 +346,26 @@
                 <a-box scale="0.22 0.12 0.2" position="0 0.52 -0.03" src="#tex-anne-cabelo"></a-box>
                 <a-box scale="0.03 0.18 0.16" position="-0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
                 <a-box scale="0.03 0.18 0.16" position="0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
-                <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido"
-                    rotation="15 0 0"></a-box>
-                <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido"
-                    rotation="15 0 0"></a-box>
+
+                <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
+                <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
                 <a-box scale="0.06 0.22 0.06" position="-0.06 -0.12 0.22" color="#ffe0bd"></a-box>
                 <a-box scale="0.06 0.22 0.06" position="0.06 -0.12 0.22" color="#ffe0bd"></a-box>
-                <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido"
-                    rotation="-25 0 5"></a-box>
-                <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido"
-                    rotation="-25 0 -5"></a-box>
+
+                <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 5"></a-box>
+                <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 -5"></a-box>
+
                 <a-box scale="0.18 0.02 0.14" position="0 0.18 0.18" color="#cfb997" rotation="10 0 0">
                     <a-box scale="0.16 0.01 0.12" position="0 0.01 0" color="#fcfcfc"></a-box>
                 </a-box>
             </a-entity>
         </a-entity>
 
-        <!-- ESCADA DE MÃO 2 -->
+        <!-- ESCADA 2 -->
         <a-entity id="escada-2" position="2.3 4 -4.5">
-            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331"
-                material="roughness: 0.9"></a-cylinder>
-            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331"
-                material="roughness: 0.9"></a-cylinder>
-
+            <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
+            <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
+            
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -551,51 +378,37 @@
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.0 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 4.4 0" color="#7a5d48"></a-cylinder>
 
-            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3"
-                material="opacity: 0; transparent: true"></a-box>
-            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3"
-                material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.1" scale="0.8 2.8 0.3" material="opacity: 0; transparent: true"></a-box>
+            <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.1" scale="0.8 0.6 0.3" material="opacity: 0; transparent: true"></a-box>
         </a-entity>
 
         <!-- SÓTÃO -->
-        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao"
-            material="side: double; roughness: 0.95;"></a-plane>
-        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao"
-            material="side: double;"></a-plane>
-        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao"
-            material="side: double;"></a-plane>
-        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao"
-            material="side: double;"></a-plane>
+        <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane>
+        <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
+        <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
+        <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane>
 
-        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b"
-            material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b" material="side: double; roughness: 0.9;"></a-plane> 
 
-        <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao"
-            material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao"
-            material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao"
-            material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao"
-            material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
+        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane> 
 
         <a-entity id="caixas-sotao" position="0 8.21 -6">
             <a-box position="-1.8 0.4 -2.5" scale="0.8 0.8 0.8" color="#6e5033" material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#5a4028"></a-box>
             </a-box>
-            <a-box position="-1.8 1.1 -2.5" scale="0.6 0.6 0.6" color="#805d3b" rotation="0 15 0"
-                material="roughness: 0.95">
+            <a-box position="-1.8 1.1 -2.5" scale="0.6 0.6 0.6" color="#805d3b" rotation="0 15 0" material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#664a2f"></a-box>
             </a-box>
-            <a-box position="1.6 0.25 -2.2" scale="1.1 0.5 0.8" color="#5a4028" rotation="0 -10 0"
-                material="roughness: 0.95"></a-box>
+            <a-box position="1.6 0.25 -2.2" scale="1.1 0.5 0.8" color="#5a4028" rotation="0 -10 0" material="roughness: 0.95"></a-box>
             <a-box position="1.4 0.55 -2.3" scale="0.4 0.08 0.3" color="#a31d1d" rotation="0 5 0"></a-box>
             <a-box position="1.4 0.63 -2.3" scale="0.38 0.07 0.28" color="#1d4fa3" rotation="0 -12 0"></a-box>
             <a-box position="-1.5 0.25 1.5" scale="0.5 0.5 0.5" color="#5c4431" material="roughness: 0.98"></a-box>
         </a-entity>
 
-        <a-plane id="janela-esperanca" class="interactable" position="0 10.2 -9.9" rotation="0 0 0" width="1.4"
-            height="1.4" color="#a0c0d0" opacity="0.65" material="side: double; roughness: 0.1; metalness: 0.5;">
+        <a-plane id="janela-esperanca" class="interactable" position="0 10.2 -9.9" rotation="0 0 0" width="1.4" height="1.4" color="#a0c0d0" opacity="0.65" material="side: double; roughness: 0.1; metalness: 0.5;">
             <a-box scale="1.4 0.05 0.05" position="0 0.7 0" color="#382b1c"></a-box>
             <a-box scale="1.4 0.05 0.05" position="0 -0.7 0" color="#382b1c"></a-box>
             <a-box scale="0.05 1.4 0.05" position="0.7 0 0" color="#382b1c"></a-box>
@@ -606,19 +419,16 @@
 
         <a-entity id="arvore-castanheira" position="0 4.5 -24">
             <a-cylinder radius="0.45" height="10" color="#412f21" material="roughness: 0.95;"></a-cylinder>
-            <a-sphere radius="3.8" position="0 6.5 0" color="#274d1a" opacity="0.85"
-                material="roughness: 0.9;"></a-sphere>
+            <a-sphere radius="3.8" position="0 6.5 0" color="#274d1a" opacity="0.85" material="roughness: 0.9;"></a-sphere>
             <a-sphere radius="2.8" position="-1.5 8 0.5" color="#1f3d14" opacity="0.85"></a-sphere>
             <a-sphere radius="2.6" position="1.5 7.5 -0.5" color="#1f3d14" opacity="0.85"></a-sphere>
         </a-entity>
 
-        <!-- CAMERA RIG FRAMEWORK -->
-        <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
-            <a-entity camera look-controls="magicWindowTrackingEnabled: false; touchEnabled: true" id="visao-usuario"
-                position="0 0 0">
+        <a-entity id="camera-rig" position="0 1.6 0" motor-colisao wasd-controls="acceleration: 25">
+            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true; reverseTouchDrag: true" id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
-                    animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
-                    animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
+                          animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
+                          animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
                 </a-cursor>
             </a-entity>
         </a-entity>
@@ -626,94 +436,6 @@
     </a-scene>
 
     <script>
-        const btnIniciarExp = document.querySelector('#btn-iniciar-experiencia');
-        const modalInicio = document.querySelector('#modal-inicio');
-
-        btnIniciarExp.addEventListener('click', async () => {
-            // Solicitar permissão de Giroscópio no iOS Safari se disponível
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    await DeviceOrientationEvent.requestPermission();
-                } catch (e) {
-                    console.log('Permissão de giroscópio ignorada ou negada.');
-                }
-            }
-
-            // Iniciar contexto de áudio
-            initializeAudioContext();
-            iniciarSomAmbiente();
-
-            // Ocultar tela de início
-            modalInicio.classList.add('hidden');
-        });
-
-        // Procedural Texture Generator
-        function criarTexturaProcedural(largura, altura, funcaoDesenho) {
-            const canvas = document.createElement('canvas');
-            canvas.width = largura;
-            canvas.height = altura;
-            const ctx = canvas.getContext('2d');
-            funcaoDesenho(ctx, largura, altura);
-            return canvas.toDataURL('image/png');
-        }
-
-        // Configure fallbacks for image textures if files are missing or fail to load
-        (function configurarTexturasComFallback() {
-            const fallbacks = {
-                '#tex-biblioteca': (ctx, w, h) => {
-                    ctx.fillStyle = '#4a2f1b';
-                    ctx.fillRect(0, 0, w, h);
-                    ctx.fillStyle = '#3b2312';
-                    for (let i = 0; i < h; i += 64) ctx.fillRect(0, i, w, 4);
-                },
-                '#tex-quarto': (ctx, w, h) => {
-                    ctx.fillStyle = '#d8c4a0';
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-andar1': (ctx, w, h) => {
-                    ctx.fillStyle = '#bfae94';
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-sotao': (ctx, w, h) => {
-                    ctx.fillStyle = '#3a271a';
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-piso-sotao': (ctx, w, h) => {
-                    ctx.fillStyle = '#523a26';
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-vista': (ctx, w, h) => {
-                    const grad = ctx.createLinearGradient(0, 0, 0, h);
-                    grad.addColorStop(0, '#5882a8');
-                    grad.addColorStop(1, '#8ca085');
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-anne-vestido': (ctx, w, h) => {
-                    ctx.fillStyle = '#2d4a43';
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-anne-rosto': (ctx, w, h) => {
-                    ctx.fillStyle = '#fce4ce';
-                    ctx.fillRect(0, 0, w, h);
-                },
-                '#tex-anne-cabelo': (ctx, w, h) => {
-                    ctx.fillStyle = '#1e140e';
-                    ctx.fillRect(0, 0, w, h);
-                }
-            };
-
-            Object.keys(fallbacks).forEach(id => {
-                const img = document.querySelector(id);
-                if (img) {
-                    img.onerror = () => {
-                        img.src = criarTexturaProcedural(512, 512, fallbacks[id]);
-                    };
-                }
-            });
-        })();
-
-        // Global variables for environment states
         let currentFloor = 0;
         let estanteAberta = false;
         let climaDia = true;
@@ -721,23 +443,22 @@
         let janelaAtiva = false;
         let processandoTransicao = false;
 
-        // Custom Diary Pages content - Expanded to 15 Historical Pages
         const paginasDiario = [
-            "12 de junho de 1942:<br><br>Espero poder contar tudo a você, como nunca pude contar a ninguém, e espero que você seja uma grande fonte de conforto e apoio. Ganhei este diário hoje no meu aniversário de 13 anos...",
-            "20 de junho de 1942:<br><br>Escrever num diário é uma experiência realmente estranha para alguém como eu. Não apenas porque nunca escrevi nada antes, mas porque me parece que mais tarde ninguém estará interessado nos pensamentos de uma garota de treze anos. Vou chamar meu diário de 'Kitty'.",
-            "9 de julho de 1942:<br><br>Chegamos ao Anexo Secreto na Prinsengracht 263. Papai, Mamãe e Margot já estavam arrumando as coisas. Subimos as escadas de madeira e nos trancamos. A vida aqui é muito diferente de tudo o que conhecíamos.",
-            "10 de julho de 1942:<br><br>Temos de andar na ponta dos pés e falar aos sussurros para que não nos ouçam na parte de baixo do armazém. O silêncio absoluto durante o dia é o nosso maior protetor.",
-            "28 de novembro de 1942:<br><br>Agora somos oito pessoas no Anexo com a chegada do Sr. Dussel. O espaço é pequeno e o racionamento é rígido. Mas temos a sorte de ter protetores incríveis como Miep e Bep, que arriscam suas vidas por nós todos os dias.",
-            "10 de dezembro de 1942:<br><br>À noite, quando as luzes se apagam e o vento sopra lá fora, o medo tenta tomar conta. Mas nos confortamos sabendo que estamos juntos. As regras de segurança são extremamente severas.",
-            "2 de maio de 1943:<br><br>A comida está ficando cada vez mais escassa e sem graça. Couve-flor enlatada, batatas velhas e pão duro são nossa rotina. Mas tentamos manter o bom humor nas refeições.",
-            "23 de julho de 1943:<br><br>O rádio nos traz notícias maravilhosas sobre o avanço dos aliados. Ouvir a transmissão da BBC nos dá uma dose imensa de esperança, embora a estática pesada torne as mensagens difíceis de compreender.",
-            "11 de novembro de 1943:<br><br>Minha caneta-tinteiro favorita, que me acompanhou por anos, foi acidentalmente destruída no fogão. Fiquei muito triste, mas percebo que há coisas muito mais preciosas que estamos lutando para preservar.",
-            "24 de fevereiro de 1944:<br><br>A castanheira vista da janela do sótão está florescendo! De lá, olhando para o céu livre e os pássaros, sinto que a natureza tem o poder de curar qualquer dor. Enquanto eu puder ver isso, não sentirei tristeza.",
-            "29 de março de 1944:<br><br>O ministro da Educação no rádio disse que após a guerra haverá uma coleção de diários e cartas sobre este período. Todos se voltaram para o meu diário! Pensei como seria interessante se eu publicasse um romance sobre o Anexo Secreto.",
-            "16 de abril de 1944:<br><br>Minhas conversas com Peter no sótão se tornaram meu momento favorito do dia. Encontrei nele um amigo com quem posso compartilhar meus sentimentos mais profundos e sonhos para o futuro.",
-            "6 de junho de 1944:<br><br>'O Dia D chegou!' - anunciou a BBC. A invasão aliada começou na Normandia! O entusiasmo no Anexo é indescritível. A libertação parece finalmente estar ao nosso alcance!",
-            "15 de julho de 1944:<br><br>É um grande milagre que eu não tenha abandonado todos os meus esperançosos ideais, porque eles parecem tão absurdos e impossíveis de realizar. No entanto, eu os mantenho, porque apesar de tudo, eu ainda acredito que as pessoas são realmente boas de coração.",
-            "1 de agosto de 1944:<br><br>Uma voz dentro de mim sussurra que preciso continuar forte. Sou meu próprio crítico mais severo. Busco constantemente maneiras de me tornar quem eu realmente gostaria de ser..."
+            "12 de junho de 1942:<br><br>Espero poder contar tudo a você, como nunca pude contar a ninguém, e espero que você seja uma grande fonte de conforto e apoio.",
+            "9 de julho de 1942:<br><br>A vida aqui é muito diferente. Temos de andar na ponta dos pés e falar aos sussurros para que não nos ouçam na parte de baixo do armazém.",
+            "10 de julho de 1942:<br><br>O Anexo é o local ideal de esconderijo. Embora seja úmido e inclinado, você não encontrará um lugar tão confortável em toda Amsterdã.",
+            "28 de novembro de 1942:<br><br>Sinto-me terrivelmente culpada por estar aqui em segurança enquanto meus amigos estão à mercê dos monstros mais cruéis que já caminharam sobre a Terra.",
+            "10 de março de 1943:<br><br>À noite, fico deitada na escuridão ouvindo as sirenes de ataque aéreo. As bombas caem tão perto que a casa inteira treme e o pó cai do teto.",
+            "18 de maio de 1943:<br><br>Nossos protetores nos trazem comida e notícias com um sorriso heroico, arriscando suas próprias vidas todos os dias por nós.",
+            "23 de julho de 1943:<br><br>O rádio nos traz notícias sobre o avanço dos aliados. Ouvir a transmissão da BBC nos dá uma dose imensa de esperança.",
+            "11 de novembro de 1943:<br><br>Minha caneta-tinteiro foi acidentalmente cremada na lareira! Ela era meu bem mais precioso além do próprio diário.",
+            "15 de janeiro de 1944:<br><br>Desenvolvi uma paixão por mitologia e história antiga. Leio tudo o que posso para manter minha mente livre e afiada.",
+            "24 de fevereiro de 1944:<br><br>A castanheira do sótão está florescendo! Olhando para o céu livre e os pássaros, sinto que a natureza tem o poder de curar qualquer dor.",
+            "16 de março de 1944:<br><br>O tempo está maravilhoso. Peter e eu ficamos olhando pela janela do sótão, compartilhando pensamentos silenciosos em meio ao caos.",
+            "29 de março de 1944:<br><br>O ministro da Educação disse no rádio que após a guerra haverá uma coleta de diários e cartas. Pensei imediatamente em publicar o meu!",
+            "11 de abril de 1944:<br><br>Fomos quase descobertos por ladrões que arrombaram o armazém. Ficamos em silêncio absoluto no escuro por horas a fio.",
+            "3 de maio de 1944:<br><br>Sinto que meu trabalho precisa ter um propósito. Quero ir além de ser apenas uma dona de casa; quero continuar vivendo mesmo após a minha morte!",
+            "1º de agosto de 1944:<br><br>Sou um amontoado de contradições. Minha metade leve e brincalhona tenta sempre esconder o meu lado mais profundo e puro..."
         ];
         let paginaAtual = 0;
 
@@ -748,144 +469,6 @@
             "Onde há esperança, há vida. Ela nos enche de coragem e nos faz fortes novamente."
         ];
 
-        // Audio HTML Elements Pointers
-        const audioAmbiente = document.querySelector('#audio-ambiente');
-        const audioAnne = document.querySelector('#audio-anne');
-        const painelAudioDiario = document.querySelector('#painel-audio-diario');
-        const txtStatusAudio = document.querySelector('#txt-status-audio');
-        const btnPausarAudio = document.querySelector('#btn-pausar-audio');
-        const btnPararAudio = document.querySelector('#btn-parar-audio');
-
-        // Set default initial volumes
-        audioAmbiente.volume = 0.5;
-        audioAnne.volume = 0.8;
-
-        // Start Ambient Sound on First User Interaction (bypassing browser autoplay policies)
-        let somAmbienteIniciado = false;
-        function iniciarSomAmbiente() {
-            if (!somAmbienteIniciado) {
-                audioAmbiente.play().then(() => {
-                    somAmbienteIniciado = true;
-                }).catch(err => {
-                    console.log("Aguardando interação para iniciar áudio ambiente.");
-                });
-            }
-        }
-        document.addEventListener('click', iniciarSomAmbiente, { once: true });
-        document.addEventListener('touchstart', iniciarSomAmbiente, { once: true });
-
-        // Diary Audio Control Mechanics
-        function tocarAudioAnne() {
-            if (audioAnne.src) {
-                audioAnne.currentTime = 0;
-                audioAnne.play().then(() => {
-                    painelAudioDiario.classList.remove('hidden');
-                    txtStatusAudio.innerText = "Tocando voz de Anne...";
-                    btnPausarAudio.innerText = "⏸️ Pausar";
-                }).catch(err => {
-                    console.log("Arquivo de áudio da Anne não encontrado ou reprodução bloqueada.");
-                    // O painel continua visível permitindo controle mesmo se houver atraso no carregamento
-                    painelAudioDiario.classList.remove('hidden');
-                });
-            }
-        }
-
-        function pausarAudioAnne() {
-            if (audioAnne.paused) {
-                audioAnne.play();
-                txtStatusAudio.innerText = "Tocando voz de Anne...";
-                btnPausarAudio.innerText = "⏸️ Pausar";
-            } else {
-                audioAnne.pause();
-                txtStatusAudio.innerText = "Áudio Pausado";
-                btnPausarAudio.innerText = "▶️ Continuar";
-            }
-        }
-
-        function pararAudioAnne() {
-            audioAnne.pause();
-            audioAnne.currentTime = 0;
-            painelAudioDiario.classList.add('hidden'); // Botões somem junto com a parada do áudio
-        }
-
-        btnPausarAudio.addEventListener('click', pausarAudioAnne);
-        btnPararAudio.addEventListener('click', pararAudioAnne);
-
-        audioAnne.addEventListener('ended', () => {
-            pararAudioAnne();
-        });
-
-        // Diary Click Interaction
-        document.querySelector('#objeto-diario').addEventListener('click', () => {
-            paginaAtual = 0;
-            document.querySelector('#modal-diario').classList.remove('hidden');
-            carregarPaginaDiario();
-            tocarAudioAnne(); // Toca o áudio da Anne ao abrir o diário
-        });
-
-        function carregarPaginaDiario() {
-            document.querySelector('#corpo-diario').innerHTML = paginasDiario[paginaAtual];
-            document.querySelector('#cont-paginas').innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
-            document.querySelector('#btn-dia-anterior').disabled = paginaAtual === 0;
-            document.querySelector('#btn-dia-proximo').disabled = paginaAtual === paginasDiario.length - 1;
-        }
-
-        document.querySelector('#btn-dia-anterior').addEventListener('click', () => {
-            if (paginaAtual > 0) {
-                paginaAtual--;
-                carregarPaginaDiario();
-            }
-        });
-        document.querySelector('#btn-dia-proximo').addEventListener('click', () => {
-            if (paginaAtual < paginasDiario.length - 1) {
-                paginaAtual++;
-                carregarPaginaDiario();
-            }
-        });
-        document.querySelector('#btn-dia-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-diario').classList.add('hidden');
-            pararAudioAnne(); // Parar o áudio caso o diário seja fechado
-        });
-
-        // Audio Settings UI logic
-        const modalConfig = document.querySelector('#modal-configuracoes');
-        const btnConfig = document.querySelector('#btn-configuracoes');
-        const btnConfigFechar = document.querySelector('#btn-config-fechar');
-        const sliderAmbiente = document.querySelector('#vol-ambiente');
-        const sliderAnne = document.querySelector('#vol-anne');
-        const valAmbiente = document.querySelector('#val-vol-ambiente');
-        const valAnne = document.querySelector('#val-vol-anne');
-
-        btnConfig.addEventListener('click', () => {
-            modalConfig.classList.remove('hidden');
-        });
-
-        btnConfigFechar.addEventListener('click', () => {
-            modalConfig.classList.add('hidden');
-        });
-
-        sliderAmbiente.addEventListener('input', (e) => {
-            const val = e.target.value;
-            valAmbiente.innerText = `${val}%`;
-            audioAmbiente.volume = val / 100;
-        });
-
-        sliderAnne.addEventListener('input', (e) => {
-            const val = e.target.value;
-            valAnne.innerText = `${val}%`;
-            audioAnne.volume = val / 100;
-        });
-
-        // Global keyboard state listener for directional WASD movement
-        const teclasPressionadas = {};
-        window.addEventListener('keydown', (e) => {
-            teclasPressionadas[e.code] = true;
-        });
-        window.addEventListener('keyup', (e) => {
-            teclasPressionadas[e.code] = false;
-        });
-
-        // Physics collision and movement engine component
         AFRAME.registerComponent('motor-colisao', {
             init: function () {
                 this.lastPosition = new THREE.Vector3();
@@ -894,87 +477,40 @@
             tick: function () {
                 if (processandoTransicao) return;
 
-                // Mantem a câmera alinhada ao centro do rig
-                const cameraChild = document.querySelector('#visao-usuario');
-                if (cameraChild) {
-                    cameraChild.object3D.position.set(0, 0, 0);
-                }
-
                 const pos = this.el.object3D.position;
 
-                // Process WASD Keyboard movement relative to current camera heading
-                if (cameraChild && cameraChild.object3D) {
-                    let dir = new THREE.Vector3();
-                    cameraChild.object3D.getWorldDirection(dir);
-
-                    // Direction vector forward on XZ plane (-dir.x, -dir.z)
-                    let fwdX = -dir.x;
-                    let fwdZ = -dir.z;
-                    let len = Math.hypot(fwdX, fwdZ);
-                    if (len > 0.0001) {
-                        fwdX /= len;
-                        fwdZ /= len;
-                    } else {
-                        fwdX = 0; fwdZ = -1;
-                    }
-
-                    // Perpendicular right vector
-                    let rightX = -fwdZ;
-                    let rightZ = fwdX;
-
-                    let moveX = 0;
-                    let moveZ = 0;
-
-                    if (teclasPressionadas['KeyW'] || teclasPressionadas['ArrowUp']) { moveX += fwdX; moveZ += fwdZ; }
-                    if (teclasPressionadas['KeyS'] || teclasPressionadas['ArrowDown']) { moveX -= fwdX; moveZ -= fwdZ; }
-                    if (teclasPressionadas['KeyA'] || teclasPressionadas['ArrowLeft']) { moveX -= rightX; moveZ -= rightZ; }
-                    if (teclasPressionadas['KeyD'] || teclasPressionadas['ArrowRight']) { moveX += rightX; moveZ += rightZ; }
-
-                    let moveLen = Math.hypot(moveX, moveZ);
-                    if (moveLen > 0) {
-                        const speed = 0.075;
-                        pos.x += (moveX / moveLen) * speed;
-                        pos.z += (moveZ / moveLen) * speed;
-                    }
-                }
-
-                // Limites das paredes externas do Anexo
                 if (pos.x < -2.6) pos.x = -2.6;
                 if (pos.x > 2.6) pos.x = 2.6;
                 if (pos.z > 1.6) pos.z = 1.6;
                 if (pos.z < -9.4) pos.z = -9.4;
 
-                // Passagem e colisão com a Estante Secreta
-                if (pos.z < -1.7 && pos.z > -2.3) {
+                if (pos.z < -1.8 && pos.z > -2.2) {
                     if (pos.x <= -0.9 || pos.x >= 0.9) {
-                        pos.z = this.lastPosition.z >= -1.7 ? -1.7 : -2.3;
-                    } else if (!estanteAberta) {
-                        pos.z = this.lastPosition.z >= -1.7 ? -1.7 : -2.3;
+                        pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
+                    } else {
+                        if (!estanteAberta) {
+                            pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
+                        }
                     }
                 }
 
-                // Colisões específicas dos móveis por andar
                 if (currentFloor === 0) {
-                    // Armário e cantos do térreo
                     if (pos.x < -1.8 && pos.z < -7.4) {
                         if (this.lastPosition.x >= -1.8) pos.x = -1.8;
                         if (this.lastPosition.z >= -7.4) pos.z = -7.4;
                     }
-                    // Mesa central de estudos
-                    if (pos.x > -0.6 && pos.x < 0.6 && pos.z > -7.0 && pos.z < -6.0) {
-                        if (this.lastPosition.x <= -0.6) pos.x = -0.6;
-                        else if (this.lastPosition.x >= 0.6) pos.x = 0.6;
-                        else if (this.lastPosition.z <= -7.0) pos.z = -7.0;
-                        else if (this.lastPosition.z >= -6.0) pos.z = -6.0;
+                    if (pos.x > -0.5 && pos.x < 0.5 && pos.z > -6.9 && pos.z < -6.1) {
+                        if (this.lastPosition.x <= -0.5) pos.x = -0.5;
+                        else if (this.lastPosition.x >= 0.5) pos.x = 0.5;
+                        else if (this.lastPosition.z <= -6.9) pos.z = -6.9;
+                        else if (this.lastPosition.z >= -6.1) pos.z = -6.1;
                     }
                 } else if (currentFloor === 1) {
-                    // Cama e móveis do Quarto de Anne
-                    if (pos.x > -0.2 && pos.x < 1.8 && pos.z < -7.4) {
+                    if (pos.x > -0.2 && pos.x < 1.7 && pos.z < -7.4) {
                         if (this.lastPosition.x <= -0.2) pos.x = -0.2;
                         if (this.lastPosition.z >= -7.4) pos.z = -7.4;
                     }
                 } else if (currentFloor === 2) {
-                    // Limite frontal do Sótão
                     if (pos.z > -2.0) pos.z = -2.0;
                 }
 
@@ -987,22 +523,17 @@
             processandoTransicao = true;
 
             const rig = document.querySelector('#camera-rig');
-            const camera = document.querySelector('#visao-usuario');
             const fade = document.querySelector('#efeito-fade');
 
             fade.style.opacity = '1';
 
             setTimeout(() => {
-                if (camera.components['wasd-controls']) {
-                    camera.components['wasd-controls'].velocity.set(0, 0, 0);
-                }
-
                 const rigPos = rig.getAttribute('position');
                 rigPos.y = novoY;
                 rig.setAttribute('position', rigPos);
 
                 currentFloor = alvoFloor;
-
+                
                 const statusTexts = [
                     "Explorando: Biblioteca (Térreo)",
                     "Explorando: Quarto de Anne (2º Andar)",
@@ -1018,26 +549,27 @@
             }, 250);
         }
 
-        document.querySelector('#trigger-subir-1').addEventListener('click', () => { transicionarAndar(1, 5.6); });
-        document.querySelector('#trigger-descer-1').addEventListener('click', () => { transicionarAndar(0, 1.6); });
-        document.querySelector('#trigger-subir-2').addEventListener('click', () => { transicionarAndar(2, 9.71); });
-        document.querySelector('#trigger-descer-2').addEventListener('click', () => { transicionarAndar(1, 5.6); });
+        document.querySelector('#trigger-subir-1').addEventListener('click', () => transicionarAndar(1, 5.6));
+        document.querySelector('#trigger-descer-1').addEventListener('click', () => transicionarAndar(0, 1.6));
+        document.querySelector('#trigger-subir-2').addEventListener('click', () => transicionarAndar(2, 9.71));
+        document.querySelector('#trigger-descer-2').addEventListener('click', () => transicionarAndar(1, 5.6));
 
         document.querySelector('#estante-secreta').addEventListener('click', () => {
             const shelf = document.querySelector('#estante-secreta');
             estanteAberta = !estanteAberta;
+            
             shelf.setAttribute('animation', {
                 property: 'position',
                 to: `${estanteAberta ? 1.8 : 0} 1.5 -1.9`,
                 dur: 1500,
                 easing: 'easeInOutQuad'
             });
-            document.querySelector('#hud-instrucoes').innerText = estanteAberta
-                ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal."
+
+            document.querySelector('#hud-instrucoes').innerText = estanteAberta 
+                ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal." 
                 : "Estante Secreta trancada.";
         });
 
-        // Procedural Audio Engine for Radio and Window
         let audioCtx = null;
         let staticSource = null;
         let morseOsc = null;
@@ -1058,6 +590,7 @@
 
         function ativarRadioProcedural() {
             initializeAudioContext();
+
             const bufferSize = audioCtx.sampleRate * 2;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
@@ -1122,12 +655,13 @@
                     tocarProximaNota();
                 }, note.d);
             }
+
             tocarProximaNota();
         }
 
         function desativarRadioProcedural() {
-            if (staticSource) { try { staticSource.stop(); } catch (e) { } staticSource = null; }
-            if (morseOsc) { try { morseOsc.stop(); } catch (e) { } morseOsc = null; }
+            if (staticSource) { try { staticSource.stop(); } catch(e){} staticSource = null; }
+            if (morseOsc) { try { morseOsc.stop(); } catch(e){} morseOsc = null; }
             if (morseSequenceInterval) { clearTimeout(morseSequenceInterval); morseSequenceInterval = null; }
             const led = document.querySelector('#led-indicador-radio');
             led.setAttribute('color', '#333333');
@@ -1136,6 +670,7 @@
 
         function ativarJanelaProcedural() {
             initializeAudioContext();
+
             const bufferSize = audioCtx.sampleRate * 2;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
@@ -1174,23 +709,28 @@
                 if (!janelaAtiva) return;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
+                
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(2500 + Math.random() * 500, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(3500 + Math.random() * 500, audioCtx.currentTime + 0.15);
+                
                 gain.gain.setValueAtTime(0, audioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.02);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
+                
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.2);
+
                 birdTimer = setTimeout(chirpBird, 2000 + Math.random() * 3000);
             }
             chirpBird();
         }
 
         function desativarJanelaProcedural() {
-            if (windSource) { try { windSource.stop(); } catch (e) { } windSource = null; }
+            if (windSource) { try { windSource.stop(); } catch(e){} windSource = null; }
             if (birdTimer) { clearTimeout(birdTimer); birdTimer = null; }
         }
 
@@ -1198,7 +738,7 @@
             radioAtivo = !radioAtivo;
             if (radioAtivo) {
                 ativarRadioProcedural();
-                abrirInspecao("Rádio Antigo", "📻", "Este pequeno aparelho receptor de rádio era a única ponte de conexão das famílias com o progresso das frentes aliadas. Otto Frank e os outros ouviam a BBC às escondidas.");
+                abrirInspecao("Rádio Antigo", "📻", "Este pequeno aparelho receptor de rádio era a única ponte de conexão com o progresso das frentes aliadas. Otto Frank e os outros ouviam a BBC às escondidas.");
             } else {
                 desativarRadioProcedural();
             }
@@ -1214,6 +754,71 @@
             }
         });
 
+        const audioFundo = document.querySelector('#audio-fundo');
+        const audioFalaAnne = document.querySelector('#audio-fala-anne');
+        const painelAudioAnne = document.querySelector('#painel-audio-anne');
+
+        document.querySelector('#btn-iniciar-exp').addEventListener('click', () => {
+            document.querySelector('#tela-inicial').classList.add('hidden');
+            initializeAudioContext();
+            audioFundo.play().catch(() => {});
+        });
+
+        document.querySelector('#objeto-diario').addEventListener('click', () => {
+            paginaAtual = 0;
+            document.querySelector('#modal-diario').classList.remove('hidden');
+            carregarPaginaDiario();
+            
+            audioFalaAnne.currentTime = 0;
+            audioFalaAnne.play().then(() => {
+                painelAudioAnne.classList.remove('hidden');
+            }).catch(() => {
+                painelAudioAnne.classList.add('hidden');
+            });
+        });
+
+        document.querySelector('#btn-audio-pausa').addEventListener('click', () => {
+            if (audioFalaAnne.paused) {
+                audioFalaAnne.play();
+                document.querySelector('#btn-audio-pausa').innerText = "⏸️ Pausar";
+            } else {
+                audioFalaAnne.pause();
+                document.querySelector('#btn-audio-pausa').innerText = "▶️ Continuar";
+            }
+        });
+
+        document.querySelector('#btn-audio-parar').addEventListener('click', () => {
+            audioFalaAnne.pause();
+            audioFalaAnne.currentTime = 0;
+            painelAudioAnne.classList.add('hidden');
+        });
+
+        function carregarPaginaDiario() {
+            document.querySelector('#corpo-diario').innerHTML = paginasDiario[paginaAtual];
+            document.querySelector('#cont-paginas').innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
+            document.querySelector('#btn-dia-anterior').disabled = paginaAtual === 0;
+            document.querySelector('#btn-dia-proximo').disabled = paginaAtual === paginasDiario.length - 1;
+        }
+
+        document.querySelector('#btn-dia-anterior').addEventListener('click', () => {
+            if (paginaAtual > 0) {
+                paginaAtual--;
+                carregarPaginaDiario();
+            }
+        });
+        document.querySelector('#btn-dia-proximo').addEventListener('click', () => {
+            if (paginaAtual < paginasDiario.length - 1) {
+                paginaAtual++;
+                carregarPaginaDiario();
+            }
+        });
+        document.querySelector('#btn-dia-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-diario').classList.add('hidden');
+            audioFalaAnne.pause();
+            audioFalaAnne.currentTime = 0;
+            painelAudioAnne.classList.add('hidden');
+        });
+
         document.querySelector('#manequim-anne').addEventListener('click', () => {
             const index = Math.floor(Math.random() * falasAnne.length);
             abrirFalaAnne(falasAnne[index]);
@@ -1223,7 +828,6 @@
             document.querySelector('#texto-fala-anne').innerText = texto;
             document.querySelector('#modal-fala-anne').classList.remove('hidden');
         }
-
         document.querySelector('#btn-fala-fechar').addEventListener('click', () => {
             document.querySelector('#modal-fala-anne').classList.add('hidden');
             if (janelaAtiva) {
@@ -1238,7 +842,6 @@
             document.querySelector('#inspecao-descricao').innerText = descricao;
             document.querySelector('#modal-inspecao').classList.remove('hidden');
         }
-
         document.querySelector('#btn-inspecao-fechar').addEventListener('click', () => {
             document.querySelector('#modal-inspecao').classList.add('hidden');
             if (radioAtivo) {
@@ -1247,7 +850,44 @@
             }
         });
 
-        // Climate toggle switcher
+        document.querySelector('#btn-config').addEventListener('click', () => {
+            document.querySelector('#modal-config').classList.remove('hidden');
+        });
+        document.querySelector('#btn-config-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-config').classList.add('hidden');
+        });
+
+        const sliderVolAmbiente = document.querySelector('#slider-vol-ambiente');
+        const sliderVolAnne = document.querySelector('#slider-vol-anne');
+
+        sliderVolAmbiente.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            audioFundo.volume = val;
+            document.querySelector('#vol-ambiente-txt').innerText = `${Math.round(val * 100)}%`;
+        });
+
+        sliderVolAnne.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            audioFalaAnne.volume = val;
+            document.querySelector('#vol-anne-txt').innerText = `${Math.round(val * 100)}%`;
+        });
+
+        document.querySelector('#btn-fullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        });
+
         const btnClima = document.querySelector('#btn-dia-noite');
         const lAmbient = document.querySelector('#luz-ambiente');
         const lSol = document.querySelector('#luz-sol');
@@ -1284,43 +924,6 @@
             }
         });
 
-        // Alternar modo Tela Cheia (Fullscreen)
-        const btnFullscreen = document.querySelector('#btn-fullscreen');
-        const iconeFullscreen = document.querySelector('#icone-fullscreen');
-        const txtFullscreen = document.querySelector('#txt-fullscreen');
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                const docEl = document.documentElement;
-                if (docEl.requestFullscreen) {
-                    docEl.requestFullscreen();
-                } else if (docEl.webkitRequestFullscreen) {
-                    docEl.webkitRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        }
-
-        function atualizarIconeFullscreen() {
-            if (document.fullscreenElement || document.webkitFullscreenElement) {
-                iconeFullscreen.innerText = '◤ ◥';
-                if (txtFullscreen) txtFullscreen.innerText = 'Sair da Tela Cheia';
-            } else {
-                iconeFullscreen.innerText = '⛶';
-                if (txtFullscreen) txtFullscreen.innerText = 'Tela Cheia';
-            }
-        }
-
-        btnFullscreen.addEventListener('click', toggleFullscreen);
-        document.addEventListener('fullscreenchange', atualizarIconeFullscreen);
-        document.addEventListener('webkitfullscreenchange', atualizarIconeFullscreen);
-
-        // QR Code generation setup
         document.querySelector('#btn-qr').addEventListener('click', () => {
             const url = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(window.location.href)}`;
             document.querySelector('#img-qrcode').setAttribute('src', url);
@@ -1330,12 +933,11 @@
             document.querySelector('#modal-qrcode').classList.add('hidden');
         });
 
-        // Joystick mobile controller mapping
         const joyZone = document.querySelector('#zona-joystick');
         const joyStick = document.querySelector('#pino-joystick');
         const cameraRig = document.querySelector('#camera-rig');
         const cameraUser = document.querySelector('#visao-usuario');
-
+        
         let joyActive = false;
         let joyCenter = { x: 0, y: 0 };
         let joyVector = { x: 0, y: 0 };
@@ -1362,14 +964,14 @@
             const touch = e.touches[0];
             const dx = touch.clientX - joyCenter.x;
             const dy = touch.clientY - joyCenter.y;
-            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 40);
+            const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 35);
             const angle = Math.atan2(dy, dx);
 
             const pinX = Math.cos(angle) * distance;
             const pinY = Math.sin(angle) * distance;
 
             joyStick.style.transform = `translate(${pinX}px, ${pinY}px)`;
-            joyVector = { x: pinX / 40, y: pinY / 40 };
+            joyVector = { x: pinX / 35, y: pinY / 35 };
         });
 
         joyZone.addEventListener('touchend', (e) => {
@@ -1379,59 +981,36 @@
             joyVector = { x: 0, y: 0 };
         });
 
-        // Atualização contínua do movimento pelo analógico
+        const turnAngle = (deg) => {
+            const lookControls = cameraUser.components['look-controls'];
+            if (lookControls && lookControls.yawObject) {
+                lookControls.yawObject.rotation.y += (deg * Math.PI / 180);
+            }
+        };
+
+        document.querySelector('#btn-girar-esq').addEventListener('click', () => turnAngle(30));
+        document.querySelector('#btn-girar-dir').addEventListener('click', () => turnAngle(-30));
+
         setInterval(() => {
             if (joyActive && (joyVector.x !== 0 || joyVector.y !== 0)) {
-                let dir = new THREE.Vector3();
+                const dir = new THREE.Vector3();
                 cameraUser.object3D.getWorldDirection(dir);
+                dir.y = 0;
+                dir.normalize();
 
-                let fwdX = -dir.x;
-                let fwdZ = -dir.z;
-                let len = Math.hypot(fwdX, fwdZ);
-                if (len > 0.001) {
-                    fwdX /= len;
-                    fwdZ /= len;
-                } else {
-                    fwdX = 0; fwdZ = -1;
-                }
+                const right = new THREE.Vector3();
+                right.crossVectors(new THREE.Vector3(0, 1, 0), dir).negate().normalize();
 
-                let rightX = -fwdZ;
-                let rightZ = fwdX;
-
-                const speed = 0.065;
+                const speed = 0.05;
                 const pos = cameraRig.getAttribute('position');
 
-                pos.x += (fwdX * (-joyVector.y) + rightX * joyVector.x) * speed;
-                pos.z += (fwdZ * (-joyVector.y) + rightZ * joyVector.x) * speed;
+                pos.x += (dir.x * -joyVector.y + right.x * joyVector.x) * speed;
+                pos.z += (dir.z * -joyVector.y + right.x * joyVector.x) * speed;
 
                 cameraRig.setAttribute('position', pos);
             }
         }, 16);
 
-        // Função para virar a câmera no mobile integrando ao look-controls do A-Frame
-        function virarCameraMobile(anguloGraus) {
-            const lookControls = cameraUser.components['look-controls'];
-            if (lookControls && lookControls.yawObject) {
-                lookControls.yawObject.rotation.y += THREE.MathUtils.degToRad(anguloGraus);
-            } else {
-                const rot = cameraRig.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
-                rot.y += anguloGraus;
-                cameraRig.setAttribute('rotation', rot);
-            }
-        }
-
-        const btnEsq = document.querySelector('#btn-virar-esq');
-        const btnDir = document.querySelector('#btn-virar-dir');
-
-        const acaoVirarEsq = (e) => { preventInterference(e); virarCameraMobile(25); };
-        const acaoVirarDir = (e) => { preventInterference(e); virarCameraMobile(-25); };
-
-        btnEsq.addEventListener('touchstart', acaoVirarEsq);
-        btnEsq.addEventListener('click', acaoVirarEsq);
-        btnDir.addEventListener('touchstart', acaoVirarDir);
-        btnDir.addEventListener('click', acaoVirarDir);
-
-        // Mobile click action button
         let currentTargetNode = null;
         const cursorEl = document.querySelector('a-cursor');
 
@@ -1462,5 +1041,4 @@
         actionBtn.addEventListener('mousedown', executeMobileClick);
     </script>
 </body>
-
 </html>
