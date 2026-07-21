@@ -221,9 +221,8 @@
             <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg">
             <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg">
             <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg">
-
-            <audio id="audio-fundo" src="assets/som_ambiente.mp3" preload="auto" loop></audio>
-            <audio id="audio-fala-anne" src="assets/anne_fala.mp3" preload="auto"></audio>
+            <!-- Áudio pré-carregado de fala da Anne. Altere 'fala_anne.mp3' para o nome do seu arquivo de áudio se necessário. -->
+            <audio id="audio-anne" src="assets/fala_anne.mp3" preload="auto"></audio>
         </a-assets>
 
         <a-entity id="luz-ambiente" light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
@@ -443,6 +442,18 @@
         let janelaAtiva = false;
         let processandoTransicao = false;
 
+        let audioCtx = null;
+        let ambienteSource = null;
+        let ambienteGain = null;
+        let staticSource = null;
+        let morseOsc = null;
+        let morseGainNode = null;
+        let morseSequenceInterval = null;
+        let windSource = null;
+        let windFilter = null;
+        let birdTimer = null;
+        let narracaoUtterance = null;
+
         const paginasDiario = [
             "12 de junho de 1942:<br><br>Espero poder contar tudo a você, como nunca pude contar a ninguém, e espero que você seja uma grande fonte de conforto e apoio.",
             "9 de julho de 1942:<br><br>A vida aqui é muito diferente. Temos de andar na ponta dos pés e falar aos sussurros para que não nos ouçam na parte de baixo do armazém.",
@@ -468,6 +479,197 @@
             "Escrever é uma forma de registrar tudo aquilo que não posso falar em voz alta.",
             "Onde há esperança, há vida. Ela nos enche de coragem e nos faz fortes novamente."
         ];
+
+        function initializeAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function iniciarAmbienteProcedural() {
+            initializeAudioContext();
+            if (ambienteSource) return;
+
+            const bufferSize = audioCtx.sampleRate * 2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            let lastOut = 0.0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                data[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = data[i];
+            }
+
+            ambienteSource = audioCtx.createBufferSource();
+            ambienteSource.buffer = buffer;
+            ambienteSource.loop = true;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 300;
+
+            ambienteGain = audioCtx.createGain();
+            const sliderVal = parseFloat(document.querySelector('#slider-vol-ambiente').value);
+            ambienteGain.gain.value = sliderVal * 0.15;
+
+            ambienteSource.connect(filter);
+            filter.connect(ambienteGain);
+            ambienteGain.connect(audioCtx.destination);
+
+            ambienteSource.start();
+        }
+
+        function falarTextoAnne(texto) {
+            if (!('speechSynthesis' in window)) return;
+
+            window.speechSynthesis.cancel();
+
+            const textoLimpo = texto.replace(/<br\s*\/?>/gi, ' ');
+            narracaoUtterance = new SpeechSynthesisUtterance(textoLimpo);
+            narracaoUtterance.lang = 'pt-BR';
+            narracaoUtterance.rate = 0.92;
+            narracaoUtterance.pitch = 1.15;
+
+            const voices = window.speechSynthesis.getVoices();
+            const ptVoice = voices.find(v => v.lang.includes('pt') && (v.name.includes('Luciana') || v.name.includes('Helena') || v.name.includes('Maria') || v.name.includes('Female') || v.name.includes('Google')));
+            if (ptVoice) narracaoUtterance.voice = ptVoice;
+
+            const vol = parseFloat(document.querySelector('#slider-vol-anne').value);
+            narracaoUtterance.volume = vol;
+
+            narracaoUtterance.onend = () => {
+                document.querySelector('#painel-audio-anne').classList.add('hidden');
+            };
+
+            window.speechSynthesis.speak(narracaoUtterance);
+            document.querySelector('#painel-audio-anne').classList.remove('hidden');
+            document.querySelector('#btn-audio-pausa').innerText = "⏸️ Pausar";
+        }
+
+        function pararFalaAnne() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            document.querySelector('#painel-audio-anne').classList.add('hidden');
+        }
+
+        document.querySelector('#btn-iniciar-exp').addEventListener('click', () => {
+            document.querySelector('#tela-inicial').classList.add('hidden');
+            iniciarAmbienteProcedural();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
+        });
+
+        document.querySelector('#objeto-diario').addEventListener('click', () => {
+            paginaAtual = 0;
+            document.querySelector('#modal-diario').classList.remove('hidden');
+            carregarPaginaDiario();
+        });
+
+        document.querySelector('#btn-audio-pausa').addEventListener('click', () => {
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                    document.querySelector('#btn-audio-pausa').innerText = "⏸️ Pausar";
+                } else if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.pause();
+                    document.querySelector('#btn-audio-pausa').innerText = "▶️ Continuar";
+                }
+            }
+        });
+
+        document.querySelector('#btn-audio-parar').addEventListener('click', () => {
+            pararFalaAnne();
+        });
+
+        function carregarPaginaDiario() {
+            const textoPagina = paginasDiario[paginaAtual];
+            document.querySelector('#corpo-diario').innerHTML = textoPagina;
+            document.querySelector('#cont-paginas').innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
+            document.querySelector('#btn-dia-anterior').disabled = paginaAtual === 0;
+            document.querySelector('#btn-dia-proximo').disabled = paginaAtual === paginasDiario.length - 1;
+            
+            falarTextoAnne(textoPagina);
+        }
+
+        document.querySelector('#btn-dia-anterior').addEventListener('click', () => {
+            if (paginaAtual > 0) {
+                paginaAtual--;
+                carregarPaginaDiario();
+            }
+        });
+        document.querySelector('#btn-dia-proximo').addEventListener('click', () => {
+            if (paginaAtual < paginasDiario.length - 1) {
+                paginaAtual++;
+                carregarPaginaDiario();
+            }
+        });
+        document.querySelector('#btn-dia-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-diario').classList.add('hidden');
+            pararFalaAnne();
+        });
+
+        document.querySelector('#manequim-anne').addEventListener('click', () => {
+            const index = Math.floor(Math.random() * falasAnne.length);
+            const fala = falasAnne[index];
+            abrirFalaAnne(fala);
+
+            // Tenta reproduzir o arquivo de áudio localizado na pasta assets/
+            const audioAnne = document.querySelector('#audio-anne');
+            if (audioAnne) {
+                audioAnne.currentTime = 0;
+                audioAnne.play().catch(err => {
+                    console.warn("Não foi possível tocar o áudio em arquivo. Usando voz sintética como fallback:", err);
+                    falarTextoAnne(fala);
+                });
+            } else {
+                falarTextoAnne(fala);
+            }
+        });
+
+        function abrirFalaAnne(texto) {
+            document.querySelector('#texto-fala-anne').innerText = texto;
+            document.querySelector('#modal-fala-anne').classList.remove('hidden');
+        }
+        document.querySelector('#btn-fala-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-fala-anne').classList.add('hidden');
+            pararFalaAnne();
+
+            // Para a execução do arquivo de áudio caso o modal seja fechado
+            const audioAnne = document.querySelector('#audio-anne');
+            if (audioAnne) {
+                audioAnne.pause();
+                audioAnne.currentTime = 0;
+            }
+
+            if (janelaAtiva) {
+                desativarJanelaProcedural();
+                janelaAtiva = false;
+            }
+        });
+
+        const sliderVolAmbiente = document.querySelector('#slider-vol-ambiente');
+        const sliderVolAnne = document.querySelector('#slider-vol-anne');
+
+        sliderVolAmbiente.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (ambienteGain) {
+                ambienteGain.gain.value = val * 0.15;
+            }
+            document.querySelector('#vol-ambiente-txt').innerText = `${Math.round(val * 100)}%`;
+        });
+
+        sliderVolAnne.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.querySelector('#vol-anne-txt').innerText = `${Math.round(val * 100)}%`;
+            if (narracaoUtterance) {
+                narracaoUtterance.volume = val;
+            }
+        });
 
         AFRAME.registerComponent('motor-colisao', {
             init: function () {
@@ -569,24 +771,6 @@
                 ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal." 
                 : "Estante Secreta trancada.";
         });
-
-        let audioCtx = null;
-        let staticSource = null;
-        let morseOsc = null;
-        let morseGainNode = null;
-        let morseSequenceInterval = null;
-        let windSource = null;
-        let windFilter = null;
-        let birdTimer = null;
-
-        function initializeAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
 
         function ativarRadioProcedural() {
             initializeAudioContext();
@@ -748,91 +932,11 @@
             janelaAtiva = !janelaAtiva;
             if (janelaAtiva) {
                 ativarJanelaProcedural();
-                abrirFalaAnne("Olhar para o céu aberto e para a grande castanheira florescendo me devolve a certeza de que a paz voltará.");
+                const textoJanela = "Olhar para o céu aberto e para a grande castanheira florescendo me devolve a certeza de que a paz voltará.";
+                abrirFalaAnne(textoJanela);
+                falarTextoAnne(textoJanela);
             } else {
                 desativarJanelaProcedural();
-            }
-        });
-
-        const audioFundo = document.querySelector('#audio-fundo');
-        const audioFalaAnne = document.querySelector('#audio-fala-anne');
-        const painelAudioAnne = document.querySelector('#painel-audio-anne');
-
-        document.querySelector('#btn-iniciar-exp').addEventListener('click', () => {
-            document.querySelector('#tela-inicial').classList.add('hidden');
-            initializeAudioContext();
-            audioFundo.play().catch(() => {});
-        });
-
-        document.querySelector('#objeto-diario').addEventListener('click', () => {
-            paginaAtual = 0;
-            document.querySelector('#modal-diario').classList.remove('hidden');
-            carregarPaginaDiario();
-            
-            audioFalaAnne.currentTime = 0;
-            audioFalaAnne.play().then(() => {
-                painelAudioAnne.classList.remove('hidden');
-            }).catch(() => {
-                painelAudioAnne.classList.add('hidden');
-            });
-        });
-
-        document.querySelector('#btn-audio-pausa').addEventListener('click', () => {
-            if (audioFalaAnne.paused) {
-                audioFalaAnne.play();
-                document.querySelector('#btn-audio-pausa').innerText = "⏸️ Pausar";
-            } else {
-                audioFalaAnne.pause();
-                document.querySelector('#btn-audio-pausa').innerText = "▶️ Continuar";
-            }
-        });
-
-        document.querySelector('#btn-audio-parar').addEventListener('click', () => {
-            audioFalaAnne.pause();
-            audioFalaAnne.currentTime = 0;
-            painelAudioAnne.classList.add('hidden');
-        });
-
-        function carregarPaginaDiario() {
-            document.querySelector('#corpo-diario').innerHTML = paginasDiario[paginaAtual];
-            document.querySelector('#cont-paginas').innerText = `Pág. ${paginaAtual + 1} / ${paginasDiario.length}`;
-            document.querySelector('#btn-dia-anterior').disabled = paginaAtual === 0;
-            document.querySelector('#btn-dia-proximo').disabled = paginaAtual === paginasDiario.length - 1;
-        }
-
-        document.querySelector('#btn-dia-anterior').addEventListener('click', () => {
-            if (paginaAtual > 0) {
-                paginaAtual--;
-                carregarPaginaDiario();
-            }
-        });
-        document.querySelector('#btn-dia-proximo').addEventListener('click', () => {
-            if (paginaAtual < paginasDiario.length - 1) {
-                paginaAtual++;
-                carregarPaginaDiario();
-            }
-        });
-        document.querySelector('#btn-dia-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-diario').classList.add('hidden');
-            audioFalaAnne.pause();
-            audioFalaAnne.currentTime = 0;
-            painelAudioAnne.classList.add('hidden');
-        });
-
-        document.querySelector('#manequim-anne').addEventListener('click', () => {
-            const index = Math.floor(Math.random() * falasAnne.length);
-            abrirFalaAnne(falasAnne[index]);
-        });
-
-        function abrirFalaAnne(texto) {
-            document.querySelector('#texto-fala-anne').innerText = texto;
-            document.querySelector('#modal-fala-anne').classList.remove('hidden');
-        }
-        document.querySelector('#btn-fala-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-fala-anne').classList.add('hidden');
-            if (janelaAtiva) {
-                desativarJanelaProcedural();
-                janelaAtiva = false;
             }
         });
 
@@ -855,21 +959,6 @@
         });
         document.querySelector('#btn-config-fechar').addEventListener('click', () => {
             document.querySelector('#modal-config').classList.add('hidden');
-        });
-
-        const sliderVolAmbiente = document.querySelector('#slider-vol-ambiente');
-        const sliderVolAnne = document.querySelector('#slider-vol-anne');
-
-        sliderVolAmbiente.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            audioFundo.volume = val;
-            document.querySelector('#vol-ambiente-txt').innerText = `${Math.round(val * 100)}%`;
-        });
-
-        sliderVolAnne.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            audioFalaAnne.volume = val;
-            document.querySelector('#vol-anne-txt').innerText = `${Math.round(val * 100)}%`;
         });
 
         document.querySelector('#btn-fullscreen').addEventListener('click', () => {
