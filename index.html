@@ -128,14 +128,14 @@
 
     <!-- Audio Settings Modal -->
     <div id="modal-configuracoes" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/80 backdrop-blur-md">
-        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-sm rounded-2xl p-6 shadow-2xl relative">
-            <h3 class="fonte-titulo text-xl font-bold text-amber-400 mb-6 text-center flex items-center justify-center gap-2">
-                ⚙️ Configurações de Áudio
+        <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto sem-scroll">
+            <h3 class="fonte-titulo text-xl font-bold text-amber-400 mb-4 text-center flex items-center justify-center gap-2">
+                ⚙️ Configurações & Texturas
             </h3>
             
             <!-- Background Music Volume Slider -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-1">
                     <label for="vol-ambiente" class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
                         🎵 Som Ambiente (Fundo)
                     </label>
@@ -145,14 +145,43 @@
             </div>
 
             <!-- Anne Voice Volume Slider -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center mb-2">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-1">
                     <label for="vol-anne" class="text-xs sm:text-sm font-semibold flex items-center gap-2 text-neutral-200">
                         🎙️ Voz de Anne Frank
                     </label>
                     <span id="val-vol-anne" class="text-xs font-bold text-amber-400">80%</span>
                 </div>
                 <input type="range" id="vol-anne" min="0" max="100" value="80" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            </div>
+
+            <!-- Custom Textures File Selectors -->
+            <div class="border-t border-neutral-700 pt-4 mb-6">
+                <h4 class="text-sm font-bold text-amber-300 mb-3 flex items-center gap-1.5">
+                    🖼️ Carregar Suas Texturas Personalizadas
+                </h4>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-neutral-300 mb-1 font-medium">Parede Biblioteca (Térreo)</label>
+                        <input type="file" id="input-tex-biblioteca" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-neutral-300 mb-1 font-medium">Parede Quarto de Anne</label>
+                        <input type="file" id="input-tex-quarto" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-neutral-300 mb-1 font-medium">Parede 1º Andar</label>
+                        <input type="file" id="input-tex-andar1" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-neutral-300 mb-1 font-medium">Parede Sótão</label>
+                        <input type="file" id="input-tex-sotao" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-neutral-300 mb-1 font-medium">Piso do Sótão</label>
+                        <input type="file" id="input-tex-piso-sotao" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+                    </div>
+                </div>
             </div>
 
             <button id="btn-config-fechar" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white w-full py-2.5 rounded-xl text-sm font-bold transition shadow-lg">
@@ -220,11 +249,11 @@
     <!-- A-Frame 3D Scene setup -->
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;">
         <a-assets>
-            <img id="tex-biblioteca" crossorigin="anonymous">
-            <img id="tex-quarto" crossorigin="anonymous">
-            <img id="tex-andar1" crossorigin="anonymous">
-            <img id="tex-sotao" crossorigin="anonymous">
-            <img id="tex-piso-sotao" crossorigin="anonymous">
+            <img id="tex-biblioteca" crossorigin="anonymous" src="biblioteca_parede.jpg">
+            <img id="tex-quarto" crossorigin="anonymous" src="quarto_parede.jpg">
+            <img id="tex-andar1" crossorigin="anonymous" src="andar1_parede.jpg">
+            <img id="tex-sotao" crossorigin="anonymous" src="sotao_parede.jpg">
+            <img id="tex-piso-sotao" crossorigin="anonymous" src="piso_sotao.jpg">
             <img id="tex-vista" crossorigin="anonymous">
             
             <img id="tex-anne-vestido" crossorigin="anonymous">
@@ -432,8 +461,8 @@
         </a-entity>
 
         <!-- CAMERA RIG FRAMEWORK -->
-        <a-entity id="camera-rig" position="0 1.6 0" motor-colisao>
-            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true" wasd-controls="acceleration: 25" id="visao-usuario">
+        <a-entity id="camera-rig" position="0 1.6 0" wasd-controls="acceleration: 25" motor-colisao>
+            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true" id="visao-usuario" position="0 0 0">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
                           animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
@@ -454,10 +483,24 @@
             return canvas.toDataURL('image/png');
         }
 
-        // Initialize inline textures before WebGL compilation
+        // Initialize inline textures before WebGL compilation with local file and procedural fallback
         (function gerarTexturasIniciais() {
+            function aplicarTexturaComFallback(idImg, funcaoGeradora) {
+                const imgEl = document.querySelector('#' + idImg);
+                const proceduralUrl = funcaoGeradora();
+
+                if (imgEl.hasAttribute('src') && imgEl.getAttribute('src') !== '') {
+                    imgEl.addEventListener('error', () => {
+                        console.warn(`Imagem ${idImg} não encontrada no caminho local. Aplicando textura de fallback.`);
+                        imgEl.src = proceduralUrl;
+                    }, { once: true });
+                } else {
+                    imgEl.src = proceduralUrl;
+                }
+            }
+
             // Wood paneling for Library
-            const texBiblio = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+            aplicarTexturaComFallback('tex-biblioteca', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
                 ctx.fillStyle = '#3a2414';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
@@ -471,11 +514,10 @@
                     ctx.lineTo(Math.random() * w, h);
                     ctx.stroke();
                 }
-            });
-            document.querySelector('#tex-biblioteca').src = texBiblio;
+            }));
 
             // Vintage wallpaper for Anne's room
-            const texQuarto = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+            aplicarTexturaComFallback('tex-quarto', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
                 ctx.fillStyle = '#d4c2a5';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = '#bfae93';
@@ -490,22 +532,20 @@
                         ctx.fill();
                     }
                 }
-            });
-            document.querySelector('#tex-quarto').src = texQuarto;
+            }));
 
             // Aged plaster for first floor
-            const texAndar1 = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+            aplicarTexturaComFallback('tex-andar1', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
                 ctx.fillStyle = '#c5b79e';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = 'rgba(0,0,0,0.03)';
                 for (let i = 0; i < 500; i++) {
                     ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
                 }
-            });
-            document.querySelector('#tex-andar1').src = texAndar1;
+            }));
 
             // Weathered attic rafters
-            const texSotao = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+            aplicarTexturaComFallback('tex-sotao', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
                 ctx.fillStyle = '#2e2015';
                 ctx.fillRect(0, 0, w, h);
                 ctx.strokeStyle = '#1a110a';
@@ -516,22 +556,20 @@
                     ctx.lineTo(w, y);
                     ctx.stroke();
                 }
-            });
-            document.querySelector('#tex-sotao').src = texSotao;
+            }));
 
             // Attic floorboards
-            const texPisoSotao = criarTexturaProcedural(512, 512, (ctx, w, h) => {
+            aplicarTexturaComFallback('tex-piso-sotao', () => criarTexturaProcedural(512, 512, (ctx, w, h) => {
                 ctx.fillStyle = '#4a3525';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = '#22150c';
                 for (let y = 0; y < h; y += 64) {
                     ctx.fillRect(0, y, w, 6);
                 }
-            });
-            document.querySelector('#tex-piso-sotao').src = texPisoSotao;
+            }));
 
             // Window view (Sky and Tree landscape)
-            const texVista = criarTexturaProcedural(512, 256, (ctx, w, h) => {
+            document.querySelector('#tex-vista').src = criarTexturaProcedural(512, 256, (ctx, w, h) => {
                 const grad = ctx.createLinearGradient(0, 0, 0, h);
                 grad.addColorStop(0, '#5882a8');
                 grad.addColorStop(0.7, '#d6e4ed');
@@ -539,16 +577,14 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
                 
-                // Silhouette of chestnut tree
                 ctx.fillStyle = '#213318';
                 ctx.beginPath();
                 ctx.arc(400, 100, 70, 0, Math.PI * 2);
                 ctx.fill();
             });
-            document.querySelector('#tex-vista').src = texVista;
 
             // Character textures
-            const texAnneVestido = criarTexturaProcedural(256, 256, (ctx, w, h) => {
+            document.querySelector('#tex-anne-vestido').src = criarTexturaProcedural(256, 256, (ctx, w, h) => {
                 ctx.fillStyle = '#2d4a43';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = '#ffffff';
@@ -556,25 +592,46 @@
                     ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
                 }
             });
-            document.querySelector('#tex-anne-vestido').src = texAnneVestido;
 
-            const texAnneRosto = criarTexturaProcedural(256, 256, (ctx, w, h) => {
+            document.querySelector('#tex-anne-rosto').src = criarTexturaProcedural(256, 256, (ctx, w, h) => {
                 ctx.fillStyle = '#fce4ce';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = '#3a2218';
-                ctx.fillRect(70, 100, 20, 10); // Left eye
-                ctx.fillRect(166, 100, 20, 10); // Right eye
+                ctx.fillRect(70, 100, 20, 10);
+                ctx.fillRect(166, 100, 20, 10);
                 ctx.fillStyle = '#c46859';
-                ctx.fillRect(100, 170, 56, 8); // Smile
+                ctx.fillRect(100, 170, 56, 8);
             });
-            document.querySelector('#tex-anne-rosto').src = texAnneRosto;
 
-            const texAnneCabelo = criarTexturaProcedural(256, 256, (ctx, w, h) => {
+            document.querySelector('#tex-anne-cabelo').src = criarTexturaProcedural(256, 256, (ctx, w, h) => {
                 ctx.fillStyle = '#1e140e';
                 ctx.fillRect(0, 0, w, h);
             });
-            document.querySelector('#tex-anne-cabelo').src = texAnneCabelo;
         })();
+
+        // File upload dynamically applies textures at runtime
+        function vincularUploaderTextura(inputId, assetId) {
+            const inputEl = document.querySelector('#' + inputId);
+            const imgEl = document.querySelector('#' + assetId);
+            if (!inputEl || !imgEl) return;
+
+            inputEl.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (evt) {
+                        imgEl.src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        vincularUploaderTextura('input-tex-biblioteca', 'tex-biblioteca');
+        vincularUploaderTextura('input-tex-quarto', 'tex-quarto');
+        vincularUploaderTextura('input-tex-andar1', 'tex-andar1');
+        vincularUploaderTextura('input-tex-sotao', 'tex-sotao');
+        vincularUploaderTextura('input-tex-piso-sotao', 'tex-piso-sotao');
 
         // Global variables for environment states
         let currentFloor = 0; 
@@ -747,40 +804,52 @@
             },
             tick: function () {
                 if (processandoTransicao) return;
+                
+                // Mantiene a câmera alinhada ao centro do rig
+                const cameraChild = document.querySelector('#visao-usuario');
+                if (cameraChild) {
+                    cameraChild.object3D.position.set(0, 0, 0);
+                }
+
                 const pos = this.el.object3D.position;
 
+                // Limites das paredes externas do Anexo
                 if (pos.x < -2.6) pos.x = -2.6;
                 if (pos.x > 2.6) pos.x = 2.6;
                 if (pos.z > 1.6) pos.z = 1.6;
                 if (pos.z < -9.4) pos.z = -9.4;
 
-                if (pos.z < -1.8 && pos.z > -2.2) {
+                // Passagem e colisão com a Estante Secreta
+                if (pos.z < -1.7 && pos.z > -2.3) {
                     if (pos.x <= -0.9 || pos.x >= 0.9) {
-                        pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
-                    } else {
-                        if (!estanteAberta) {
-                            pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
-                        }
+                        pos.z = this.lastPosition.z >= -1.7 ? -1.7 : -2.3;
+                    } else if (!estanteAberta) {
+                        pos.z = this.lastPosition.z >= -1.7 ? -1.7 : -2.3;
                     }
                 }
 
+                // Colisões específicas dos móveis por andar
                 if (currentFloor === 0) {
+                    // Armário e cantos do térreo
                     if (pos.x < -1.8 && pos.z < -7.4) {
                         if (this.lastPosition.x >= -1.8) pos.x = -1.8;
                         if (this.lastPosition.z >= -7.4) pos.z = -7.4;
                     }
-                    if (pos.x > -0.5 && pos.x < 0.5 && pos.z > -6.9 && pos.z < -6.1) {
-                        if (this.lastPosition.x <= -0.5) pos.x = -0.5;
-                        else if (this.lastPosition.x >= 0.5) pos.x = 0.5;
-                        else if (this.lastPosition.z <= -6.9) pos.z = -6.9;
-                        else if (this.lastPosition.z >= -6.1) pos.z = -6.1;
+                    // Mesa central de estudos
+                    if (pos.x > -0.6 && pos.x < 0.6 && pos.z > -7.0 && pos.z < -6.0) {
+                        if (this.lastPosition.x <= -0.6) pos.x = -0.6;
+                        else if (this.lastPosition.x >= 0.6) pos.x = 0.6;
+                        else if (this.lastPosition.z <= -7.0) pos.z = -7.0;
+                        else if (this.lastPosition.z >= -6.0) pos.z = -6.0;
                     }
                 } else if (currentFloor === 1) {
-                    if (pos.x > -0.2 && pos.x < 1.7 && pos.z < -7.4) {
+                    // Cama e móveis do Quarto de Anne
+                    if (pos.x > -0.2 && pos.x < 1.8 && pos.z < -7.4) {
                         if (this.lastPosition.x <= -0.2) pos.x = -0.2;
                         if (this.lastPosition.z >= -7.4) pos.z = -7.4;
                     }
                 } else if (currentFloor === 2) {
+                    // Limite frontal do Sótão
                     if (pos.z > -2.0) pos.z = -2.0;
                 }
 
