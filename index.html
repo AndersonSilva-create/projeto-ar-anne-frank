@@ -235,7 +235,8 @@
             <img id="tex-anne-vestido" src="assets/anne_vestido.jpg">
             <img id="tex-anne-rosto" src="assets/anne_rosto.jpg">
             <img id="tex-anne-cabelo" src="assets/anne_cabelo.jpg">
-            <audio id="audio-anne" src="audio_anne.mp3" preload="auto"></audio>
+            <!-- Corrigido o caminho do áudio para assets/audio_anne.mp3 -->
+            <audio id="audio-anne" src="assets/audio_anne.mp3" preload="auto" crossorigin="anonymous"></audio>
         </a-assets> 
 
         <!-- Luzes e Iluminação -->
@@ -487,12 +488,12 @@
         <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
         <a-plane position="2.85 8.11 -4.5" rotation="-90 0 0" width="0.3" height="0.8" src="#tex-piso-sotao" material="side: double;"></a-plane>
 
-        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b" material="side: double; roughness: 0.9;"></a-plane> 
+        <a-plane position="0 12 -6" rotation="90 0 0" width="6" height="8" color="#1a120b" material="side: double; roughness: 0.9;"></a-plane>
 
         <a-plane position="-3 10 -6" rotation="0 90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
         <a-plane position="3 10 -6" rotation="0 -90 0" width="8" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
         <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
-        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane> 
+        <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
 
         <!-- Caixas e Baús do Sótão com Colisão Configurada -->
         <a-entity id="caixas-sotao" position="0 8.21 -6">
@@ -516,13 +517,6 @@
             <a-box scale="0.02 1.4 0.02" position="0 0 0" color="#382b1c"></a-box>
             <a-box scale="1.4 0.02 0.02" position="0 0 0" color="#382b1c"></a-box>
         </a-plane>
-
-        <a-entity id="arvore-castanheira" position="0 4.5 -24">
-            <a-cylinder radius="0.45" height="10" color="#412f21" material="roughness: 0.95;"></a-cylinder>
-            <a-sphere radius="3.8" position="0 6.5 0" color="#274d1a" opacity="0.85" material="roughness: 0.9;"></a-sphere>
-            <a-sphere radius="2.8" position="-1.5 8 0.5" color="#1f3d14" opacity="0.85"></a-sphere>
-            <a-sphere radius="2.6" position="1.5 7.5 -0.5" color="#1f3d14" opacity="0.85"></a-sphere>
-        </a-entity>
 
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao controle-wasd-custom>
             <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true; reverseTouchDrag: true" id="visao-usuario">
@@ -768,7 +762,15 @@
             }
         }
 
-        const audioAnne = document.querySelector('#audio-anne');
+        // --- SISTEMA DE ÁUDIO DE ANNE FRANK ---
+        function obterElementoAudioAnne() {
+            let el = document.querySelector('#audio-anne');
+            if (!el) {
+                el = new Audio('assets/audio_anne.mp3');
+                el.id = 'audio-anne';
+            }
+            return el;
+        }
 
         function atualizarBotoesAudioAnne(tocando) {
             const btnPausa = document.querySelector('#btn-anne-pausa');
@@ -789,11 +791,21 @@
 
         function tocarAudioAnne() {
             initializeAudioContext();
+            const audioAnne = obterElementoAudioAnne();
             if (!audioAnne) return;
 
+            // Pausa qualquer sintese de voz ativa para nao sobrepor
             pararFalaAnne();
 
-            audioAnne.volume = parseFloat(document.querySelector('#slider-vol-anne').value);
+            const sliderVol = document.querySelector('#slider-vol-anne');
+            if (sliderVol) {
+                audioAnne.volume = parseFloat(sliderVol.value);
+            }
+
+            if (audioAnne.ended || audioAnne.paused) {
+                audioAnne.currentTime = 0;
+            }
+
             audioAnne.play().then(() => {
                 atualizarBotoesAudioAnne(true);
             }).catch(err => {
@@ -802,14 +814,17 @@
         }
 
         function pausarAudioAnne() {
+            const audioAnne = obterElementoAudioAnne();
             if (!audioAnne) return;
+
             const iconePausa = document.querySelector('#icone-anne-pausa');
             const txtPausa = document.querySelector('#txt-anne-pausa');
 
             if (audioAnne.paused) {
-                audioAnne.play();
-                if (iconePausa) iconePausa.innerText = "⏸️";
-                if (txtPausa) txtPausa.innerText = "Pausar";
+                audioAnne.play().then(() => {
+                    if (iconePausa) iconePausa.innerText = "⏸️";
+                    if (txtPausa) txtPausa.innerText = "Pausar";
+                }).catch(err => console.warn(err));
             } else {
                 audioAnne.pause();
                 if (iconePausa) iconePausa.innerText = "▶️";
@@ -818,17 +833,23 @@
         }
 
         function pararAudioAnne() {
+            const audioAnne = obterElementoAudioAnne();
             if (!audioAnne) return;
+
             audioAnne.pause();
             audioAnne.currentTime = 0;
             atualizarBotoesAudioAnne(false);
         }
 
-        if (audioAnne) {
-            audioAnne.addEventListener('ended', () => {
-                pararAudioAnne();
-            });
-        }
+        // Listener para quando o áudio terminar a reprodução espontaneamente
+        window.addEventListener('DOMContentLoaded', () => {
+            const audioAnne = document.querySelector('#audio-anne');
+            if (audioAnne) {
+                audioAnne.addEventListener('ended', () => {
+                    pararAudioAnne();
+                });
+            }
+        });
 
         document.querySelector('#btn-falar-anne-top').addEventListener('click', () => {
             tocarAudioAnne();
@@ -1179,6 +1200,7 @@
             if (narracaoUtterance) {
                 narracaoUtterance.volume = val;
             }
+            const audioAnne = document.querySelector('#audio-anne');
             if (audioAnne) {
                 audioAnne.volume = val;
             }
@@ -1202,6 +1224,7 @@
 
                 if (currentFloor !== 1) {
                     pararFalaAnne();
+                    pararAudioAnne();
                     document.querySelector('#grupo-falar-anne').classList.add('hidden');
                 } else {
                     document.querySelector('#grupo-falar-anne').classList.remove('hidden');
@@ -1251,111 +1274,111 @@
         });
 
         // COMPONENTE REGISTRADO: Motor de Colisão nas Paredes e Objetos
-AFRAME.registerComponent('motor-colisao', {
-    init: function() {
-        this.lastPosition = new THREE.Vector3();
-        this.lastPosition.copy(this.el.getAttribute('position'));
-        this.playerRadius = 0.35;
-    },
-    resolveBox: function(pos, box) {
-        const r = this.playerRadius;
-        const minX = box.minX - r;
-        const maxX = box.maxX + r;
-        const minZ = box.minZ - r;
-        const maxZ = box.maxZ + r;
+        AFRAME.registerComponent('motor-colisao', {
+            init: function() {
+                this.lastPosition = new THREE.Vector3();
+                this.lastPosition.copy(this.el.getAttribute('position'));
+                this.playerRadius = 0.35;
+            },
+            resolveBox: function(pos, box) {
+                const r = this.playerRadius;
+                const minX = box.minX - r;
+                const maxX = box.maxX + r;
+                const minZ = box.minZ - r;
+                const maxZ = box.maxZ + r;
 
-        if (pos.x > minX && pos.x < maxX && pos.z > minZ && pos.z < maxZ) {
-            const pushLeft = pos.x - minX;
-            const pushRight = maxX - pos.x;
-            const pushBack = pos.z - minZ;
-            const pushFront = maxZ - pos.z;
+                if (pos.x > minX && pos.x < maxX && pos.z > minZ && pos.z < maxZ) {
+                    const pushLeft = pos.x - minX;
+                    const pushRight = maxX - pos.x;
+                    const pushBack = pos.z - minZ;
+                    const pushFront = maxZ - pos.z;
 
-            const minPush = Math.min(pushLeft, pushRight, pushBack, pushFront);
+                    const minPush = Math.min(pushLeft, pushRight, pushBack, pushFront);
 
-            if (minPush === pushLeft) pos.x = minX;
-            else if (minPush === pushRight) pos.x = maxX;
-            else if (minPush === pushBack) pos.z = minZ;
-            else if (minPush === pushFront) pos.z = maxZ;
-        }
-    },
-    tick: function() {
-        const pos = this.el.getAttribute('position');
-        const r = this.playerRadius;
-
-        // 1. Limites Externos Universais (Paredes Leste, Oeste e Norte)
-        if (pos.x < -2.85 + r) pos.x = -2.85 + r;
-        if (pos.x > 2.85 - r) pos.x = 2.85 - r;
-        if (pos.z < -9.8 + r) pos.z = -9.8 + r;
-
-        // 2. Colisões Específicas por Andar
-        if (pos.y < 3.5) {
-            // --- TÉRREO (Biblioteca e Quarto Principal) ---
-            if (pos.z > 1.8 - r) pos.z = 1.8 - r;
-
-            const wallZ = -2.0;
-            const estanteEl = document.querySelector('#estante-secreta');
-            let estanteX = 0;
-            if (estanteEl && estanteEl.object3D) {
-                estanteX = estanteEl.object3D.position.x;
-            }
-
-            // Colisão com a Estante Secreta (móvel dinâmico)
-            this.resolveBox(pos, {
-                minX: estanteX - 0.98,
-                maxX: estanteX + 0.98,
-                minZ: -2.15,
-                maxZ: -1.65
-            });
-
-            // Colisão com as Paredes Divisórias Fixas da Biblioteca
-            if (pos.x < -0.95 || pos.x > 0.95) {
-                if (this.lastPosition.z >= wallZ + r && pos.z < wallZ + r) {
-                    pos.z = wallZ + r;
-                } else if (this.lastPosition.z <= wallZ - r && pos.z > wallZ - r) {
-                    pos.z = wallZ - r;
+                    if (minPush === pushLeft) pos.x = minX;
+                    else if (minPush === pushRight) pos.x = maxX;
+                    else if (minPush === pushBack) pos.z = minZ;
+                    else if (minPush === pushFront) pos.z = maxZ;
                 }
+            },
+            tick: function() {
+                const pos = this.el.getAttribute('position');
+                const r = this.playerRadius;
+
+                // 1. Limites Externos Universais (Paredes Leste, Oeste e Norte)
+                if (pos.x < -2.85 + r) pos.x = -2.85 + r;
+                if (pos.x > 2.85 - r) pos.x = 2.85 - r;
+                if (pos.z < -9.8 + r) pos.z = -9.8 + r;
+
+                // 2. Colisões Específicas por Andar
+                if (pos.y < 3.5) {
+                    // --- TÉRREO (Biblioteca e Quarto Principal) ---
+                    if (pos.z > 1.8 - r) pos.z = 1.8 - r;
+
+                    const wallZ = -2.0;
+                    const estanteEl = document.querySelector('#estante-secreta');
+                    let estanteX = 0;
+                    if (estanteEl && estanteEl.object3D) {
+                        estanteX = estanteEl.object3D.position.x;
+                    }
+
+                    // Colisão com a Estante Secreta (móvel dinâmico)
+                    this.resolveBox(pos, {
+                        minX: estanteX - 0.98,
+                        maxX: estanteX + 0.98,
+                        minZ: -2.15,
+                        maxZ: -1.65
+                    });
+
+                    // Colisão com as Paredes Divisórias Fixas da Biblioteca
+                    if (pos.x < -0.95 || pos.x > 0.95) {
+                        if (this.lastPosition.z >= wallZ + r && pos.z < wallZ + r) {
+                            pos.z = wallZ + r;
+                        } else if (this.lastPosition.z <= wallZ - r && pos.z > wallZ - r) {
+                            pos.z = wallZ - r;
+                        }
+                    }
+
+                    // Colisão com a Mesa de Estudos do Térreo
+                    this.resolveBox(pos, { minX: -0.5, maxX: 0.5, minZ: -7.0, maxZ: -6.0 });
+
+                    // Colisão com o Armário do Térreo
+                    this.resolveBox(pos, { minX: -2.95, maxX: -2.25, minZ: -9.2, maxZ: -7.8 });
+
+                    // Colisão com a Estrutura da Escada do 1º Andar
+                    this.resolveBox(pos, { minX: -2.65, maxX: -1.95, minZ: -4.85, maxZ: -4.15 });
+
+                } else if (pos.y >= 3.5 && pos.y < 7.5) {
+                    // --- SEGUNDO ANDAR (Quarto de Anne Frank) ---
+                    if (pos.z > -2.0 - r) pos.z = -2.0 - r;
+
+                    // Colisão com o Canto de Estudos (Escrivaninha, Cadeira e Abajur)
+                    this.resolveBox(pos, { minX: -2.85, maxX: -1.4, minZ: -9.8, maxZ: -8.4 });
+
+                    // Colisão com a Estante de Livros da Parede
+                    this.resolveBox(pos, { minX: -2.85, maxX: -2.2, minZ: -7.7, maxZ: -6.7 });
+
+                    // Colisão com a Cama de Anne Frank e o Manequim
+                    this.resolveBox(pos, { minX: 0.2, maxX: 1.45, minZ: -9.5, maxZ: -7.5 });
+
+                    // Colisão com o Penico ao lado da cama
+                    this.resolveBox(pos, { minX: -0.1, maxX: 0.35, minZ: -8.0, maxZ: -7.6 });
+
+                    // Colisão com a Estrutura da Escada do Sótão
+                    this.resolveBox(pos, { minX: 1.95, maxX: 2.65, minZ: -4.85, maxZ: -4.15 });
+
+                } else if (pos.y >= 7.5) {
+                    // --- TERCEIRO ANDAR (Sótão) ---
+                    if (pos.z > -2.0 - r) pos.z = -2.0 - r;
+
+                    // Colisão com a Pilha Principal de Caixas de Madeira
+                    this.resolveBox(pos, { minX: -2.3, maxX: -1.3, minZ: -9.0, maxZ: -7.5 });
+                }
+
+                this.el.setAttribute('position', pos);
+                this.lastPosition.copy(pos);
             }
-
-            // Colisão com a Mesa de Estudos do Térreo
-            this.resolveBox(pos, { minX: -0.5, maxX: 0.5, minZ: -7.0, maxZ: -6.0 });
-
-            // Colisão com o Armário do Térreo
-            this.resolveBox(pos, { minX: -2.95, maxX: -2.25, minZ: -9.2, maxZ: -7.8 });
-
-            // Colisão com a Estrutura da Escada do 1º Andar
-            this.resolveBox(pos, { minX: -2.65, maxX: -1.95, minZ: -4.85, maxZ: -4.15 });
-
-        } else if (pos.y >= 3.5 && pos.y < 7.5) {
-            // --- SEGUNDO ANDAR (Quarto de Anne Frank) ---
-            if (pos.z > -2.0 - r) pos.z = -2.0 - r;
-
-            // Colisão com o Canto de Estudos (Escrivaninha, Cadeira e Abajur)
-            this.resolveBox(pos, { minX: -2.85, maxX: -1.4, minZ: -9.8, maxZ: -8.4 });
-
-            // Colisão com a Estante de Livros da Parede
-            this.resolveBox(pos, { minX: -2.85, maxX: -2.2, minZ: -7.7, maxZ: -6.7 });
-
-            // Colisão com a Cama de Anne Frank e o Manequim
-            this.resolveBox(pos, { minX: 0.2, maxX: 1.45, minZ: -9.5, maxZ: -7.5 });
-
-            // Colisão com o Penico ao lado da cama
-            this.resolveBox(pos, { minX: -0.1, maxX: 0.35, minZ: -8.0, maxZ: -7.6 });
-
-            // Colisão com a Estrutura da Escada do Sótão
-            this.resolveBox(pos, { minX: 1.95, maxX: 2.65, minZ: -4.85, maxZ: -4.15 });
-
-        } else if (pos.y >= 7.5) {
-            // --- TERCEIRO ANDAR (Sótão) ---
-            if (pos.z > -2.0 - r) pos.z = -2.0 - r;
-
-            // Colisão com a Pilha Principal de Caixas de Madeira
-            this.resolveBox(pos, { minX: -2.3, maxX: -1.3, minZ: -9.0, maxZ: -7.5 });
-        }
-
-        this.el.setAttribute('position', pos);
-        this.lastPosition.copy(pos);
-    }
-});
+        });
 
         let joystickActive = false;
         let joystickVector = { x: 0, y: 0 };
