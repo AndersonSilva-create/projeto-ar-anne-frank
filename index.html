@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Anexo Secreto - Reconstrução Virtual Tridimensional</title>
-    <!-- A-Frame 1.4.0 Library for WebVR/WebXR and 3D rendering -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Tailwind CSS for HUD and responsive interfaces -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -53,6 +51,7 @@
             border: 2px solid rgba(255, 255, 255, 0.25);
             border-radius: 50%;
             touch-action: none;
+            position: relative;
         }
         #pino-joystick {
             width: 36px;
@@ -62,6 +61,9 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.05s ease-out;
             pointer-events: none;
+            position: absolute;
+            top: 27px;
+            left: 27px;
         }
         .a-enter-vr, .a-enter-ar {
             display: none !important;
@@ -72,6 +74,7 @@
 
     <div id="efeito-fade" class="fixed inset-0 bg-black opacity-0 z-[99999] pointer-events-none"></div>
 
+    <!-- Tela de Entrada Inicial -->
     <div id="tela-inicial" class="fixed inset-0 z-[10000] bg-neutral-950 flex flex-col items-center justify-center p-6 text-center">
         <div class="max-w-md bg-neutral-900 border border-neutral-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center">
             <h1 class="fonte-titulo text-2xl sm:text-3xl font-bold text-amber-400 mb-3">O Anexo Secreto</h1>
@@ -84,16 +87,31 @@
         </div>
     </div>
 
+    <!-- Barra Superior de Controle (HUD) -->
     <div class="fixed top-4 left-4 right-4 flex justify-between items-start sm:items-center z-[999] pointer-events-none">
         <div class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold pointer-events-auto shadow-xl my-1">
             <span id="txt-status" class="text-amber-300">Explorando: Biblioteca (Térreo)</span>
         </div>
-        <div class="flex gap-1.5 sm:gap-2 pointer-events-auto flex-wrap justify-end my-1">
+        <div class="flex gap-1.5 sm:gap-2 pointer-events-auto flex-wrap justify-end my-1 items-center">
+            
+            <!-- Grupo de Áudio de Anne (Visível apenas no 2º Andar) -->
+            <div id="grupo-falar-anne" class="hidden flex items-center gap-1.5">
+                <button id="btn-falar-anne-top" class="bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500">
+                    <span>🗣️</span> <span id="txt-falar-anne">Ouvir Anne</span>
+                </button>
+                <button id="btn-anne-pausa" class="hidden bg-amber-900 hover:bg-amber-800 active:scale-95 text-white px-2.5 sm:px-3 py-2 rounded-full text-xs font-bold transition flex items-center gap-1 shadow-lg border border-amber-600">
+                    <span id="icone-anne-pausa">⏸️</span> <span id="txt-anne-pausa" class="hidden sm:inline">Pausar</span>
+                </button>
+                <button id="btn-anne-parar" class="hidden bg-red-800 hover:bg-red-700 active:scale-95 text-white px-2.5 sm:px-3 py-2 rounded-full text-xs font-bold transition flex items-center gap-1 shadow-lg border border-red-500">
+                    <span>⏹️</span> <span class="hidden sm:inline">Parar</span>
+                </button>
+            </div>
+
             <button id="btn-dia-noite" class="bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400">
                 <span id="icone-clima">🌙</span> <span id="txt-clima" class="hidden sm:inline">Modo Noite</span>
             </button>
             <button id="btn-toggle-narracao" class="bg-emerald-800 hover:bg-emerald-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-emerald-500">
-                <span id="icone-narracao">🗣️</span> <span id="txt-narracao" class="hidden sm:inline">Voz: ON</span>
+                <span id="icone-narracao">🎙️</span> <span id="txt-narracao" class="hidden sm:inline">Voz: ON</span>
             </button>
             <button id="btn-fullscreen" class="bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-neutral-600">
                 <span>⛶</span> <span class="hidden sm:inline">Tela Cheia</span>
@@ -107,14 +125,12 @@
         </div>
     </div>
 
+    <!-- Modal Diário -->
     <div id="modal-diario" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/70 backdrop-blur-sm">
         <div class="modal-historico w-full max-w-lg flex flex-col h-[75vh] relative p-6 sm:p-8">
             <h2 class="fonte-titulo text-xl sm:text-2xl font-bold border-b border-[#4a3319]/30 pb-2 mb-3 text-[#4a3319] text-center">Diário de Anne Frank</h2>
-            
-            <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic" id="corpo-diario">
-            </div>
+            <div class="flex-1 overflow-y-auto sem-scroll pr-2 text-base sm:text-lg leading-relaxed italic" id="corpo-diario"></div>
 
-            <!-- Speech player subpanel inside diary -->
             <div id="painel-audio-anne" class="my-2 p-3 bg-[#4a3319]/10 rounded-lg border border-[#4a3319]/20 flex items-center justify-between gap-2">
                 <span class="text-xs font-semibold text-[#4a3319] flex items-center gap-1.5">
                     <span class="animate-pulse">🎙️</span> Narração de Anne:
@@ -134,22 +150,10 @@
         </div>
     </div>
 
-    <div id="modal-fala-anne" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/60 backdrop-blur-sm">
-        <div class="modal-historico w-full max-w-md p-6 relative border-double border-8 border-[#4a3319]">
-            <h3 class="fonte-titulo text-xl font-bold border-b border-[#4a3319]/30 pb-2 mb-4 text-[#4a3319] flex items-center gap-2">
-                ✍️ Pensamento de Anne
-            </h3>
-            <p id="texto-fala-anne" class="italic text-base sm:text-lg leading-relaxed text-[#2b1a09] pr-1"></p>
-            <div class="mt-6 flex justify-end">
-                <button id="btn-fala-fechar" class="bg-[#4a3319] text-[#f2e6cb] active:scale-95 px-5 py-2 rounded font-bold hover:bg-[#342412] transition">Refletir</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Modal Ajustes -->
     <div id="modal-config" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
         <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-sm rounded-2xl p-6 flex flex-col gap-5 shadow-2xl">
             <h3 class="fonte-titulo text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2">⚙️ Ajustes de Som</h3>
-            
             <div class="flex flex-col gap-2">
                 <label class="text-xs font-semibold text-neutral-300 flex justify-between">
                     <span>🔊 Som Ambiente:</span>
@@ -157,24 +161,22 @@
                 </label>
                 <input id="slider-vol-ambiente" type="range" min="0" max="1" step="0.05" value="0.5" class="accent-amber-500 w-full cursor-pointer">
             </div>
-
             <div class="flex flex-col gap-2">
                 <label class="text-xs font-semibold text-neutral-300 flex justify-between">
-                    <span>🗣️ Fala de Anne / Narração:</span>
+                    <span>🗣️ Fala de Anne / Áudio:</span>
                     <span id="vol-anne-txt">80%</span>
                 </label>
                 <input id="slider-vol-anne" type="range" min="0" max="1" step="0.05" value="0.8" class="accent-amber-500 w-full cursor-pointer">
             </div>
-
             <div class="flex items-center justify-between pt-2 border-t border-neutral-800">
                 <span class="text-xs font-semibold text-neutral-300">🎙️ Narração Automática:</span>
                 <button id="btn-config-toggle-narracao" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">Ativada</button>
             </div>
-
             <button id="btn-config-fechar" class="mt-2 bg-neutral-800 hover:bg-neutral-700 text-white w-full py-2.5 rounded-xl font-bold text-xs transition">Concluído</button>
         </div>
     </div>
 
+    <!-- Modal Inspeção -->
     <div id="modal-inspecao" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/85 backdrop-blur-md">
         <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-md rounded-2xl p-6 flex flex-col items-center shadow-2xl relative">
             <h3 id="inspecao-titulo" class="fonte-titulo text-2xl font-bold text-amber-400 mb-2">Objeto Antigo</h3>
@@ -186,6 +188,7 @@
         </div>
     </div>
 
+    <!-- Modal QR Code Mobile -->
     <div id="modal-qrcode" class="fixed inset-0 flex items-center justify-center z-[9999] hidden p-4 bg-black/90 backdrop-blur-sm">
         <div class="bg-neutral-900 border border-neutral-700 text-white w-full max-w-xs rounded-2xl p-6 flex flex-col items-center">
             <h3 class="text-lg font-bold text-center mb-2">Modo Celular (AR)</h3>
@@ -197,6 +200,7 @@
         </div>
     </div>
 
+    <!-- Controles Mobile -->
     <div id="controles-mobile" class="fixed bottom-6 left-6 right-6 flex justify-between items-end z-[9999] pointer-events-none hidden">
         <div class="pointer-events-auto flex items-center gap-3">
             <div id="zona-joystick" class="flex items-center justify-center">
@@ -220,18 +224,21 @@
 
     <a-scene background="color: #87ceeb" renderer="colorManagement: true; antialias: true;" vr-mode-ui="enabled: false">
         <a-assets>
-            <img id="tex-biblioteca" crossorigin="anonymous" src="assets/biblioteca_parede.jpg">
-            <img id="tex-quarto" crossorigin="anonymous" src="assets/quarto_parede.jpg">
-            <img id="tex-andar1" crossorigin="anonymous" src="assets/andar1_parede.jpg">
-            <img id="tex-sotao" crossorigin="anonymous" src="assets/sotao_parede.jpg">
-            <img id="tex-piso-sotao" crossorigin="anonymous" src="assets/piso_sotao.png">
-            <img id="tex-vista" crossorigin="anonymous" src="assets/vista_rua.jpg">
-            <img id="tex-anne-vestido" crossorigin="anonymous" src="assets/anne_vestido.jpg">
-            <img id="tex-anne-rosto" crossorigin="anonymous" src="assets/anne_rosto.jpg">
-            <img id="tex-anne-cabelo" crossorigin="anonymous" src="assets/anne_cabelo.jpg">
-            <audio id="audio-anne" src="assets/fala_anne.mp3" preload="auto"></audio>
-        </a-assets>
+            <img id="tex-radio-frontal">
+            <img id="tex-radio-corpo">
+            <img id="tex-biblioteca" src="assets/biblioteca_parede.jpg">
+            <img id="tex-quarto" src="assets/quarto_parede.jpg">
+            <img id="tex-andar1" src="assets/andar1_parede.jpg">
+            <img id="tex-sotao" src="assets/sotao_parede.jpg">
+            <img id="tex-piso-sotao" src="assets/piso_sotao.png">
+            <img id="tex-vista" src="assets/vista_rua.jpg">
+            <img id="tex-anne-vestido" src="assets/anne_vestido.jpg">
+            <img id="tex-anne-rosto" src="assets/anne_rosto.jpg">
+            <img id="tex-anne-cabelo" src="assets/anne_cabelo.jpg">
+            <audio id="audio-anne" src="audio_anne.mp3" preload="auto"></audio>
+        </a-assets> 
 
+        <!-- Luzes e Iluminação -->
         <a-entity id="luz-ambiente" light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
         <a-entity id="luz-sol" light="type: directional; color: #ffeebb; intensity: 1.2" position="1 4 1"></a-entity>
         <a-entity id="luz-biblioteca-teto" light="type: point; color: #ffbb66; intensity: 1.0; distance: 6; decay: 1.5" position="0 3.2 0"></a-entity>
@@ -255,6 +262,7 @@
         <a-plane position="0 3.5 -2" rotation="0 0 0" width="2" height="1" src="#tex-biblioteca" material="side: double; roughness: 0.7;"></a-plane>
         <a-plane position="0 4 -2" rotation="90 0 0" width="2" height="1" color="#ebdcb9" material="side: double; roughness: 0.7;"></a-plane>
 
+        <!-- Estante Secreta da Biblioteca (Abre deslizando horizontalmente) -->
         <a-box id="estante-secreta" class="interactable" position="0 1.5 -1.9" width="1.95" height="3" depth="0.38" color="#5a3d28" material="roughness: 0.8">
             <a-box scale="0.1 0.4 0.3" position="-0.7 0.8 0.1" color="#8b0000"></a-box>
             <a-box scale="0.12 0.45 0.3" position="-0.5 0.82 0.1" color="#00008b"></a-box>
@@ -273,6 +281,7 @@
         <a-plane position="3 2 -6" rotation="0 -90 0" width="8" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
         <a-plane position="0 2 -10" rotation="0 0 0" width="6" height="4" src="#tex-quarto" material="side: double;"></a-plane> 
 
+        <!-- Mesa de Estudos com o Diário e o Rádio sobre ela -->
         <a-entity id="mesa-estudos" position="0 0 -6.5">
             <a-box position="0 0.72 0" scale="0.8 0.05 0.8" color="#5c3a21" material="roughness: 0.9"></a-box>
             <a-cylinder position="-0.35 0.36 -0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
@@ -280,35 +289,42 @@
             <a-cylinder position="-0.35 0.36 0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
             <a-cylinder position="0.35 0.36 0.35" radius="0.025" height="0.72" color="#402a18"></a-cylinder>
             
-            <a-box id="objeto-diario" position="0 0.76 0" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable" material="roughness: 0.7">
+            <!-- Diário de Anne Frank -->
+            <a-box id="objeto-diario" position="-0.15 0.76 0.05" scale="0.22 0.04 0.3" color="#a31d1d" class="interactable" material="roughness: 0.7">
                 <a-box scale="0.04 0.005 0.1" position="-0.09 0.02 0" color="#d4af37"></a-box>
                 <a-box scale="0.2 0.03 0.28" position="0.01 0 0" color="#fefefe"></a-box>
             </a-box>
+
+            <!-- RÁDIO VINTAGE -->
+            <a-entity id="container-radio" position="0.2 0.82 0.0" rotation="0 -15 0">
+                <a-box id="objeto-radio" class="interactable" scale="0.32 0.22 0.20" position="0 0 0" material="opacity: 0; transparent: true; depthTest: true;"></a-box>
+                <a-box scale="0.22 0.14 0.11" position="0 0 0" src="#tex-radio-corpo" material="roughness: 0.6; metalness: 0.1;"></a-box>
+                <a-box scale="0.20 0.12 0.005" position="0 0 0.056" src="#tex-radio-frontal" material="roughness: 0.4;"></a-box>
+                <a-box scale="0.09 0.045 0.006" position="-0.04 0.025 0.057" color="#f3e5ab" material="roughness: 0.3;">
+                    <a-box scale="0.003 0.035 0.002" position="0 0 0.002" color="#cc0000"></a-box>
+                </a-box>
+                <a-box scale="0.07 0.09 0.006" position="0.05 -0.005 0.057" color="#4a3728" material="roughness: 0.9;"></a-box>
+                <a-cylinder radius="0.011" height="0.012" rotation="90 0 0" position="-0.06 -0.035 0.06" color="#d4af37" material="metalness: 0.8; roughness: 0.2;"></a-cylinder>
+                <a-cylinder radius="0.011" height="0.012" rotation="90 0 0" position="-0.015 -0.035 0.06" color="#d4af37" material="metalness: 0.8; roughness: 0.2;"></a-cylinder>
+                <a-sphere id="led-indicador-radio" position="-0.08 0.045 0.058" radius="0.008" color="#333333" material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
+                <a-cylinder radius="0.0025" height="0.28" position="-0.08 0.18 -0.04" rotation="5 0 -10" color="#c0c0c0" material="metalness: 0.9; roughness: 0.1;"></a-cylinder>
+            </a-entity>
         </a-entity>
 
         <a-entity id="armario-terreo" position="-2.6 0 -8.5">
-            <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95;">
+            <a-box scale="0.6 2.8 1.2" color="#4a3319" position="0 1.4 0" material="roughness: 0.95; src: #tex-quarto;">
                 <a-box scale="0.02 1.0 0.5" position="0.31 0 -0.26" color="#5c4033"></a-box>
                 <a-box scale="0.02 1.0 0.5" position="0.31 0 0.26" color="#5c4033"></a-box>
-                <a-sphere position="0.33 0 0.05" radius="0.02" color="#d4af37"></a-sphere>
+                <a-sphere position="0.33 0 0.12" radius="0.02" color="#d4af37"></a-sphere>
+                <a-cylinder radius="0.008" height="0.04" rotation="0 0 90" position="0.32 0 0.12" color="#b89728"></a-cylinder>
+                <a-sphere position="0.33 0 -0.12" radius="0.02" color="#d4af37"></a-sphere>
+                <a-cylinder radius="0.008" height="0.04" rotation="0 0 90" position="0.32 0 -0.12" color="#b89728"></a-cylinder>
             </a-box>
         </a-entity>
 
-        <a-entity id="radio-vintage" position="-2.6 0 -5">
-            <a-box scale="0.4 0.95 0.5" color="#5c3818" position="0 0.475 0" material="roughness: 0.8;">
-                <a-box id="objeto-radio" scale="0.02 0.3 0.35" position="0.21 0.2 0" color="#2b1a09" class="interactable">
-                    <a-box scale="0.005 0.1 0.15" position="0.01 0.06 -0.07" color="#eeddbb"></a-box>
-                    <a-cylinder radius="0.02" height="0.01" rotation="0 0 90" position="0.01 -0.06 0.08" color="#8b5a2b"></a-cylinder>
-                    <a-sphere id="led-indicador-radio" position="0.01 0.08 0.11" radius="0.012" color="#333333" material="emissive: #333333; emissiveIntensity: 0;"></a-sphere>
-                </a-box>
-            </a-box>
-        </a-entity>
-
-        <!-- ESCADA 1 -->
         <a-entity id="escada-1" position="-2.3 0 -4.5">
             <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
             <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
-            
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -323,16 +339,13 @@
 
             <a-box id="trigger-subir-1" class="interactable" position="0 1.5 0.2" scale="1.6 3.0 1.0" material="opacity: 0; transparent: true"></a-box>
             <a-box id="trigger-descer-1" class="interactable" position="0 4.3 0.2" scale="1.6 1.2 1.0" material="opacity: 0; transparent: true"></a-box>
-            <a-plane class="interactable" position="0 1.6 0.25" width="1.2" height="0.4" text="value: ⬆ SUBIR (2º Andar); align: center; width: 3.5; color: #ffffff;" material="opacity: 0; transparent: true; shader: flat; side: double;"></a-plane>
-            <a-plane class="interactable" position="0 4.3 0.25" width="1.2" height="0.4" text="value: ⬇ DESCER (Térreo); align: center; width: 3.5; color: #ffffff;" material="opacity: 0; transparent: true; shader: flat; side: double;"></a-plane>
         </a-entity>
 
-        <!-- SEGUNDO ANDAR -->
+        <!-- SEGUNDO ANDAR: QUARTO DE ANNE FRANK -->
         <a-plane position="0.55 4.01 -6" rotation="-90 0 0" width="4.9" height="8" color="#352412" material="side: double; roughness: 0.95;"></a-plane>
         <a-plane position="-2.45 4.01 -3.05" rotation="-90 0 0" width="1.1" height="2.1" color="#352412" material="side: double;"></a-plane>
         <a-plane position="-2.45 4.01 -7.45" rotation="-90 0 0" width="1.1" height="5.1" color="#352412" material="side: double;"></a-plane>
         <a-plane position="-2.85 4.01 -4.5" rotation="-90 0 0" width="0.3" height="0.8" color="#352412" material="side: double;"></a-plane>
-
         <a-plane position="0 8.00 -6" rotation="90 0 0" width="6" height="8" color="#eae5d8" material="side: double; roughness: 0.7;"></a-plane> 
 
         <a-plane position="-3 6 -6" rotation="0 90 0" width="8" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
@@ -340,27 +353,102 @@
         <a-plane position="0 6 -10" rotation="0 0 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane>
         <a-plane position="0 6 -2" rotation="0 180 0" width="6" height="4" src="#tex-andar1" material="side: double; roughness: 0.8;"></a-plane> 
 
-        <a-plane position="2.98 6 -6" rotation="0 -90 0" width="1.4" height="1.6" src="#tex-vista" material="side: double;"></a-plane>
+        <a-entity id="janela-andar2" class="interactable" position="2.95 5.8 -6.5" rotation="0 -90 0">
+            <a-plane width="1.6" height="1.8" src="#tex-vista" material="side: double; roughness: 0.2;"></a-plane>
+            <a-box scale="1.7 0.08 0.08" position="0 0.92 0.04" color="#3a2514"></a-box>
+            <a-box scale="1.7 0.08 0.08" position="0 -0.92 0.04" color="#3a2514"></a-box>
+            <a-box scale="0.08 1.8 0.08" position="0.82 0 0.04" color="#3a2514"></a-box>
+            <a-box scale="0.08 1.8 0.08" position="-0.82 0 0.04" color="#3a2514"></a-box>
+            <a-box scale="0.04 1.8 0.04" position="0 0 0.03" color="#3a2514"></a-box>
+            <a-box scale="1.6 0.04 0.04" position="0 0 0.03" color="#3a2514"></a-box>
+            <a-box scale="1.8 0.06 0.2" position="0 -0.93 0.1" color="#4a311c"></a-box>
+        </a-entity>
+
+        <a-entity id="canto-estudos-andar2" position="-2.1 4.01 -9.55">
+            <a-box position="0 0.7 0" scale="1.1 0.06 0.7" color="#4a311c" material="roughness: 0.8"></a-box>
+            <a-cylinder position="-0.48 0.35 -0.28" radius="0.03" height="0.7" color="#332011"></a-cylinder>
+            <a-cylinder position="0.48 0.35 -0.28" radius="0.03" height="0.7" color="#332011"></a-cylinder>
+            <a-cylinder position="-0.48 0.35 0.28" radius="0.03" height="0.7" color="#332011"></a-cylinder>
+            <a-cylinder position="0.48 0.35 0.28" radius="0.03" height="0.7" color="#332011"></a-cylinder>
+
+            <a-entity id="cadeira-estudos" position="0 0 0.55" rotation="0 180 0">
+                <a-box position="0 0.42 0" scale="0.45 0.04 0.45" color="#5c3a21"></a-box>
+                <a-box position="0 0.72 -0.2" scale="0.45 0.55 0.04" color="#5c3a21"></a-box>
+                <a-cylinder position="-0.18 0.21 -0.18" radius="0.02" height="0.42" color="#3a2312"></a-cylinder>
+                <a-cylinder position="0.18 0.21 -0.18" radius="0.02" height="0.42" color="#3a2312"></a-cylinder>
+                <a-cylinder position="-0.18 0.21 0.18" radius="0.02" height="0.42" color="#3a2312"></a-cylinder>
+                <a-cylinder position="0.18 0.21 0.18" radius="0.02" height="0.42" color="#3a2312"></a-cylinder>
+            </a-entity>
+
+            <a-entity id="abajur" position="-0.35 0.73 -0.15">
+                <a-cylinder radius="0.08" height="0.02" color="#8b6b3e"></a-cylinder>
+                <a-cylinder radius="0.012" height="0.25" position="0 0.13 0" color="#b5945b"></a-cylinder>
+                <a-cone radius-bottom="0.12" radius-top="0.06" height="0.16" position="0 0.28 0" color="#f7e8c1" material="emissive: #ffdd99; emissiveIntensity: 0.5; roughness: 0.5"></a-cone>
+                <a-entity light="type: point; color: #ffdd99; intensity: 0.7; distance: 2.8" position="0 0.25 0"></a-entity>
+            </a-entity>
+
+            <a-box position="0.2 0.75 -0.1" scale="0.22 0.04 0.3" color="#1e3a5f" rotation="0 12 0"></a-box>
+            <a-box position="0.22 0.79 -0.08" scale="0.2 0.03 0.28" color="#8b263e" rotation="0 -5 0"></a-box>
+            <a-box position="0.18 0.82 -0.09" scale="0.18 0.03 0.25" color="#3a5f1e" rotation="0 25 0"></a-box>
+            <a-plane position="-0.05 0.732 0.1" rotation="-90 15 0" width="0.25" height="0.3" color="#f2ebd9" material="side: double"></a-plane>
+            <a-cylinder position="-0.08 0.76 0.12" radius="0.02" height="0.06" color="#2b1a09"></a-cylinder>
+            <a-box position="-0.05 0.762 0.08" scale="0.14 0.005 0.01" rotation="0 40 0" color="#ddc488"></a-box>
+
+            <a-entity id="prateleira-parede" position="0 1.6 -0.44">
+                <a-box scale="1.1 0.04 0.25" color="#4a311c" material="roughness: 0.8"></a-box>
+                <a-box scale="0.03 0.2 0.2" position="-0.45 -0.1 0" color="#332011"></a-box>
+                <a-box scale="0.03 0.2 0.2" position="0.45 -0.1 0" color="#332011"></a-box>
+                <a-box position="-0.35 0.12 0" scale="0.05 0.2 0.15" color="#a03333"></a-box>
+                <a-box position="-0.28 0.12 0" scale="0.05 0.18 0.15" color="#3377a0"></a-box>
+                <a-box position="-0.21 0.12 0" scale="0.06 0.22 0.15" color="#33a055"></a-box>
+                <a-cylinder position="0.2 0.1 0" radius="0.05" height="0.16" color="#d4af37"></a-cylinder>
+                <a-box position="0.35 0.08 0" scale="0.15 0.12 0.12" color="#664422"></a-box>
+            </a-entity>
+        </a-entity>
+
+        <a-entity id="estante-livros-andar2" position="-2.65 4.01 -7.2">
+            <a-box position="0 0.75 0" scale="0.45 1.5 0.8" color="#4a311c" material="roughness: 0.9">
+                <a-box scale="0.95 0.02 0.9" position="0 0.1 0" color="#332011"></a-box>
+                <a-box scale="0.95 0.02 0.9" position="0 -0.25 0" color="#332011"></a-box>
+                <a-box scale="0.7 0.22 0.08" position="0 0.22 0.18" color="#7b241c"></a-box>
+                <a-box scale="0.7 0.2 0.08" position="0 0.22 0.06" color="#1f618d"></a-box>
+                <a-box scale="0.7 0.24 0.08" position="0 0.22 -0.06" color="#1e8449"></a-box>
+                <a-box scale="0.7 0.18 0.08" position="0 0.22 -0.18" color="#b7950b"></a-box>
+                <a-box scale="0.7 0.2 0.08" position="0 -0.13 0.18" color="#5d6d7e"></a-box>
+                <a-box scale="0.7 0.22 0.08" position="0 -0.13 0.06" color="#6c3483"></a-box>
+                <a-box scale="0.7 0.19 0.08" position="0 -0.13 -0.06" color="#a04000"></a-box>
+                <a-box scale="0.08 0.32 0.35" position="0.15 0.32 0.1" color="#8b4513" rotation="0 15 0"></a-box>
+                <a-box scale="0.07 0.3 0.32" position="0.22 0.31 0.08" color="#2e8b57" rotation="0 -10 0"></a-box>
+                <a-box scale="0.09 0.35 0.35" position="-0.15 -0.05 0.1" color="#4682b4" rotation="0 5 0"></a-box>
+                <a-box scale="0.06 0.28 0.3" position="-0.05 -0.07 0.12" color="#cd853f" rotation="0 -5 0"></a-box>
+            </a-box>
+        </a-entity>
 
         <a-entity id="cama-anne" position="0.8 4.01 -8.5">
             <a-box scale="1.1 0.3 1.8" color="#4a3319" position="0 0.15 0" material="roughness: 0.95;"></a-box>
             <a-box scale="1.05 0.1 1.7" color="#f5ecd5" position="0 0.3 0"></a-box>
             <a-box scale="1.1 0.6 0.08" color="#332211" position="0 0.35 -0.9" material="roughness: 0.9;"></a-box>
 
-            <a-entity id="manequim-anne" position="0 0.35 0" rotation="0 -115 0" class="interactable">
-                <a-box scale="0.28 0.4 0.2" position="0 0.2 0" src="#tex-anne-vestido"></a-box>
-                <a-sphere radius="0.1" position="0 0.48 0" src="#tex-anne-rosto" rotation="0 90 0"></a-sphere>
-                <a-box scale="0.22 0.12 0.2" position="0 0.52 -0.03" src="#tex-anne-cabelo"></a-box>
-                <a-box scale="0.03 0.18 0.16" position="-0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
-                <a-box scale="0.03 0.18 0.16" position="0.09 0.44 0" src="#tex-anne-cabelo"></a-box>
+            <!-- Manequim de Anne Frank -->
+            <a-entity id="manequim-anne" position="-0.42 0.38 0" rotation="0 270 0" class="interactable">
+                <a-box scale="0.28 0.4 0.2" position="0 0.2 0" src="#tex-anne-vestido" material="roughness: 0.75;"></a-box>
+                <a-sphere radius="0.1" position="0 0.48 0" src="#tex-anne-rosto" rotation="0 90 0" material="roughness: 0.6;"></a-sphere>
+                
+                <a-box scale="0.22 0.12 0.2" position="0 0.52 -0.03" src="#tex-anne-cabelo" material="roughness: 0.8;"></a-box>
+                <a-box scale="0.03 0.18 0.16" position="-0.09 0.44 0" src="#tex-anne-cabelo" material="roughness: 0.8;"></a-box>
+                <a-box scale="0.03 0.18 0.16" position="0.09 0.44 0" src="#tex-anne-cabelo" material="roughness: 0.8;"></a-box>
 
-                <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
-                <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido" rotation="15 0 0"></a-box>
-                <a-box scale="0.06 0.22 0.06" position="-0.06 -0.12 0.22" color="#ffe0bd"></a-box>
-                <a-box scale="0.06 0.22 0.06" position="0.06 -0.12 0.22" color="#ffe0bd"></a-box>
+                <a-box scale="0.2 0.35 0.07" position="0 0.32 -0.11" src="#tex-anne-cabelo" material="roughness: 0.85;" rotation="5 0 0"></a-box>
+                <a-box scale="0.07 0.32 0.06" position="-0.08 0.3 -0.1" src="#tex-anne-cabelo" material="roughness: 0.85;" rotation="10 -10 0"></a-box>
+                <a-box scale="0.07 0.32 0.06" position="0.08 0.3 -0.1" src="#tex-anne-cabelo" material="roughness: 0.85;" rotation="10 10 0"></a-box>
 
-                <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 5"></a-box>
-                <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido" rotation="-25 0 -5"></a-box>
+                <a-box scale="0.07 0.1 0.28" position="-0.06 0.04 0.12" src="#tex-anne-vestido" rotation="0 0 0"></a-box>
+                <a-box scale="0.07 0.1 0.28" position="0.06 0.04 0.12" src="#tex-anne-vestido" rotation="0 0 0"></a-box>
+                <a-box scale="0.06 0.22 0.06" position="-0.06 -0.12 0.22" color="#ffe0bd" material="roughness: 0.7"></a-box>
+                <a-box scale="0.06 0.22 0.06" position="0.06 -0.12 0.22" color="#ffe0bd" material="roughness: 0.7"></a-box>
+
+                <a-box scale="0.06 0.18 0.06" position="-0.15 0.2 0.06" src="#tex-anne-vestido" rotation="0 0 0"></a-box>
+                <a-box scale="0.06 0.18 0.06" position="0.15 0.2 0.06" src="#tex-anne-vestido" rotation="0 0 0"></a-box>
 
                 <a-box scale="0.18 0.02 0.14" position="0 0.18 0.18" color="#cfb997" rotation="10 0 0">
                     <a-box scale="0.16 0.01 0.12" position="0 0.01 0" color="#fcfcfc"></a-box>
@@ -368,11 +456,15 @@
             </a-entity>
         </a-entity>
 
-        <!-- ESCADA 2 -->
+        <a-entity id="penico-cama" position="0.12 4.01 -7.8">
+            <a-cylinder radius="0.13" height="0.14" color="#e3ded0" material="roughness: 0.45; metalness: 0.1;"></a-cylinder>
+            <a-torus radius="0.13" radius-tubular="0.016" rotation="90 0 0" position="0 0.07 0" color="#e3ded0"></a-torus>
+            <a-torus radius="0.04" radius-tubular="0.012" rotation="0 0 90" position="0.14 0 0" color="#e3ded0"></a-torus>
+        </a-entity>
+
         <a-entity id="escada-2" position="2.3 4 -4.5">
             <a-cylinder radius="0.03" height="4.7" position="-0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
             <a-cylinder radius="0.03" height="4.7" position="0.3 2.35 0" color="#5c4331" material="roughness: 0.9"></a-cylinder>
-            
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.4 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 0.8 0" color="#7a5d48"></a-cylinder>
             <a-cylinder radius="0.015" height="0.6" rotation="0 0 90" position="0 1.2 0" color="#7a5d48"></a-cylinder>
@@ -387,11 +479,9 @@
 
             <a-box id="trigger-subir-2" class="interactable" position="0 1.5 0.2" scale="1.6 3.0 1.0" material="opacity: 0; transparent: true"></a-box>
             <a-box id="trigger-descer-2" class="interactable" position="0 4.3 0.2" scale="1.6 1.2 1.0" material="opacity: 0; transparent: true"></a-box>
-            <a-plane class="interactable" position="0 1.6 0.25" width="1.2" height="0.4" text="value: ⬆ SUBIR (Sótão); align: center; width: 3.5; color: #ffffff;" material="opacity: 0; transparent: true; shader: flat; side: double;"></a-plane>
-            <a-plane class="interactable" position="0 4.3 0.25" width="1.2" height="0.4" text="value: ⬇ DESCER (2º Andar); align: center; width: 3.5; color: #ffffff;" material="opacity: 0; transparent: true; shader: flat; side: double;"></a-plane>
         </a-entity>
 
-        <!-- SÓTÃO -->
+        <!-- TERCEIRO ANDAR: SÓTÃO -->
         <a-plane position="-0.55 8.11 -6" rotation="-90 0 0" width="4.9" height="8" src="#tex-piso-sotao" material="side: double; roughness: 0.95;"></a-plane>
         <a-plane position="2.45 8.11 -3.05" rotation="-90 0 0" width="1.1" height="2.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
         <a-plane position="2.45 8.11 -7.45" rotation="-90 0 0" width="1.1" height="5.1" src="#tex-piso-sotao" material="side: double;"></a-plane>
@@ -404,6 +494,7 @@
         <a-plane position="0 10 -10" rotation="0 0 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane>
         <a-plane position="0 10 -2" rotation="0 180 0" width="6" height="4" src="#tex-sotao" material="side: double; roughness: 0.9;"></a-plane> 
 
+        <!-- Caixas e Baús do Sótão com Colisão Configurada -->
         <a-entity id="caixas-sotao" position="0 8.21 -6">
             <a-box position="-1.8 0.4 -2.5" scale="0.8 0.8 0.8" color="#6e5033" material="roughness: 0.95">
                 <a-box scale="0.85 0.1 0.85" position="0 0.4 0" color="#5a4028"></a-box>
@@ -453,6 +544,193 @@
         let processandoTransicao = false;
         let narracaoAutoAtiva = true;
 
+        function applyTexture(id, canvas) {
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const img = document.querySelector(`#${id}`);
+            
+            if (img && (!img.getAttribute('src') || img.getAttribute('src') === '')) {
+                img.setAttribute('src', dataUrl);
+                
+                document.querySelectorAll(`[src="#${id}"]`).forEach(el => {
+                    if (el.tagName.toLowerCase() !== 'img') {
+                        el.setAttribute('src', dataUrl);
+                    }
+                });
+            }
+        }
+
+        function gerarTexturasCanvas() {
+            // Biblioteca
+            const cBib = document.createElement('canvas');
+            cBib.width = 512; cBib.height = 512;
+            const ctxB = cBib.getContext('2d');
+            ctxB.fillStyle = '#1b3326'; ctxB.fillRect(0,0,512,512);
+            ctxB.fillStyle = '#244232';
+            for(let i=0; i<512; i+=32) ctxB.fillRect(i, 0, 16, 512);
+            ctxB.fillStyle = '#9e8142';
+            for(let x=16; x<512; x+=64) {
+                for(let y=16; y<512; y+=64) {
+                    ctxB.beginPath(); ctxB.arc(x, y, 5, 0, Math.PI*2); ctxB.fill();
+                }
+            }
+            applyTexture('tex-biblioteca', cBib);
+
+            // Quarto
+            const cQua = document.createElement('canvas');
+            cQua.width = 512; cQua.height = 512;
+            const ctxQ = cQua.getContext('2d');
+            ctxQ.fillStyle = '#f2e8d5'; ctxQ.fillRect(0,0,512,512);
+            ctxQ.fillStyle = '#e2d3ba';
+            for(let i=0; i<512; i+=40) ctxQ.fillRect(i, 0, 20, 512);
+            ctxQ.fillStyle = '#ab5252';
+            for(let x=20; x<512; x+=80) {
+                for(let y=20; y<512; y+=80) {
+                    ctxQ.beginPath(); ctxQ.arc(x, y, 4, 0, Math.PI*2); ctxQ.fill();
+                }
+            }
+            applyTexture('tex-quarto', cQua);
+
+            // Andar 1
+            const cAnd = document.createElement('canvas');
+            cAnd.width = 512; cAnd.height = 512;
+            const ctxA = cAnd.getContext('2d');
+            ctxA.fillStyle = '#d8e4e8'; ctxA.fillRect(0,0,512,512);
+            ctxA.fillStyle = '#c5d5db';
+            for(let i=0; i<512; i+=32) ctxA.fillRect(i, 0, 16, 512);
+            applyTexture('tex-andar1', cAnd);
+
+            // Sótão
+            const cSot = document.createElement('canvas');
+            cSot.width = 512; cSot.height = 512;
+            const ctxS = cSot.getContext('2d');
+            ctxS.fillStyle = '#382516'; ctxS.fillRect(0,0,512,512);
+            ctxS.strokeStyle = '#24170d'; ctxS.lineWidth = 4;
+            for(let y=0; y<512; y+=64) {
+                ctxS.beginPath(); ctxS.moveTo(0, y); ctxS.lineTo(512, y); ctxS.stroke();
+            }
+            applyTexture('tex-sotao', cSot);
+
+            // Piso Sótão
+            const cPiso = document.createElement('canvas');
+            cPiso.width = 512; cPiso.height = 512;
+            const ctxP = cPiso.getContext('2d');
+            ctxP.fillStyle = '#422f1d'; ctxP.fillRect(0,0,512,512);
+            ctxP.fillStyle = '#4d3722';
+            for(let i=0; i<512; i+=64) ctxP.fillRect(i, 0, 32, 512);
+            ctxP.strokeStyle = '#261a0e'; ctxP.lineWidth = 3;
+            for(let i=0; i<512; i+=64) {
+                ctxP.beginPath(); ctxP.moveTo(i, 0); ctxP.lineTo(i, 512); ctxP.stroke();
+            }
+            applyTexture('tex-piso-sotao', cPiso);
+
+            // Vista da Janela
+            const cVis = document.createElement('canvas');
+            cVis.width = 512; cVis.height = 512;
+            const ctxV = cVis.getContext('2d');
+            const grad = ctxV.createLinearGradient(0,0,0,512);
+            grad.addColorStop(0, '#87ceeb'); grad.addColorStop(0.7, '#e0f0ff'); grad.addColorStop(1, '#a0c8d0');
+            ctxV.fillStyle = grad; ctxV.fillRect(0,0,512,512);
+            ctxV.fillStyle = '#6e3b2e';
+            for(let x=10; x<500; x+=70) {
+                ctxV.fillRect(x, 320, 55, 192);
+                ctxV.beginPath(); ctxV.moveTo(x-5, 320); ctxV.lineTo(x+27, 260); ctxV.lineTo(x+60, 320); ctxV.fill();
+            }
+            applyTexture('tex-vista', cVis);
+
+            // Vestido Anne
+            const cVes = document.createElement('canvas');
+            cVes.width = 256; cVes.height = 256;
+            const ctxVe = cVes.getContext('2d');
+            ctxVe.fillStyle = '#2b5470'; ctxVe.fillRect(0,0,256,256);
+            ctxVe.fillStyle = '#38698c';
+            for(let i=0; i<256; i+=16) {
+                ctxVe.fillRect(i, 0, 8, 256);
+                ctxVe.fillRect(0, i, 256, 8);
+            }
+            ctxVe.fillStyle = '#1c384d';
+            for(let x=8; x<256; x+=32) {
+                for(let y=8; y<256; y+=32) {
+                    ctxVe.fillRect(x, y, 8, 8);
+                }
+            }
+            applyTexture('tex-anne-vestido', cVes);
+
+            // Rosto Anne
+            const cRos = document.createElement('canvas');
+            cRos.width = 256; cRos.height = 256;
+            const ctxR = cRos.getContext('2d');
+            ctxR.fillStyle = '#fce2c8'; ctxR.fillRect(0,0,256,256);
+            ctxR.fillStyle = '#3d2b1f';
+            ctxR.beginPath(); ctxR.arc(85, 110, 11, 0, Math.PI*2); ctxR.fill();
+            ctxR.beginPath(); ctxR.arc(171, 110, 11, 0, Math.PI*2); ctxR.fill();
+            ctxR.fillStyle = '#ffffff';
+            ctxR.beginPath(); ctxR.arc(82, 107, 3.5, 0, Math.PI*2); ctxR.fill();
+            ctxR.beginPath(); ctxR.arc(168, 107, 3.5, 0, Math.PI*2); ctxR.fill();
+            ctxR.strokeStyle = '#2b1a0e'; ctxR.lineWidth = 4;
+            ctxR.beginPath(); ctxR.arc(85, 100, 20, Math.PI*1.1, Math.PI*1.9); ctxR.stroke();
+            ctxR.beginPath(); ctxR.arc(171, 100, 20, Math.PI*1.1, Math.PI*1.9); ctxR.stroke();
+            ctxR.strokeStyle = '#b84a4a'; ctxR.lineWidth = 4.5;
+            ctxR.beginPath(); ctxR.arc(128, 145, 28, Math.PI*0.2, Math.PI*0.8); ctxR.stroke();
+            ctxR.fillStyle = 'rgba(230, 120, 120, 0.35)';
+            ctxR.beginPath(); ctxR.arc(65, 145, 18, 0, Math.PI*2); ctxR.fill();
+            ctxR.beginPath(); ctxR.arc(191, 145, 18, 0, Math.PI*2); ctxR.fill();
+            applyTexture('tex-anne-rosto', cRos);
+
+            // Cabelo Anne
+            const cCab = document.createElement('canvas');
+            cCab.width = 256; cCab.height = 256;
+            const ctxC = cCab.getContext('2d');
+            ctxC.fillStyle = '#1c1007'; ctxC.fillRect(0,0,256,256);
+            ctxC.fillStyle = '#301d0f';
+            for(let i=0; i<256; i+=10) ctxC.fillRect(i, 0, 5, 256);
+            ctxC.fillStyle = '#4a2e18';
+            for(let i=5; i<256; i+=20) ctxC.fillRect(i, 0, 3, 256);
+            applyTexture('tex-anne-cabelo', cCab);
+
+            // Textura do Rádio Vintage
+            const cRadCorpo = document.createElement('canvas');
+            cRadCorpo.width = 256; cRadCorpo.height = 256;
+            const ctxRadCorpo = cRadCorpo.getContext('2d');
+            ctxRadCorpo.fillStyle = '#4a2a11'; ctxRadCorpo.fillRect(0,0,256,256);
+            ctxRadCorpo.fillStyle = '#361d09';
+            for(let y=0; y<256; y+=12) {
+                ctxRadCorpo.fillRect(0, y, 256, 4);
+            }
+            ctxRadCorpo.strokeStyle = '#241204'; ctxRadCorpo.lineWidth = 8;
+            ctxRadCorpo.strokeRect(0, 0, 256, 256);
+            applyTexture('tex-radio-corpo', cRadCorpo);
+
+            // Textura do Painel Frontal do Rádio
+            const cRadFront = document.createElement('canvas');
+            cRadFront.width = 256; cRadFront.height = 256;
+            const ctxRadFront = cRadFront.getContext('2d');
+            ctxRadFront.fillStyle = '#2b190d'; ctxRadFront.fillRect(0,0,256,256);
+            ctxRadFront.strokeStyle = '#c5a059'; ctxRadFront.lineWidth = 6;
+            ctxRadFront.strokeRect(10, 10, 236, 236);
+
+            ctxRadFront.fillStyle = '#110b06'; ctxRadFront.fillRect(20, 25, 216, 95);
+            ctxRadFront.fillStyle = '#d4af37';
+            ctxRadFront.font = 'bold 18px Georgia';
+            ctxRadFront.fillText('BBC LONDON 1942', 45, 55);
+            
+            ctxRadFront.strokeStyle = '#e6c875'; ctxRadFront.lineWidth = 2;
+            ctxRadFront.beginPath(); ctxRadFront.moveTo(35, 80); ctxRadFront.lineTo(220, 80); ctxRadFront.stroke();
+            for(let x = 35; x <= 220; x += 15) {
+                ctxRadFront.beginPath(); ctxRadFront.moveTo(x, 72); ctxRadFront.lineTo(x, 88); ctxRadFront.stroke();
+            }
+
+            ctxRadFront.fillStyle = '#3d2b1d'; ctxRadFront.fillRect(20, 135, 216, 100);
+            ctxRadFront.fillStyle = '#26190e';
+            for(let x=20; x<236; x+=10) {
+                for(let y=135; y<235; y+=10) {
+                    ctxRadFront.fillRect(x, y, 5, 5);
+                }
+            }
+            applyTexture('tex-radio-frontal', cRadFront);
+        }
+
+        window.addEventListener('load', gerarTexturasCanvas);
+
         let audioCtx = null;
         let ambienteSource = null;
         let ambienteGain = null;
@@ -460,9 +738,6 @@
         let morseOsc = null;
         let morseGainNode = null;
         let morseSequenceInterval = null;
-        let windSource = null;
-        let windFilter = null;
-        let birdTimer = null;
         let narracaoUtterance = null;
 
         const paginasDiario = [
@@ -484,13 +759,6 @@
         ];
         let paginaAtual = 0;
 
-        const falasAnne = [
-            "Como é maravilhoso que ninguém precise esperar um único momento antes de começar a melhorar o mundo.",
-            "Apesar de tudo, eu ainda acredito que as pessoas são realmente boas de coração.",
-            "Escrever é uma forma de registrar tudo aquilo que não posso falar em voz alta.",
-            "Onde há esperança, há vida. Ela nos enche de coragem e nos faz fortes novamente."
-        ];
-
         function initializeAudioContext() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -499,6 +767,86 @@
                 audioCtx.resume();
             }
         }
+
+        const audioAnne = document.querySelector('#audio-anne');
+
+        function atualizarBotoesAudioAnne(tocando) {
+            const btnPausa = document.querySelector('#btn-anne-pausa');
+            const btnParar = document.querySelector('#btn-anne-parar');
+
+            if (tocando) {
+                if (btnPausa) btnPausa.classList.remove('hidden');
+                if (btnParar) btnParar.classList.remove('hidden');
+            } else {
+                if (btnPausa) btnPausa.classList.add('hidden');
+                if (btnParar) btnParar.classList.add('hidden');
+                const iconePausa = document.querySelector('#icone-anne-pausa');
+                const txtPausa = document.querySelector('#txt-anne-pausa');
+                if (iconePausa) iconePausa.innerText = "⏸️";
+                if (txtPausa) txtPausa.innerText = "Pausar";
+            }
+        }
+
+        function tocarAudioAnne() {
+            initializeAudioContext();
+            if (!audioAnne) return;
+
+            pararFalaAnne();
+
+            audioAnne.volume = parseFloat(document.querySelector('#slider-vol-anne').value);
+            audioAnne.play().then(() => {
+                atualizarBotoesAudioAnne(true);
+            }).catch(err => {
+                console.warn("Não foi possível tocar o áudio de Anne:", err);
+            });
+        }
+
+        function pausarAudioAnne() {
+            if (!audioAnne) return;
+            const iconePausa = document.querySelector('#icone-anne-pausa');
+            const txtPausa = document.querySelector('#txt-anne-pausa');
+
+            if (audioAnne.paused) {
+                audioAnne.play();
+                if (iconePausa) iconePausa.innerText = "⏸️";
+                if (txtPausa) txtPausa.innerText = "Pausar";
+            } else {
+                audioAnne.pause();
+                if (iconePausa) iconePausa.innerText = "▶️";
+                if (txtPausa) txtPausa.innerText = "Continuar";
+            }
+        }
+
+        function pararAudioAnne() {
+            if (!audioAnne) return;
+            audioAnne.pause();
+            audioAnne.currentTime = 0;
+            atualizarBotoesAudioAnne(false);
+        }
+
+        if (audioAnne) {
+            audioAnne.addEventListener('ended', () => {
+                pararAudioAnne();
+            });
+        }
+
+        document.querySelector('#btn-falar-anne-top').addEventListener('click', () => {
+            tocarAudioAnne();
+        });
+
+        document.querySelector('#btn-anne-pausa').addEventListener('click', () => {
+            pausarAudioAnne();
+        });
+
+        document.querySelector('#btn-anne-parar').addEventListener('click', () => {
+            pararAudioAnne();
+        });
+
+        document.querySelector('#manequim-anne').addEventListener('click', () => {
+            if (currentFloor === 1) {
+                tocarAudioAnne();
+            }
+        });
 
         function iniciarAmbienteProcedural() {
             initializeAudioContext();
@@ -570,7 +918,7 @@
             const btnConfig = document.querySelector('#btn-config-toggle-narracao');
 
             if (narracaoAutoAtiva) {
-                if (iconeTop) iconeTop.innerText = "🗣️";
+                if (iconeTop) iconeTop.innerText = "🎙️";
                 if (txtTop) txtTop.innerText = "Voz: ON";
                 if (btnTop) btnTop.className = "bg-emerald-800 hover:bg-emerald-700 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-emerald-500";
                 if (btnConfig) {
@@ -596,6 +944,118 @@
             document.querySelector('#painel-audio-anne').classList.add('hidden');
         }
 
+        function ativarRadioProcedural() {
+            initializeAudioContext();
+
+            if (staticSource) desativarRadioProcedural();
+
+            const bufferSize = audioCtx.sampleRate * 2;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            staticSource = audioCtx.createBufferSource();
+            staticSource.buffer = noiseBuffer;
+            staticSource.loop = true;
+
+            const bandpass = audioCtx.createBiquadFilter();
+            bandpass.type = 'bandpass';
+            bandpass.frequency.value = 1000;
+            bandpass.Q.value = 1.6;
+
+            const staticGain = audioCtx.createGain();
+            staticGain.gain.value = 0.05;
+
+            staticSource.connect(bandpass);
+            bandpass.connect(staticGain);
+            staticGain.connect(audioCtx.destination);
+            staticSource.start();
+
+            morseOsc = audioCtx.createOscillator();
+            morseOsc.type = 'sine';
+            morseOsc.frequency.value = 880;
+
+            morseGainNode = audioCtx.createGain();
+            morseGainNode.gain.value = 0;
+
+            morseOsc.connect(morseGainNode);
+            morseGainNode.connect(audioCtx.destination);
+            morseOsc.start();
+
+            const pattern = [
+                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 300 },
+                { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 300 },
+                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 600 }
+            ];
+
+            let index = 0;
+            const led = document.querySelector('#led-indicador-radio');
+
+            function tocarProximaNota() {
+                if (!radioAtivo) return;
+                const note = pattern[index];
+
+                if (note.f === 1) {
+                    morseGainNode.gain.setTargetAtTime(0.08, audioCtx.currentTime, 0.01);
+                    if (led) {
+                        led.setAttribute('color', '#33ff33');
+                        led.setAttribute('material', 'emissiveIntensity', '1.5');
+                    }
+                } else {
+                    morseGainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
+                    if (led) {
+                        led.setAttribute('color', '#114411');
+                        led.setAttribute('material', 'emissiveIntensity', '0.2');
+                    }
+                }
+
+                morseSequenceInterval = setTimeout(() => {
+                    index = (index + 1) % pattern.length;
+                    tocarProximaNota();
+                }, note.d);
+            }
+
+            tocarProximaNota();
+        }
+
+        function desativarRadioProcedural() {
+            if (staticSource) { try { staticSource.stop(); } catch(e){} staticSource = null; }
+            if (morseOsc) { try { morseOsc.stop(); } catch(e){} morseOsc = null; }
+            if (morseSequenceInterval) { clearTimeout(morseSequenceInterval); morseSequenceInterval = null; }
+            const led = document.querySelector('#led-indicador-radio');
+            if (led) {
+                led.setAttribute('color', '#333333');
+                led.setAttribute('material', 'emissiveIntensity', '0');
+            }
+        }
+
+        function alternarRadio() {
+            radioAtivo = !radioAtivo;
+            if (radioAtivo) {
+                ativarRadioProcedural();
+                abrirModalInspecao(
+                    "📻 Rádio Vintage (Sintonia BBC)",
+                    "O rádio era a principal janela do Anexo para o mundo externo. Escondidos da ocupação, Anne Frank e sua família ouviam a Rádio BBC de Londres às escondidas para acompanhar o avanço dos aliados e transmitir forças uns aos outros nos momentos mais difíceis.",
+                    "📻"
+                );
+            } else {
+                desativarRadioProcedural();
+            }
+        }
+
+        function abrirModalInspecao(titulo, descricao, icone = "📻") {
+            document.querySelector('#inspecao-titulo').innerText = titulo;
+            document.querySelector('#inspecao-descricao').innerText = descricao;
+            document.querySelector('#inspecao-render').innerText = icone;
+            document.querySelector('#modal-inspecao').classList.remove('hidden');
+        }
+
+        document.querySelector('#btn-inspecao-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-inspecao').classList.add('hidden');
+        });
+
         document.querySelector('#btn-toggle-narracao').addEventListener('click', () => alternarNarracaoAuto());
         document.querySelector('#btn-config-toggle-narracao').addEventListener('click', () => alternarNarracaoAuto());
 
@@ -606,6 +1066,8 @@
                 window.speechSynthesis.getVoices();
             }
         });
+
+        document.querySelector('#objeto-radio').addEventListener('click', alternarRadio);
 
         document.querySelector('#objeto-diario').addEventListener('click', () => {
             paginaAtual = 0;
@@ -656,40 +1118,47 @@
             pararFalaAnne();
         });
 
-        document.querySelector('#manequim-anne').addEventListener('click', () => {
-            const index = Math.floor(Math.random() * falasAnne.length);
-            const fala = falasAnne[index];
-            abrirFalaAnne(fala);
+        document.querySelector('#btn-config').addEventListener('click', () => {
+            document.querySelector('#modal-config').classList.remove('hidden');
+        });
+        document.querySelector('#btn-config-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-config').classList.add('hidden');
+        });
 
-            const audioAnne = document.querySelector('#audio-anne');
-            if (audioAnne) {
-                audioAnne.currentTime = 0;
-                audioAnne.play().catch(err => {
-                    falarTextoAnne(fala);
-                });
+        document.querySelector('#btn-fullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
             } else {
-                falarTextoAnne(fala);
+                if (document.exitFullscreen) document.exitFullscreen();
             }
         });
 
-        function abrirFalaAnne(texto) {
-            document.querySelector('#texto-fala-anne').innerText = texto;
-            document.querySelector('#modal-fala-anne').classList.remove('hidden');
-        }
+        document.querySelector('#btn-qr').addEventListener('click', () => {
+            const currentUrl = encodeURIComponent(window.location.href);
+            document.querySelector('#img-qrcode').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${currentUrl}`;
+            document.querySelector('#modal-qrcode').classList.remove('hidden');
+        });
+        document.querySelector('#btn-qr-fechar').addEventListener('click', () => {
+            document.querySelector('#modal-qrcode').classList.add('hidden');
+        });
 
-        document.querySelector('#btn-fala-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-fala-anne').classList.add('hidden');
-            pararFalaAnne();
+        document.querySelector('#btn-dia-noite').addEventListener('click', () => {
+            climaDia = !climaDia;
+            const sky = document.querySelector('#sky');
+            const luzSol = document.querySelector('#luz-sol');
+            const iconeClima = document.querySelector('#icone-clima');
+            const txtClima = document.querySelector('#txt-clima');
 
-            const audioAnne = document.querySelector('#audio-anne');
-            if (audioAnne) {
-                audioAnne.pause();
-                audioAnne.currentTime = 0;
-            }
-
-            if (janelaAtiva) {
-                desativarJanelaProcedural();
-                janelaAtiva = false;
+            if (climaDia) {
+                sky.setAttribute('color', '#87ceeb');
+                luzSol.setAttribute('light', 'intensity', '1.2');
+                iconeClima.innerText = "🌙";
+                txtClima.innerText = "Modo Noite";
+            } else {
+                sky.setAttribute('color', '#090d16');
+                luzSol.setAttribute('light', 'intensity', '0.15');
+                iconeClima.innerText = "☀️";
+                txtClima.innerText = "Modo Dia";
             }
         });
 
@@ -710,6 +1179,236 @@
             if (narracaoUtterance) {
                 narracaoUtterance.volume = val;
             }
+            if (audioAnne) {
+                audioAnne.volume = val;
+            }
+        });
+
+        function mudarAndar(novoAndar, targetX, targetY, targetZ) {
+            if (processandoTransicao) return;
+            processandoTransicao = true;
+            const fade = document.querySelector('#efeito-fade');
+            if (fade) fade.style.opacity = '1';
+
+            setTimeout(() => {
+                currentFloor = novoAndar;
+                const rig = document.querySelector('#camera-rig');
+                if (rig) {
+                    rig.setAttribute('position', `${targetX} ${targetY} ${targetZ}`);
+                    if (rig.components['motor-colisao']) {
+                        rig.components['motor-colisao'].lastPosition.set(targetX, targetY, targetZ);
+                    }
+                }
+
+                if (currentFloor !== 1) {
+                    pararFalaAnne();
+                    document.querySelector('#grupo-falar-anne').classList.add('hidden');
+                } else {
+                    document.querySelector('#grupo-falar-anne').classList.remove('hidden');
+                }
+
+                const txtStatus = document.querySelector('#txt-status');
+                if (txtStatus) {
+                    if (novoAndar === 0) txtStatus.innerText = "Explorando: Biblioteca (Térreo)";
+                    else if (novoAndar === 1) txtStatus.innerText = "Explorando: Quarto de Anne (2º Andar)";
+                    else if (novoAndar === 2) txtStatus.innerText = "Explorando: Sótão (3º Andar)";
+                }
+
+                setTimeout(() => {
+                    if (fade) fade.style.opacity = '0';
+                    processandoTransicao = false;
+                }, 300);
+            }, 300);
+        }
+
+        // Interações com as escadas
+        document.querySelector('#trigger-subir-1').addEventListener('click', () => mudarAndar(1, -2.0, 5.6, -4.5));
+        document.querySelector('#trigger-descer-1').addEventListener('click', () => mudarAndar(0, -2.0, 1.6, -4.5));
+        document.querySelector('#trigger-subir-2').addEventListener('click', () => mudarAndar(2, 2.0, 9.6, -4.5));
+        document.querySelector('#trigger-descer-2').addEventListener('click', () => mudarAndar(1, 2.0, 5.6, -4.5));
+
+        // Interação com a Estante Secreta (Térreo) - Abertura e Fechamento Horizontal (Deslizando)
+        document.querySelector('#estante-secreta').addEventListener('click', () => {
+            const estante = document.querySelector('#estante-secreta');
+            if (!estanteAberta) {
+                // Desliza horizontalmente para a esquerda (-1.7)
+                estante.setAttribute('animation', 'property: position; to: -1.7 1.5 -1.9; dur: 1200; easing: easeInOutQuad');
+                estanteAberta = true;
+            } else {
+                // Desliza horizontalmente de volta para a posição fechada (0)
+                estante.setAttribute('animation', 'property: position; to: 0 1.5 -1.9; dur: 1200; easing: easeInOutQuad');
+                estanteAberta = false;
+            }
+        });
+
+        // Janela do Sótão
+        document.querySelector('#janela-esperanca').addEventListener('click', () => {
+            abrirModalInspecao(
+                "🌳 A Castanheira do Sótão",
+                "A janela do sótão era o único lugar de onde Anne conseguia ver a natureza. A grande castanheira ao ar livre tornou-se para ela um símbolo de esperança, liberdade e perseverança durante os dois anos de isolamento.",
+                "🌿"
+            );
+        });
+
+        // COMPONENTE REGISTRADO: Motor de Colisão nas Paredes e Objetos
+AFRAME.registerComponent('motor-colisao', {
+    init: function() {
+        this.lastPosition = new THREE.Vector3();
+        this.lastPosition.copy(this.el.getAttribute('position'));
+        this.playerRadius = 0.35;
+    },
+    resolveBox: function(pos, box) {
+        const r = this.playerRadius;
+        const minX = box.minX - r;
+        const maxX = box.maxX + r;
+        const minZ = box.minZ - r;
+        const maxZ = box.maxZ + r;
+
+        if (pos.x > minX && pos.x < maxX && pos.z > minZ && pos.z < maxZ) {
+            const pushLeft = pos.x - minX;
+            const pushRight = maxX - pos.x;
+            const pushBack = pos.z - minZ;
+            const pushFront = maxZ - pos.z;
+
+            const minPush = Math.min(pushLeft, pushRight, pushBack, pushFront);
+
+            if (minPush === pushLeft) pos.x = minX;
+            else if (minPush === pushRight) pos.x = maxX;
+            else if (minPush === pushBack) pos.z = minZ;
+            else if (minPush === pushFront) pos.z = maxZ;
+        }
+    },
+    tick: function() {
+        const pos = this.el.getAttribute('position');
+        const r = this.playerRadius;
+
+        // 1. Limites Externos Universais (Paredes Leste, Oeste e Norte)
+        if (pos.x < -2.85 + r) pos.x = -2.85 + r;
+        if (pos.x > 2.85 - r) pos.x = 2.85 - r;
+        if (pos.z < -9.8 + r) pos.z = -9.8 + r;
+
+        // 2. Colisões Específicas por Andar
+        if (pos.y < 3.5) {
+            // --- TÉRREO (Biblioteca e Quarto Principal) ---
+            if (pos.z > 1.8 - r) pos.z = 1.8 - r;
+
+            const wallZ = -2.0;
+            const estanteEl = document.querySelector('#estante-secreta');
+            let estanteX = 0;
+            if (estanteEl && estanteEl.object3D) {
+                estanteX = estanteEl.object3D.position.x;
+            }
+
+            // Colisão com a Estante Secreta (móvel dinâmico)
+            this.resolveBox(pos, {
+                minX: estanteX - 0.98,
+                maxX: estanteX + 0.98,
+                minZ: -2.15,
+                maxZ: -1.65
+            });
+
+            // Colisão com as Paredes Divisórias Fixas da Biblioteca
+            if (pos.x < -0.95 || pos.x > 0.95) {
+                if (this.lastPosition.z >= wallZ + r && pos.z < wallZ + r) {
+                    pos.z = wallZ + r;
+                } else if (this.lastPosition.z <= wallZ - r && pos.z > wallZ - r) {
+                    pos.z = wallZ - r;
+                }
+            }
+
+            // Colisão com a Mesa de Estudos do Térreo
+            this.resolveBox(pos, { minX: -0.5, maxX: 0.5, minZ: -7.0, maxZ: -6.0 });
+
+            // Colisão com o Armário do Térreo
+            this.resolveBox(pos, { minX: -2.95, maxX: -2.25, minZ: -9.2, maxZ: -7.8 });
+
+            // Colisão com a Estrutura da Escada do 1º Andar
+            this.resolveBox(pos, { minX: -2.65, maxX: -1.95, minZ: -4.85, maxZ: -4.15 });
+
+        } else if (pos.y >= 3.5 && pos.y < 7.5) {
+            // --- SEGUNDO ANDAR (Quarto de Anne Frank) ---
+            if (pos.z > -2.0 - r) pos.z = -2.0 - r;
+
+            // Colisão com o Canto de Estudos (Escrivaninha, Cadeira e Abajur)
+            this.resolveBox(pos, { minX: -2.85, maxX: -1.4, minZ: -9.8, maxZ: -8.4 });
+
+            // Colisão com a Estante de Livros da Parede
+            this.resolveBox(pos, { minX: -2.85, maxX: -2.2, minZ: -7.7, maxZ: -6.7 });
+
+            // Colisão com a Cama de Anne Frank e o Manequim
+            this.resolveBox(pos, { minX: 0.2, maxX: 1.45, minZ: -9.5, maxZ: -7.5 });
+
+            // Colisão com o Penico ao lado da cama
+            this.resolveBox(pos, { minX: -0.1, maxX: 0.35, minZ: -8.0, maxZ: -7.6 });
+
+            // Colisão com a Estrutura da Escada do Sótão
+            this.resolveBox(pos, { minX: 1.95, maxX: 2.65, minZ: -4.85, maxZ: -4.15 });
+
+        } else if (pos.y >= 7.5) {
+            // --- TERCEIRO ANDAR (Sótão) ---
+            if (pos.z > -2.0 - r) pos.z = -2.0 - r;
+
+            // Colisão com a Pilha Principal de Caixas de Madeira
+            this.resolveBox(pos, { minX: -2.3, maxX: -1.3, minZ: -9.0, maxZ: -7.5 });
+        }
+
+        this.el.setAttribute('position', pos);
+        this.lastPosition.copy(pos);
+    }
+});
+
+        let joystickActive = false;
+        let joystickVector = { x: 0, y: 0 };
+        const zonaJoystick = document.querySelector('#zona-joystick');
+        const pinoJoystick = document.querySelector('#pino-joystick');
+
+        if (zonaJoystick && pinoJoystick) {
+            const handleTouchMove = (e) => {
+                if (!joystickActive) return;
+                const touch = e.touches ? e.touches[0] : e;
+                const rect = zonaJoystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                let deltaX = touch.clientX - centerX;
+                let deltaY = touch.clientY - centerY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxRadius = 35;
+
+                if (distance > maxRadius) {
+                    deltaX = (deltaX / distance) * maxRadius;
+                    deltaY = (deltaY / distance) * maxRadius;
+                }
+
+                pinoJoystick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                joystickVector.x = deltaX / maxRadius;
+                joystickVector.y = deltaY / maxRadius;
+            };
+
+            const handleTouchStart = (e) => {
+                joystickActive = true;
+                handleTouchMove(e);
+            };
+
+            const handleTouchEnd = () => {
+                joystickActive = false;
+                joystickVector = { x: 0, y: 0 };
+                pinoJoystick.style.transform = 'translate(0px, 0px)';
+            };
+
+            zonaJoystick.addEventListener('touchstart', handleTouchStart);
+            zonaJoystick.addEventListener('touchmove', handleTouchMove);
+            zonaJoystick.addEventListener('touchend', handleTouchEnd);
+            zonaJoystick.addEventListener('mousedown', handleTouchStart);
+            window.addEventListener('mousemove', (e) => { if (joystickActive) handleTouchMove(e); });
+            window.addEventListener('mouseup', handleTouchEnd);
+        }
+
+        const rig = document.querySelector('#camera-rig');
+        document.querySelector('#btn-girar-esq')?.addEventListener('click', () => {
+            if (rig) rig.object3D.rotation.y += Math.PI / 8;
+        });
+        document.querySelector('#btn-girar-dir')?.addEventListener('click', () => {
+            if (rig) rig.object3D.rotation.y -= Math.PI / 8;
         });
 
         AFRAME.registerComponent('controle-wasd-custom', {
@@ -734,8 +1433,6 @@
                 const moveLeft = k['KeyA'] || k['ArrowLeft'];
                 const moveRight = k['KeyD'] || k['ArrowRight'];
 
-                if (!moveForward && !moveBackward && !moveLeft && !moveRight) return;
-
                 const cameraUser = document.querySelector('#visao-usuario');
                 if (!cameraUser || !cameraUser.object3D) return;
 
@@ -755,485 +1452,20 @@
                 if (moveRight) moveDir.add(right);
                 if (moveLeft) moveDir.sub(right);
 
+                if (joystickActive) {
+                    if (Math.abs(joystickVector.y) > 0.1) moveDir.addScaledVector(forward, -joystickVector.y);
+                    if (Math.abs(joystickVector.x) > 0.1) moveDir.addScaledVector(right, joystickVector.x);
+                }
+
                 if (moveDir.lengthSq() > 0) {
                     moveDir.normalize();
                     const moveSpeed = (delta / 1000) * 3.0;
                     const pos = this.el.getAttribute('position');
                     pos.x += moveDir.x * moveSpeed;
                     pos.z += moveDir.z * moveSpeed;
-                    this.el.setAttribute('position', pos);
                 }
             }
         });
-
-        AFRAME.registerComponent('motor-colisao', {
-            init: function () {
-                this.lastPosition = new THREE.Vector3();
-                this.lastPosition.copy(this.el.object3D.position);
-            },
-            tick: function () {
-                if (processandoTransicao) return;
-
-                const pos = this.el.object3D.position;
-
-                if (pos.x < -2.6) pos.x = -2.6;
-                if (pos.x > 2.6) pos.x = 2.6;
-                if (pos.z > 1.6) pos.z = 1.6;
-                if (pos.z < -9.4) pos.z = -9.4;
-
-                if (pos.z < -1.8 && pos.z > -2.2) {
-                    if (pos.x <= -0.9 || pos.x >= 0.9) {
-                        pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
-                    } else {
-                        if (!estanteAberta) {
-                            pos.z = this.lastPosition.z >= -1.8 ? -1.8 : -2.2;
-                        }
-                    }
-                }
-
-                if (currentFloor === 0) {
-                    if (pos.x < -1.8 && pos.z < -7.4) {
-                        if (this.lastPosition.x >= -1.8) pos.x = -1.8;
-                        if (this.lastPosition.z >= -7.4) pos.z = -7.4;
-                    }
-                    if (pos.x > -0.5 && pos.x < 0.5 && pos.z > -6.9 && pos.z < -6.1) {
-                        if (this.lastPosition.x <= -0.5) pos.x = -0.5;
-                        else if (this.lastPosition.x >= 0.5) pos.x = 0.5;
-                        else if (this.lastPosition.z <= -6.9) pos.z = -6.9;
-                        else if (this.lastPosition.z >= -6.1) pos.z = -6.1;
-                    }
-                } else if (currentFloor === 1) {
-                    if (pos.x > -0.2 && pos.x < 1.7 && pos.z < -7.4) {
-                        if (this.lastPosition.x <= -0.2) pos.x = -0.2;
-                        if (this.lastPosition.z >= -7.4) pos.z = -7.4;
-                    }
-                } else if (currentFloor === 2) {
-                    if (pos.z > -2.0) pos.z = -2.0;
-                }
-
-                this.lastPosition.copy(pos);
-            }
-        });
-
-        function transicionarAndar(alvoFloor, novoY) {
-            if (processandoTransicao) return;
-            processandoTransicao = true;
-
-            const rig = document.querySelector('#camera-rig');
-            const fade = document.querySelector('#efeito-fade');
-
-            fade.style.opacity = '1';
-
-            setTimeout(() => {
-                const rigPos = rig.getAttribute('position');
-                rigPos.y = novoY;
-                rig.setAttribute('position', rigPos);
-
-                currentFloor = alvoFloor;
-                
-                const statusTexts = [
-                    "Explorando: Biblioteca (Térreo)",
-                    "Explorando: Quarto de Anne (2º Andar)",
-                    "Explorando: Sótão (Área de Observação)"
-                ];
-                document.querySelector('#txt-status').innerText = statusTexts[currentFloor];
-
-                setTimeout(() => {
-                    fade.style.opacity = '0';
-                    processandoTransicao = false;
-                }, 150);
-
-            }, 300);
-        }
-
-        document.querySelectorAll('#escada-1 .interactable').forEach(el => {
-            el.addEventListener('click', () => {
-                if (currentFloor === 0) transicionarAndar(1, 5.6);
-                else if (currentFloor === 1) transicionarAndar(0, 1.6);
-            });
-        });
-        document.querySelectorAll('#escada-2 .interactable').forEach(el => {
-            el.addEventListener('click', () => {
-                if (currentFloor === 1) transicionarAndar(2, 9.71);
-                else if (currentFloor === 2) transicionarAndar(1, 5.6);
-            });
-        });
-
-        document.querySelector('#estante-secreta').addEventListener('click', () => {
-            const shelf = document.querySelector('#estante-secreta');
-            estanteAberta = !estanteAberta;
-            
-            shelf.setAttribute('animation', {
-                property: 'position',
-                to: `${estanteAberta ? 1.8 : 0} 1.5 -1.9`,
-                dur: 1500,
-                easing: 'easeInOutQuad'
-            });
-
-            document.querySelector('#hud-instrucoes').innerText = estanteAberta 
-                ? "Estante Secreta aberta! Siga em frente para entrar no Quarto Principal." 
-                : "Estante Secreta trancada.";
-        });
-
-        function ativarRadioProcedural() {
-            initializeAudioContext();
-
-            const bufferSize = audioCtx.sampleRate * 2;
-            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                output[i] = Math.random() * 2 - 1;
-            }
-
-            staticSource = audioCtx.createBufferSource();
-            staticSource.buffer = noiseBuffer;
-            staticSource.loop = true;
-
-            const bandpass = audioCtx.createBiquadFilter();
-            bandpass.type = 'bandpass';
-            bandpass.frequency.value = 1000;
-            bandpass.Q.value = 1.6;
-
-            const staticGain = audioCtx.createGain();
-            staticGain.gain.value = 0.05;
-
-            staticSource.connect(bandpass);
-            bandpass.connect(staticGain);
-            staticGain.connect(audioCtx.destination);
-            staticSource.start();
-
-            morseOsc = audioCtx.createOscillator();
-            morseOsc.type = 'sine';
-            morseOsc.frequency.value = 880;
-
-            morseGainNode = audioCtx.createGain();
-            morseGainNode.gain.value = 0;
-
-            morseOsc.connect(morseGainNode);
-            morseGainNode.connect(audioCtx.destination);
-            morseOsc.start();
-
-            const pattern = [
-                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 240 },
-                { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 240 },
-                { f: 1, d: 80 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 240 }, { f: 0, d: 80 }, { f: 1, d: 80 }, { f: 0, d: 240 },
-                { f: 1, d: 80 }, { f: 0, d: 800 }
-            ];
-
-            let index = 0;
-            const led = document.querySelector('#led-indicador-radio');
-
-            function tocarProximaNota() {
-                if (!radioAtivo) return;
-                const note = pattern[index];
-
-                if (note.f === 1) {
-                    morseGainNode.gain.setTargetAtTime(0.08, audioCtx.currentTime, 0.01);
-                    led.setAttribute('color', '#33ff33');
-                    led.setAttribute('material', 'emissiveIntensity', '1.5');
-                } else {
-                    morseGainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
-                    led.setAttribute('color', '#114411');
-                    led.setAttribute('material', 'emissiveIntensity', '0.2');
-                }
-
-                morseSequenceInterval = setTimeout(() => {
-                    index = (index + 1) % pattern.length;
-                    tocarProximaNota();
-                }, note.d);
-            }
-
-            tocarProximaNota();
-        }
-
-        function desativarRadioProcedural() {
-            if (staticSource) { try { staticSource.stop(); } catch(e){} staticSource = null; }
-            if (morseOsc) { try { morseOsc.stop(); } catch(e){} morseOsc = null; }
-            if (morseSequenceInterval) { clearTimeout(morseSequenceInterval); morseSequenceInterval = null; }
-            const led = document.querySelector('#led-indicador-radio');
-            if (led) {
-                led.setAttribute('color', '#333333');
-                led.setAttribute('material', 'emissiveIntensity', '0');
-            }
-        }
-
-        function ativarJanelaProcedural() {
-            initializeAudioContext();
-
-            const bufferSize = audioCtx.sampleRate * 2;
-            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                output[i] = Math.random() * 2 - 1;
-            }
-
-            windSource = audioCtx.createBufferSource();
-            windSource.buffer = noiseBuffer;
-            windSource.loop = true;
-
-            windFilter = audioCtx.createBiquadFilter();
-            windFilter.type = 'bandpass';
-            windFilter.frequency.value = 350;
-            windFilter.Q.value = 1.8;
-
-            const windGain = audioCtx.createGain();
-            windGain.gain.value = 0.07;
-
-            windSource.connect(windFilter);
-            windFilter.connect(windGain);
-            windGain.connect(audioCtx.destination);
-            windSource.start();
-
-            function sweepWind() {
-                if (!janelaAtiva) return;
-                const freq = 200 + Math.random() * 300;
-                const Q = 1.0 + Math.random() * 2.0;
-                windFilter.frequency.exponentialRampToValueAtTime(freq, audioCtx.currentTime + 1.5);
-                windFilter.Q.exponentialRampToValueAtTime(Q, audioCtx.currentTime + 1.5);
-                setTimeout(sweepWind, 1500);
-            }
-            sweepWind();
-
-            function chirpBird() {
-                if (!janelaAtiva) return;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(2500 + Math.random() * 500, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(3500 + Math.random() * 500, audioCtx.currentTime + 0.15);
-                
-                gain.gain.setValueAtTime(0, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
-
-                birdTimer = setTimeout(chirpBird, 2000 + Math.random() * 3000);
-            }
-            chirpBird();
-        }
-
-        function desativarJanelaProcedural() {
-            if (windSource) { try { windSource.stop(); } catch(e){} windSource = null; }
-            if (birdTimer) { clearTimeout(birdTimer); birdTimer = null; }
-        }
-
-        document.querySelector('#objeto-radio').addEventListener('click', () => {
-            radioAtivo = !radioAtivo;
-            if (radioAtivo) {
-                ativarRadioProcedural();
-                abrirInspecao("Rádio Antigo", "📻", "Este pequeno aparelho receptor de rádio era a única ponte de conexão com o progresso das frentes aliadas. Otto Frank e os outros ouviam a BBC às escondidas.");
-            } else {
-                desativarRadioProcedural();
-            }
-        });
-
-        document.querySelector('#janela-esperanca').addEventListener('click', () => {
-            janelaAtiva = !janelaAtiva;
-            if (janelaAtiva) {
-                ativarJanelaProcedural();
-                const textoJanela = "Olhar para o céu aberto e para a grande castanheira florescendo me devolve a certeza de que a paz voltará.";
-                abrirFalaAnne(textoJanela);
-                falarTextoAnne(textoJanela);
-            } else {
-                desativarJanelaProcedural();
-            }
-        });
-
-        function abrirInspecao(titulo, render, descricao) {
-            document.querySelector('#inspecao-titulo').innerText = titulo;
-            document.querySelector('#inspecao-render').innerText = render;
-            document.querySelector('#inspecao-descricao').innerText = descricao;
-            document.querySelector('#modal-inspecao').classList.remove('hidden');
-        }
-        document.querySelector('#btn-inspecao-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-inspecao').classList.add('hidden');
-            if (radioAtivo) {
-                desativarRadioProcedural();
-                radioAtivo = false;
-            }
-        });
-
-        document.querySelector('#btn-config').addEventListener('click', () => {
-            document.querySelector('#modal-config').classList.remove('hidden');
-        });
-        document.querySelector('#btn-config-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-config').classList.add('hidden');
-        });
-
-        document.querySelector('#btn-fullscreen').addEventListener('click', () => {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        });
-
-        const btnClima = document.querySelector('#btn-dia-noite');
-        const lAmbient = document.querySelector('#luz-ambiente');
-        const lSol = document.querySelector('#luz-sol');
-        const lBiblio = document.querySelector('#luz-biblioteca-teto');
-        const lVela1 = document.querySelector('#luz-velas-1');
-        const lVela2 = document.querySelector('#luz-velas-2');
-        const lAttic = document.querySelector('#luz-sotao-luar');
-        const skyEl = document.querySelector('#sky');
-
-        btnClima.addEventListener('click', () => {
-            climaDia = !climaDia;
-            if (climaDia) {
-                lAmbient.setAttribute('light', 'intensity', '0.6; color: #ffffff;');
-                lSol.setAttribute('light', 'intensity', '1.2');
-                lBiblio.setAttribute('light', 'intensity', '1.0; color: #ffffff;');
-                lVela1.setAttribute('light', 'intensity', '0.2');
-                lVela2.setAttribute('light', 'intensity', '0.2');
-                lAttic.setAttribute('light', 'intensity', '0.1');
-                skyEl.setAttribute('color', '#87ceeb');
-                document.querySelector('#icone-clima').innerText = "🌙";
-                document.querySelector('#txt-clima').innerText = "Modo Noite";
-                btnClima.className = "bg-indigo-900 hover:bg-indigo-800 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-indigo-400";
-            } else {
-                lAmbient.setAttribute('light', 'intensity', '0.25; color: #0c0f1d;');
-                lSol.setAttribute('light', 'intensity', '0.0');
-                lBiblio.setAttribute('light', 'intensity', '1.8; color: #ffbb66;');
-                lVela1.setAttribute('light', 'intensity', '1.2');
-                lVela2.setAttribute('light', 'intensity', '1.2');
-                lAttic.setAttribute('light', 'intensity', '0.3');
-                skyEl.setAttribute('color', '#03030c');
-                document.querySelector('#icone-clima').innerText = "☀️";
-                document.querySelector('#txt-clima').innerText = "Modo Dia";
-                btnClima.className = "bg-amber-700 hover:bg-amber-600 active:scale-95 text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-lg border border-amber-500";
-            }
-        });
-
-        document.querySelector('#btn-qr').addEventListener('click', () => {
-            const url = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(window.location.href)}`;
-            document.querySelector('#img-qrcode').setAttribute('src', url);
-            document.querySelector('#modal-qrcode').classList.remove('hidden');
-        });
-        document.querySelector('#btn-qr-fechar').addEventListener('click', () => {
-            document.querySelector('#modal-qrcode').classList.add('hidden');
-        });
-
-        const joyZone = document.querySelector('#zona-joystick');
-        const joyStick = document.querySelector('#pino-joystick');
-        const cameraRig = document.querySelector('#camera-rig');
-        const cameraUser = document.querySelector('#visao-usuario');
-        
-        let joyActive = false;
-        let joyCenter = { x: 0, y: 0 };
-        let joyVector = { x: 0, y: 0 };
-
-        const preventInterference = (e) => {
-            e.stopPropagation();
-            if (e.cancelable) e.preventDefault();
-        };
-
-        joyZone.addEventListener('touchstart', (e) => {
-            preventInterference(e);
-            joyActive = true;
-            const touch = e.touches[0];
-            const bounds = joyZone.getBoundingClientRect();
-            joyCenter = {
-                x: bounds.left + bounds.width / 2,
-                y: bounds.top + bounds.height / 2
-            };
-        });
-
-        joyZone.addEventListener('touchmove', (e) => {
-            preventInterference(e);
-            if (!joyActive) return;
-            const touch = e.touches[0];
-            const dx = touch.clientX - joyCenter.x;
-            const dy = touch.clientY - joyCenter.y;
-            const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 35);
-            const angle = Math.atan2(dy, dx);
-
-            const pinX = Math.cos(angle) * distance;
-            const pinY = Math.sin(angle) * distance;
-
-            joyStick.style.transform = `translate(${pinX}px, ${pinY}px)`;
-            joyVector = { x: pinX / 35, y: pinY / 35 };
-        });
-
-        joyZone.addEventListener('touchend', (e) => {
-            preventInterference(e);
-            joyActive = false;
-            joyStick.style.transform = 'translate(0px, 0px)';
-            joyVector = { x: 0, y: 0 };
-        });
-
-        const turnAngle = (deg) => {
-            const lookControls = cameraUser.components['look-controls'];
-            if (lookControls && lookControls.yawObject) {
-                lookControls.yawObject.rotation.y += (deg * Math.PI / 180);
-            }
-        };
-
-        document.querySelector('#btn-girar-esq').addEventListener('click', () => turnAngle(30));
-        document.querySelector('#btn-girar-dir').addEventListener('click', () => turnAngle(-30));
-
-        setInterval(() => {
-            if (joyActive && (joyVector.x !== 0 || joyVector.y !== 0)) {
-                const forward = new THREE.Vector3();
-                cameraUser.object3D.getWorldDirection(forward);
-                forward.negate();
-                forward.y = 0;
-                forward.normalize();
-
-                const right = new THREE.Vector3();
-                right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-
-                const speed = 0.05;
-                const pos = cameraRig.getAttribute('position');
-
-                pos.x += (forward.x * -joyVector.y + right.x * joyVector.x) * speed;
-                pos.z += (forward.z * -joyVector.y + right.z * joyVector.x) * speed;
-
-                cameraRig.setAttribute('position', pos);
-            }
-        }, 16);
-
-        let currentTargetNode = null;
-        const cursorEl = document.querySelector('a-cursor');
-
-        cursorEl.addEventListener('raycaster-intersection', (e) => {
-            const nodes = e.detail.els.filter(el => el.classList.contains('interactable'));
-            if (nodes.length > 0) {
-                currentTargetNode = nodes[0];
-                document.querySelector('#mobile-action-btn').classList.add('scale-105', 'bg-amber-500');
-            }
-        });
-
-        cursorEl.addEventListener('raycaster-intersection-cleared', () => {
-            currentTargetNode = null;
-            document.querySelector('#mobile-action-btn').classList.remove('scale-105', 'bg-amber-500');
-        });
-
-        const actionBtn = document.querySelector('#mobile-action-btn');
-        const executeMobileClick = (e) => {
-            preventInterference(e);
-            if (currentTargetNode) {
-                currentTargetNode.emit('click');
-                actionBtn.classList.add('scale-95');
-                setTimeout(() => actionBtn.classList.remove('scale-95'), 100);
-            }
-        };
-
-        actionBtn.addEventListener('touchstart', executeMobileClick);
-        actionBtn.addEventListener('mousedown', executeMobileClick);
     </script>
 </body>
 </html>
