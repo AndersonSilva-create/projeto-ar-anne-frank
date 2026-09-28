@@ -519,7 +519,7 @@
         </a-plane> 
 
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao controle-wasd-custom>
-            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: false; reverseTouchDrag: true" id="visao-usuario">
+            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: false; reverseTouchDrag: true" look-touch-livre id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
                           animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
@@ -1443,13 +1443,11 @@
         this.touchId = null;
         this.lastX = 0;
         this.lastY = 0;
-        this.pitch = 0;
-        this.yaw = 0;
 
         this.onTouchStart = (e) => {
             if (this.touchId !== null) return;
-            // Ignora toques em UI (joystick, botões, modais, sliders)
-            if (e.target.closest('#controles-mobile, button, input, .modal-historico, #hud-instrucoes')) return;
+            // Ignora toques na UI (joystick, botões, modais, sliders)
+            if (e.target.closest && e.target.closest('#controles-mobile, button, input, .modal-historico, #hud-instrucoes')) return;
             const t = e.changedTouches[0];
             this.touchId = t.identifier;
             this.lastX = t.clientX;
@@ -1458,6 +1456,9 @@
 
         this.onTouchMove = (e) => {
             if (this.touchId === null) return;
+            const look = this.el.components['look-controls'];
+            if (!look || !look.yawObject || !look.pitchObject) return;
+
             for (const t of e.changedTouches) {
                 if (t.identifier !== this.touchId) continue;
                 const dx = t.clientX - this.lastX;
@@ -1466,12 +1467,12 @@
                 this.lastY = t.clientY;
 
                 const dir = this.data.inverter ? 1 : -1;
-                this.yaw += dir * dx * this.data.sensibilidade;
-                this.pitch += dir * dy * this.data.sensibilidade;
-                // Limita para não virar de cabeça para baixo
-                this.pitch = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, this.pitch));
+                look.yawObject.rotation.y += dir * dx * this.data.sensibilidade;
+                look.pitchObject.rotation.x += dir * dy * this.data.sensibilidade;
 
-                this.el.object3D.rotation.set(this.pitch, this.yaw, 0);
+                // Limita para não virar de cabeça para baixo
+                const limite = Math.PI / 2 - 0.05;
+                look.pitchObject.rotation.x = Math.max(-limite, Math.min(limite, look.pitchObject.rotation.x));
             }
         };
 
@@ -1493,7 +1494,6 @@
         window.removeEventListener('touchcancel', this.onTouchEnd);
     }
 });
-
 
         AFRAME.registerComponent('controle-wasd-custom', {
             init: function () {
