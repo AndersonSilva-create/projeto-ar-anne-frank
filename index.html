@@ -516,10 +516,10 @@
             <a-box scale="0.05 1.4 0.05" position="-0.7 0 0" color="#382b1c"></a-box>
             <a-box scale="0.02 1.4 0.02" position="0 0 0" color="#382b1c"></a-box>
             <a-box scale="1.4 0.02 0.02" position="0 0 0" color="#382b1c"></a-box>
-        </a-plane>
+        </a-plane> 
 
         <a-entity id="camera-rig" position="0 1.6 0" motor-colisao controle-wasd-custom>
-            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: true; reverseTouchDrag: true" id="visao-usuario">
+            <a-entity camera look-controls="magicWindowTrackingEnabled: true; touchEnabled: false; reverseTouchDrag: true" id="visao-usuario">
                 <a-cursor raycaster="objects: .interactable" color="#ffffff" scale="0.5 0.5 0.5"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInQuad; dur: 1500; from: 0.5 0.5 0.5; to: 0.1 0.1 0.1"
                           animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInQuad; dur: 300; to: 0.5 0.5 0.5">
@@ -1433,6 +1433,67 @@
         document.querySelector('#btn-girar-dir')?.addEventListener('click', () => {
             if (rig) rig.object3D.rotation.y -= Math.PI / 8;
         });
+
+        AFRAME.registerComponent('look-touch-livre', {
+    schema: {
+        sensibilidade: { type: 'number', default: 0.005 },
+        inverter: { type: 'boolean', default: false }
+    },
+    init: function () {
+        this.touchId = null;
+        this.lastX = 0;
+        this.lastY = 0;
+        this.pitch = 0;
+        this.yaw = 0;
+
+        this.onTouchStart = (e) => {
+            if (this.touchId !== null) return;
+            // Ignora toques em UI (joystick, botões, modais, sliders)
+            if (e.target.closest('#controles-mobile, button, input, .modal-historico, #hud-instrucoes')) return;
+            const t = e.changedTouches[0];
+            this.touchId = t.identifier;
+            this.lastX = t.clientX;
+            this.lastY = t.clientY;
+        };
+
+        this.onTouchMove = (e) => {
+            if (this.touchId === null) return;
+            for (const t of e.changedTouches) {
+                if (t.identifier !== this.touchId) continue;
+                const dx = t.clientX - this.lastX;
+                const dy = t.clientY - this.lastY;
+                this.lastX = t.clientX;
+                this.lastY = t.clientY;
+
+                const dir = this.data.inverter ? 1 : -1;
+                this.yaw += dir * dx * this.data.sensibilidade;
+                this.pitch += dir * dy * this.data.sensibilidade;
+                // Limita para não virar de cabeça para baixo
+                this.pitch = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, this.pitch));
+
+                this.el.object3D.rotation.set(this.pitch, this.yaw, 0);
+            }
+        };
+
+        this.onTouchEnd = (e) => {
+            for (const t of e.changedTouches) {
+                if (t.identifier === this.touchId) this.touchId = null;
+            }
+        };
+
+        window.addEventListener('touchstart', this.onTouchStart, { passive: true });
+        window.addEventListener('touchmove', this.onTouchMove, { passive: true });
+        window.addEventListener('touchend', this.onTouchEnd);
+        window.addEventListener('touchcancel', this.onTouchEnd);
+    },
+    remove: function () {
+        window.removeEventListener('touchstart', this.onTouchStart);
+        window.removeEventListener('touchmove', this.onTouchMove);
+        window.removeEventListener('touchend', this.onTouchEnd);
+        window.removeEventListener('touchcancel', this.onTouchEnd);
+    }
+});
+
 
         AFRAME.registerComponent('controle-wasd-custom', {
             init: function () {
